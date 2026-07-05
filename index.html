@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <script src="config.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <title>家庭投資總覽</title>
+  <style>
+    :root{
+      --bg:#f3f6fb;--surface:#fff;--surface2:#f7f9fc;--text:#172033;--muted:#6b7587;
+      --line:#e3e8f0;--brand:#315bd6;--positive:#12835f;--negative:#d74d59;
+      --mom1:#8b62d9;--mom2:#c26bb1;--bro1:#5578e8;--bro2:#20a37a;
+      --shadow:0 12px 34px rgba(35,50,80,.08);--radius:20px;
+    }
+    @media(prefers-color-scheme:dark){
+      :root{--bg:#09111f;--surface:#111b2b;--surface2:#162235;--text:#edf3fb;--muted:#9ca8ba;
+        --line:#28364a;--brand:#86a9ff;--positive:#56d0a2;--negative:#ff7d87;
+        --shadow:0 14px 35px rgba(0,0,0,.25)}
+    }
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans TC",sans-serif}
+    button{font:inherit}.app{max-width:1120px;margin:auto;padding:22px 16px 54px}
+    header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:17px}
+    h1{font-size:clamp(29px,5vw,43px);line-height:1.05;letter-spacing:-.045em;margin:0}
+    .subtitle{margin:8px 0 0;color:var(--muted);font-size:14px}
+    .actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .btn{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;
+      padding:10px 14px;font-weight:750;cursor:pointer;box-shadow:var(--shadow)}
+    .btn:disabled{opacity:.55;cursor:progress}.status{display:flex;align-items:center;gap:9px;
+      background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;
+      margin-bottom:13px;color:var(--muted);font-size:13px}
+    .dot{width:9px;height:9px;border-radius:50%;background:var(--brand);flex:0 0 auto}
+    .dot.loading{animation:pulse 1s infinite}.dot.ok{background:var(--positive)}.dot.error{background:var(--negative)}
+    @keyframes pulse{50%{opacity:.25;transform:scale(.75)}}.status-text{min-width:0;overflow-wrap:anywhere}
+    .status-meta{margin-left:auto;white-space:nowrap}.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:5px;
+      margin-bottom:13px;scrollbar-width:none}.tab{border:1px solid var(--line);background:var(--surface);
+      color:var(--muted);padding:9px 15px;border-radius:999px;white-space:nowrap;cursor:pointer;font-weight:750}
+    .tab.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+      padding:19px;box-shadow:var(--shadow);min-width:0}.label{font-size:12px;font-weight:750;color:var(--muted);margin-bottom:10px}
+    .number{font-size:clamp(23px,3.5vw,34px);font-weight:850;letter-spacing:-.045em;white-space:nowrap}
+    .hint{font-size:11px;color:var(--muted);margin-top:8px}.positive{color:var(--positive)}.negative{color:var(--negative)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .head{display:flex;justify-content:space-between;gap:10px;margin-bottom:16px}.title{font-size:17px;font-weight:850}
+    .desc{font-size:12px;color:var(--muted);margin-top:4px}.donut-layout{display:grid;grid-template-columns:170px 1fr;gap:22px;align-items:center}
+    .donut{width:170px;aspect-ratio:1;border-radius:50%;position:relative;margin:auto;background:var(--surface2)}
+    .donut:after{content:"";position:absolute;inset:29px;border-radius:50%;background:var(--surface);border:1px solid var(--line)}
+    .donut-center{position:absolute;inset:0;z-index:1;display:grid;place-content:center;text-align:center}
+    .donut-center strong{font-size:20px}.donut-center span{font-size:11px;color:var(--muted)}
+    .legend{display:grid;gap:11px}.legend-row{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;font-size:13px}
+    .swatch{width:10px;height:10px;border-radius:99px}.legend-value{text-align:right;font-weight:800}
+    .legend-value small{display:block;color:var(--muted);font-weight:500;margin-top:2px}
+    .bars{display:grid;gap:16px}.bar-name{display:flex;justify-content:space-between;gap:12px;font-size:12px;margin-bottom:7px}
+    .bar-name strong{font-size:13px}.bar-note{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:11px}
+    .track{height:10px;border-radius:999px;background:var(--surface2);overflow:hidden;margin:5px 0}.fill{height:100%;border-radius:999px}
+    .chart{height:250px}svg{width:100%;height:100%;display:block;overflow:visible}.gridline{stroke:var(--line);stroke-width:1}
+    .trend{fill:none;stroke:var(--brand);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+    .area{fill:url(#areaGradient)}.point{fill:var(--surface);stroke:var(--brand);stroke-width:3}.axis{font-size:10px;fill:var(--muted)}
+    .table-card{padding:0;overflow:hidden}.table-head{padding:19px 19px 12px}.table-wrap{overflow:auto}
+    table{border-collapse:collapse;width:100%;min-width:760px}th,td{padding:13px 18px;border-top:1px solid var(--line);text-align:right;font-size:13px}
+    th{font-size:11px;color:var(--muted);background:var(--surface2)}th:first-child,td:first-child{text-align:left}td:first-child{font-weight:800}
+    .empty{display:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+    .empty.show{display:block}.empty h2{margin:0 0 8px;font-size:21px}.empty p,.empty li{color:var(--muted);line-height:1.6;font-size:14px}
+    details{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.6}summary{cursor:pointer;color:var(--text);font-weight:800}
+    .masked .money{filter:blur(8px);user-select:none}.masked .money:hover{filter:none}
+
+    .login-gate{
+      min-height:100svh;display:grid;place-items:center;padding:22px;background:
+      radial-gradient(circle at 20% 15%,color-mix(in srgb,var(--brand) 12%,transparent),transparent 34%),
+      var(--bg)
+    }
+    .login-card{
+      width:min(440px,100%);background:var(--surface);border:1px solid var(--line);
+      border-radius:26px;padding:30px;box-shadow:var(--shadow);text-align:center
+    }
+    .lock-icon{
+      width:58px;height:58px;border-radius:18px;display:grid;place-items:center;
+      margin:0 auto 18px;background:var(--surface2);font-size:28px
+    }
+    .login-card h1{font-size:31px;margin-bottom:10px}
+    .login-card p{color:var(--muted);line-height:1.6;font-size:14px}
+    .google-login{
+      width:100%;margin-top:12px;border:0;border-radius:14px;padding:13px 16px;
+      background:var(--text);color:var(--bg);font-weight:850;cursor:pointer
+    }
+    .google-login:disabled{opacity:.55;cursor:progress}
+    .login-message{min-height:22px;margin:12px 0 0!important;font-size:12px!important}
+    .login-help{font-size:11px!important;margin-top:18px!important}
+
+    @media(max-width:880px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
+    @media(max-width:620px){.app{padding:17px 11px 42px}header{display:block}.actions{justify-content:flex-start;margin-top:15px}
+      .kpis{gap:9px}.card{padding:15px;border-radius:17px}.number{font-size:23px}.donut-layout{grid-template-columns:1fr}.donut{width:155px}
+      .status{align-items:flex-start}.status-meta{display:none}}
+    @media(max-width:385px){.kpis{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<section class="login-gate" id="loginGate">
+  <div class="login-card">
+    <div class="lock-icon">🔐</div>
+    <h1>家庭投資總覽</h1>
+    <p>請使用已被授權查看私人 Google Sheet 的帳號登入。未授權帳號無法取得任何資產資料。</p>
+    <button class="google-login" id="loginBtn" type="button">使用 Google 帳號登入</button>
+    <p class="login-message" id="loginMessage">正在載入 Google 登入服務…</p>
+    <p class="login-help">登入憑證只保存在目前分頁的記憶體中；關閉頁面後即失效。</p>
+  </div>
+</section>
+
+<main class="app" id="app" hidden>
+  <header>
+    <div><h1>家庭投資總覽</h1><p class="subtitle">媽媽與哥哥的台股、美股投資 · Google Sheet 自動同步</p></div>
+    <div class="actions">
+      <button class="btn" id="privacyBtn" type="button">隱藏金額</button>
+      <button class="btn" id="syncBtn" type="button">同步 Google Sheet</button>
+      <button class="btn" id="logoutBtn" type="button">登出</button>
+    </div>
+  </header>
+
+  <div class="status">
+    <span class="dot loading" id="dot"></span>
+    <span class="status-text" id="status">正在連線 Google Sheet…</span>
+    <span class="status-meta" id="statusMeta"></span>
+  </div>
+
+  <section class="empty" id="empty">
+    <h2>尚未取得資料</h2>
+    <p id="errorText">正在嘗試讀取「總表」。</p>
+    <ol>
+      <li>Google Sheet 應設為「受限制」，並只分享給你、媽媽與哥哥的 Google 帳號。</li>
+      <li>請使用 GitHub Pages 的 HTTPS 網址開啟，不要直接用 iPhone「檔案」App 預覽 HTML。</li>
+      <li>Google Cloud 專案需啟用 Google Sheets API，且 OAuth 測試使用者需包含三人的帳號。</li>
+    </ol>
+  </section>
+
+  <section id="dashboard" hidden>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-view="family">家庭合計</button>
+      <button class="tab" data-view="mom">媽媽</button>
+      <button class="tab" data-view="brother">哥哥</button>
+    </nav>
+
+    <section class="kpis">
+      <article class="card"><div class="label">目前總資產</div><div class="number money" id="totalValue">—</div><div class="hint" id="valueHint">依最新市值加總</div></article>
+      <article class="card"><div class="label">總成本</div><div class="number money" id="totalCost">—</div><div class="hint">依首次投入金額計算</div></article>
+      <article class="card"><div class="label">未實現損益</div><div class="number money" id="profit">—</div><div class="hint">目前市值－總成本</div></article>
+      <article class="card"><div class="label">總報酬率</div><div class="number" id="returnRate">—</div><div class="hint">未實現損益 ÷ 總成本</div></article>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <div class="head"><div><div class="title">目前資產配置</div><div class="desc">依帳戶／市場的目前市值</div></div></div>
+        <div class="donut-layout">
+          <div class="donut" id="donut"><div class="donut-center"><strong class="money" id="donutTotal"></strong><span>總資產</span></div></div>
+          <div class="legend" id="legend"></div>
+        </div>
+      </article>
+      <article class="card">
+        <div class="head"><div><div class="title">成本 vs. 目前市值</div><div class="desc">灰色為成本，彩色為目前市值</div></div></div>
+        <div class="bars" id="bars"></div>
+      </article>
+    </section>
+
+    <section class="card" style="margin-bottom:12px">
+      <div class="head"><div><div class="title">總資產趨勢</div><div class="desc" id="trendDesc">家庭合計歷史變化</div></div></div>
+      <div class="chart"><svg id="trend" viewBox="0 0 700 250" aria-label="總資產趨勢圖"></svg></div>
+    </section>
+
+    <section class="card table-card">
+      <div class="table-head"><div class="title">帳戶明細</div><div class="desc">金額統一以新台幣顯示</div></div>
+      <div class="table-wrap">
+        <table><thead><tr><th>帳戶／市場</th><th>持有人</th><th>總成本</th><th>目前市值</th><th>未實現損益</th><th>報酬率</th><th>配置占比</th></tr></thead><tbody id="rows"></tbody></table>
+      </div>
+    </section>
+  </section>
+
+  <details><summary>成本與資料來源</summary>
+    哥哥的成本由「總表」歷史資料中，美股與台股首次投入金額各 NT$100,000 推導；媽媽的 Firstrade 與 IB 首次投入金額各 NT$200,000。網站使用 Google OAuth 唯讀權限讀取私人「總表」，不會修改試算表，也不會把資產資料儲存在瀏覽器。
+  </details>
+</main>
+
+<script>
+const CONFIG=window.APP_CONFIG||{};
+const SHEET_ID=CONFIG.GOOGLE_SHEET_ID||"";
+const SHEET_RANGE=CONFIG.GOOGLE_SHEET_RANGE||"'總表'!A:Q";
+const GOOGLE_CLIENT_ID=CONFIG.GOOGLE_CLIENT_ID||"";
+const GOOGLE_SCOPE="https://www.googleapis.com/auth/spreadsheets.readonly";
+const REFRESH_MS=5*60*1000;
+const COLORS={momFirstrade:"var(--mom1)",momIB:"var(--mom2)",brotherUS:"var(--bro1)",brotherTW:"var(--bro2)"};
+let model=null,view="family",syncing=false,ticker=null,tokenClient=null,accessToken=null,refreshTimer=null;
+
+const $=s=>document.querySelector(s);
+const fmt=n=>new Intl.NumberFormat("zh-TW",{style:"currency",currency:"TWD",maximumFractionDigits:0}).format(n||0);
+const short=n=>new Intl.NumberFormat("zh-TW",{notation:"compact",maximumFractionDigits:1}).format(n||0);
+const pct=n=>`${((n||0)*100).toFixed(2)}%`;
+const safeNum=v=>{
+  if(typeof v==="number"&&Number.isFinite(v))return v;
+  if(typeof v==="string"){
+    const s=v.trim();
+    if(s.endsWith("%")){const p=Number(s.slice(0,-1).replace(/,/g,""));return Number.isFinite(p)?p/100:null}
+    const n=Number(s.replace(/[,$NT\s]/g,""));return Number.isFinite(n)?n:null;
+  }
+  return null;
+};
+const norm=v=>String(v??"").trim().toLowerCase().replace(/\s+/g," ");
+function parseDate(v){
+  if(v instanceof Date&&!isNaN(v))return v.toISOString().slice(0,10);
+  if(typeof v==="number"&&v>20000){
+    return new Date(Date.UTC(1899,11,30)+v*86400000).toISOString().slice(0,10);
+  }
+  if(typeof v==="string"){
+    const g=v.match(/^Date\((\d+),(\d+),(\d+)/);
+    if(g)return new Date(Date.UTC(+g[1],+g[2],+g[3])).toISOString().slice(0,10);
+    const d=new Date(v.replace(/\//g,"-"));if(!isNaN(d))return d.toISOString().slice(0,10);
+  }
+  return "";
+}
+function setStatus(kind,text){
+  $("#dot").className="dot "+(kind==="loading"?"loading":kind==="ok"?"ok":"error");
+  $("#status").textContent=text;
+  $("#statusMeta").textContent=new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false});
+  $("#syncBtn").disabled=kind==="loading";
+}
+function showLogin(message="",isError=false){
+  $("#app").hidden=true;
+  $("#loginGate").hidden=false;
+  $("#loginMessage").textContent=message||"請登入後讀取私人試算表。";
+  $("#loginMessage").className="login-message "+(isError?"negative":"");
+  $("#loginBtn").disabled=false;
+}
+function showApp(){
+  $("#loginGate").hidden=true;
+  $("#app").hidden=false;
+}
+function waitForGoogleIdentity(maxMs=10000){
+  return new Promise((resolve,reject)=>{
+    const started=Date.now();
+    const timer=setInterval(()=>{
+      if(window.google?.accounts?.oauth2){clearInterval(timer);resolve();return}
+      if(Date.now()-started>maxMs){clearInterval(timer);reject(new Error("Google 登入服務載入失敗"))}
+    },100);
+  });
+}
+async function initAuth(){
+  if(!GOOGLE_CLIENT_ID||GOOGLE_CLIENT_ID.includes("PASTE_")){
+    showLogin("尚未設定 Google OAuth Client ID，請先修改 config.js。",true);
+    return;
+  }
+  try{
+    await waitForGoogleIdentity();
+    tokenClient=google.accounts.oauth2.initTokenClient({
+      client_id:GOOGLE_CLIENT_ID,
+      scope:GOOGLE_SCOPE,
+      callback:async response=>{
+        $("#loginBtn").disabled=false;
+        if(response?.error){
+          showLogin(`登入失敗：${response.error_description||response.error}`,true);
+          return;
+        }
+        if(!response?.access_token){
+          showLogin("沒有取得 Google 存取權杖。",true);
+          return;
+        }
+        accessToken=response.access_token;
+        showApp();
+        await sync();
+        scheduleRefresh();
+      },
+      error_callback:error=>{
+        $("#loginBtn").disabled=false;
+        showLogin(`登入視窗未完成：${error?.type||"未知錯誤"}`,true);
+      }
+    });
+    $("#loginMessage").textContent="請使用已被分享試算表權限的 Google 帳號登入。";
+    $("#loginBtn").disabled=false;
+  }catch(err){
+    showLogin(err.message,true);
+  }
+}
+function requestLogin(){
+  if(!tokenClient){showLogin("Google 登入服務尚未準備完成，請稍後再試。",true);return}
+  $("#loginBtn").disabled=true;
+  $("#loginMessage").textContent="正在開啟 Google 登入視窗…";
+  tokenClient.requestAccessToken({prompt:"select_account"});
+}
+function logout(){
+  if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null}
+  const token=accessToken;
+  accessToken=null;model=null;
+  $("#dashboard").hidden=true;
+  if(token&&window.google?.accounts?.oauth2){
+    google.accounts.oauth2.revoke(token,()=>showLogin("已安全登出。"));
+  }else{
+    showLogin("已安全登出。");
+  }
+}
+function scheduleRefresh(){
+  if(refreshTimer)clearInterval(refreshTimer);
+  refreshTimer=setInterval(()=>{if(accessToken)sync()},REFRESH_MS);
+}
+async function loadSummary(){
+  if(!accessToken)throw new Error("尚未登入");
+  const range=encodeURIComponent(SHEET_RANGE);
+  const url=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(SHEET_ID)}/values/${range}?majorDimension=ROWS&valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=SERIAL_NUMBER`;
+  const res=await fetch(url,{
+    method:"GET",
+    headers:{Authorization:`Bearer ${accessToken}`},
+    cache:"no-store",
+    credentials:"omit"
+  });
+  if(res.status===401){
+    accessToken=null;
+    throw new Error("登入已過期，請重新登入");
+  }
+  if(res.status===403){
+    throw new Error("此 Google 帳號沒有試算表權限，或尚未啟用 Google Sheets API");
+  }
+  if(res.status===404){
+    throw new Error("找不到試算表或「總表」範圍");
+  }
+  if(!res.ok){
+    let detail="";
+    try{detail=(await res.json())?.error?.message||""}catch(_){}
+    throw new Error(detail||`Google Sheets API 錯誤 ${res.status}`);
+  }
+  const data=await res.json();
+  return Array.isArray(data.values)?data.values:[];
+}
+function firstPositive(rows,col){
+  for(const r of rows){const n=safeNum(r?.[col]);if(n!==null&&n>0)return n}
+  return 0;
+}
+function lastPositive(rows,col){
+  for(let i=rows.length-1;i>=0;i--){const n=safeNum(rows[i]?.[col]);if(n!==null&&n>0)return n}
+  return 0;
+}
+function parseSummary(rows){
+  let header=-1;
+  for(let i=0;i<Math.min(rows.length,12);i++){
+    const r=rows[i]||[];
+    if(norm(r[6])==="日期"&&norm(r[9]).includes("哥總值")&&norm(r[15]).includes("媽總值")){header=i;break}
+  }
+  if(header<1)throw new Error("找不到「總表」標題列，請確認欄位未被移動");
+
+  const current=rows[header-1]||[];
+  const historyRows=rows.slice(header+1).filter(r=>parseDate(r?.[6]));
+  const latestHist=historyRows.at(-1)||[];
+
+  const currentValue=(col)=>safeNum(current[col])??lastPositive(historyRows,col);
+  const brotherUSCost=firstPositive(historyRows,7);
+  const brotherTWCost=firstPositive(historyRows,8);
+  const momFirstradeCost=firstPositive(historyRows,13);
+  const momIBCost=firstPositive(historyRows,14);
+
+  const accounts=[
+    {key:"momFirstrade",owner:"媽媽",name:"Firstrade",cost:momFirstradeCost,value:currentValue(13)},
+    {key:"momIB",owner:"媽媽",name:"IB",cost:momIBCost,value:currentValue(14)},
+    {key:"brotherUS",owner:"哥哥",name:"美股",cost:brotherUSCost,value:currentValue(7)},
+    {key:"brotherTW",owner:"哥哥",name:"台股",cost:brotherTWCost,value:currentValue(8)}
+  ];
+  accounts.forEach(a=>{a.profit=a.value-a.cost;a.rate=a.cost?a.profit/a.cost:0});
+
+  const history=[];
+  for(const r of historyRows){
+    const date=parseDate(r[6]);
+    const brother=safeNum(r[9]);
+    const mom=safeNum(r[15]);
+    if(!date)continue;
+    history.push({date,brother:brother??0,mom:mom??0,family:(brother??0)+(mom??0)});
+  }
+  const currentDate=parseDate(current[6]);
+  const brotherNow=safeNum(current[9])??accounts.filter(a=>a.owner==="哥哥").reduce((s,a)=>s+a.value,0);
+  const momNow=safeNum(current[15])??accounts.filter(a=>a.owner==="媽媽").reduce((s,a)=>s+a.value,0);
+  if(currentDate&&!history.some(x=>x.date===currentDate)){
+    history.push({date:currentDate,brother:brotherNow,mom:momNow,family:brotherNow+momNow});
+  }
+  history.sort((a,b)=>a.date.localeCompare(b.date));
+  return {snapshotDate:currentDate||history.at(-1)?.date||"",accounts,history};
+}
+function filteredAccounts(){
+  if(!model)return[];
+  if(view==="mom")return model.accounts.filter(a=>a.owner==="媽媽");
+  if(view==="brother")return model.accounts.filter(a=>a.owner==="哥哥");
+  return model.accounts;
+}
+function viewLabel(){return view==="mom"?"媽媽":view==="brother"?"哥哥":"家庭合計"}
+function render(){
+  const accounts=filteredAccounts();
+  const totalValue=accounts.reduce((s,a)=>s+a.value,0),totalCost=accounts.reduce((s,a)=>s+a.cost,0);
+  const profit=totalValue-totalCost,rate=totalCost?profit/totalCost:0;
+  $("#totalValue").textContent=fmt(totalValue);$("#totalCost").textContent=fmt(totalCost);
+  $("#profit").textContent=(profit>=0?"+":"")+fmt(profit);$("#profit").className="number money "+(profit>=0?"positive":"negative");
+  $("#returnRate").textContent=(rate>=0?"+":"")+pct(rate);$("#returnRate").className="number "+(rate>=0?"positive":"negative");
+  $("#donutTotal").textContent=short(totalValue);
+  $("#valueHint").textContent=`資料日期：${model.snapshotDate||"—"}`;
+  $("#trendDesc").textContent=`${viewLabel()}歷史變化`;
+
+  let start=0;const stops=[];
+  accounts.forEach(a=>{const end=start+(totalValue?a.value/totalValue*100:0);stops.push(`${COLORS[a.key]} ${start}% ${end}%`);start=end});
+  $("#donut").style.background=stops.length?`conic-gradient(${stops.join(",")})`:"var(--surface2)";
+  $("#legend").innerHTML=accounts.map(a=>`<div class="legend-row"><span class="swatch" style="background:${COLORS[a.key]}"></span>
+    <div>${a.name}<small style="display:block;color:var(--muted);margin-top:2px">${a.owner}</small></div>
+    <div class="legend-value money">${fmt(a.value)}<small>${pct(totalValue?a.value/totalValue:0)}</small></div></div>`).join("");
+
+  const max=Math.max(1,...accounts.flatMap(a=>[a.cost,a.value]));
+  $("#bars").innerHTML=accounts.map(a=>`<div><div class="bar-name"><strong>${a.name}</strong><span class="${a.profit>=0?"positive":"negative"} money">${a.profit>=0?"+":""}${fmt(a.profit)}</span></div>
+    <div class="bar-note"><span class="money">成本 ${fmt(a.cost)}</span><span class="money">市值 ${fmt(a.value)}</span></div>
+    <div class="track"><div class="fill" style="width:${a.cost/max*100}%;background:var(--muted);opacity:.45"></div></div>
+    <div class="track"><div class="fill" style="width:${a.value/max*100}%;background:${COLORS[a.key]}"></div></div></div>`).join("");
+
+  $("#rows").innerHTML=accounts.map(a=>`<tr><td>${a.name}</td><td>${a.owner}</td><td class="money">${fmt(a.cost)}</td><td class="money">${fmt(a.value)}</td>
+    <td class="${a.profit>=0?"positive":"negative"} money">${a.profit>=0?"+":""}${fmt(a.profit)}</td>
+    <td class="${a.rate>=0?"positive":"negative"}">${a.rate>=0?"+":""}${pct(a.rate)}</td><td>${pct(totalValue?a.value/totalValue:0)}</td></tr>`).join("");
+  renderTrend();
+}
+function renderTrend(){
+  const svg=$("#trend"),key=view==="mom"?"mom":view==="brother"?"brother":"family";
+  const h=model.history.filter(x=>x[key]>0);
+  if(h.length<2){svg.innerHTML='<text x="350" y="120" text-anchor="middle" class="axis">需要至少兩筆有效歷史資料</text>';return}
+  const W=700,H=250,p={l:58,r:18,t:12,b:36},vals=h.map(x=>x[key]),mn=Math.min(...vals)*.95,mx=Math.max(...vals)*1.03;
+  const X=i=>p.l+(W-p.l-p.r)*(i/(h.length-1)),Y=v=>p.t+(H-p.t-p.b)*(1-(v-mn)/(mx-mn||1));
+  let out='<defs><linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--brand)" stop-opacity=".24"/><stop offset="100%" stop-color="var(--brand)" stop-opacity="0"/></linearGradient></defs>';
+  for(let i=0;i<=4;i++){const v=mn+(mx-mn)*i/4,y=Y(v);out+=`<line class="gridline" x1="${p.l}" y1="${y}" x2="${W-p.r}" y2="${y}"/><text class="axis" x="${p.l-7}" y="${y+4}" text-anchor="end">${short(v)}</text>`}
+  const pts=h.map((d,i)=>[X(i),Y(d[key])]),path=pts.map((q,i)=>(i?"L":"M")+q.join(",")).join(" ");
+  const area=path+` L ${pts.at(-1)[0]},${H-p.b} L ${pts[0][0]},${H-p.b} Z`;
+  out+=`<path class="area" d="${area}"/><path class="trend" d="${path}"/>`;
+  pts.forEach((q,i)=>{out+=`<circle class="point" cx="${q[0]}" cy="${q[1]}" r="4"><title>${h[i].date} · ${fmt(h[i][key])}</title></circle>`;
+    if(i===0||i===pts.length-1||pts.length<=7)out+=`<text class="axis" x="${q[0]}" y="${H-11}" text-anchor="middle">${h[i].date.slice(5).replace("-","/")}</text>`});
+  svg.innerHTML=out;
+}
+async function sync(){
+  if(syncing)return;
+  if(!accessToken){showLogin("請重新登入後同步資料。",true);return}
+  syncing=true;let seconds=0;
+  setStatus("loading","正在從私人 Google Sheet 讀取「總表」… 0 秒");
+  ticker=setInterval(()=>{seconds++;setStatus("loading",`正在從私人 Google Sheet 讀取「總表」… ${seconds} 秒`)},1000);
+  try{
+    const rows=await loadSummary();
+    model=parseSummary(rows);
+    $("#empty").classList.remove("show");
+    $("#dashboard").hidden=false;
+    render();
+    setStatus("ok",`同步完成 · 資料日期 ${model.snapshotDate||"—"}`);
+  }catch(err){
+    console.error(err);
+    $("#dashboard").hidden=true;
+    $("#empty").classList.add("show");
+    $("#errorText").textContent=`讀取失敗：${err.message}`;
+    setStatus("error",`讀取失敗：${err.message}`);
+    if(!accessToken||String(err.message).includes("登入已過期")){
+      setTimeout(()=>showLogin("登入已過期，請重新登入。",true),700);
+    }
+  }finally{
+    clearInterval(ticker);ticker=null;syncing=false;$("#syncBtn").disabled=false;
+  }
+}
+$("#syncBtn").onclick=sync;
+$("#loginBtn").onclick=requestLogin;
+$("#logoutBtn").onclick=logout;
+$("#tabs").querySelectorAll(".tab").forEach(b=>b.onclick=()=>{view=b.dataset.view;$("#tabs").querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));render()});
+$("#privacyBtn").onclick=()=>{
+  const masked=$("#app").classList.toggle("masked");$("#privacyBtn").textContent=masked?"顯示金額":"隱藏金額";
+};
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible"&&accessToken)sync();
+});
+showLogin("正在載入 Google 登入服務…");
+initAuth();
+</script>
+</body>
+</html>
