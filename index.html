@@ -55,12 +55,28 @@
     .legend{display:grid;gap:11px}.legend-row{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;font-size:13px}
     .swatch{width:10px;height:10px;border-radius:99px}.legend-value{text-align:right;font-weight:800}
     .legend-value small{display:block;color:var(--muted);font-weight:500;margin-top:2px}
+    .market-alloc{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+    .market-track{height:14px;border-radius:999px;background:var(--surface2);overflow:hidden;display:flex}
+    .market-segment{height:100%}.market-segment.us{background:#315bd6}.market-segment.tw{background:#20a37a}
+    .market-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:13px}
+    .market-item{display:grid;gap:4px}
+    .market-topline{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;font-weight:700}
+    .market-topline .swatch{width:11px;height:11px}
+    .market-value{font-size:15px;font-weight:850}
+    .market-meta{font-size:12px;color:var(--muted)}
     .bars{display:grid;gap:16px}.bar-name{display:flex;justify-content:space-between;gap:12px;font-size:12px;margin-bottom:7px}
     .bar-name strong{font-size:13px}.bar-note{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:11px}
     .track{height:10px;border-radius:999px;background:var(--surface2);overflow:hidden;margin:5px 0}.fill{height:100%;border-radius:999px}
-    .chart{height:250px}svg{width:100%;height:100%;display:block;overflow:visible}.gridline{stroke:var(--line);stroke-width:1}
+    .chart{height:250px}.chart svg{width:100%;height:100%;display:block;overflow:visible;touch-action:pan-y}
+    .gridline{stroke:var(--line);stroke-width:1}
     .trend{fill:none;stroke:var(--brand);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
-    .area{fill:url(#areaGradient)}.point{fill:var(--surface);stroke:var(--brand);stroke-width:3}.axis{font-size:10px;fill:var(--muted)}
+    .area{fill:url(#areaGradient)}.point{fill:var(--surface);stroke:var(--brand);stroke-width:2;opacity:.35}.axis{font-size:10px;fill:var(--muted)}
+    .crosshair{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 5;opacity:.65}
+    .selected-point{fill:var(--surface);stroke:var(--brand);stroke-width:3}
+    .interaction-hit{fill:transparent;cursor:crosshair}
+    .tooltip-box{fill:var(--surface);stroke:var(--line);stroke-width:1;filter:drop-shadow(0 8px 18px rgba(30,45,70,.16))}
+    .tooltip-date{font-size:11px;fill:var(--muted)}
+    .tooltip-value{font-size:16px;font-weight:800;fill:var(--text)}
     .table-card{padding:0;overflow:hidden}.table-head{padding:19px 19px 12px}.table-wrap{overflow:auto}
     table{border-collapse:collapse;width:100%;min-width:760px}th,td{padding:13px 18px;border-top:1px solid var(--line);text-align:right;font-size:13px}
     th{font-size:11px;color:var(--muted);background:var(--surface2)}th:first-child,td:first-child{text-align:left}td:first-child{font-weight:800}
@@ -95,7 +111,7 @@
     @media(max-width:880px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
     @media(max-width:620px){.app{padding:17px 11px 42px}header{display:block}.actions{justify-content:flex-start;margin-top:15px}
       .kpis{gap:9px}.card{padding:15px;border-radius:17px}.number{font-size:23px}.donut-layout{grid-template-columns:1fr}.donut{width:155px}
-      .status{align-items:flex-start}.status-meta{display:none}}
+      .status{align-items:flex-start}.status-meta{display:none}.market-legend{grid-template-columns:1fr}}
     @media(max-width:385px){.kpis{grid-template-columns:1fr}}
   </style>
 
@@ -163,6 +179,19 @@
           <div class="donut" id="donut"><div class="donut-center"><strong class="money" id="donutTotal"></strong><span>總資產</span></div></div>
           <div class="legend" id="legend"></div>
         </div>
+        <section class="market-alloc" aria-labelledby="marketAllocTitle">
+          <div class="head" style="margin-bottom:12px">
+            <div>
+              <div class="title" id="marketAllocTitle">市場配置</div>
+              <div class="desc">不分帳戶，依市場加總目前市值</div>
+            </div>
+          </div>
+          <div class="market-track" id="marketTrack" aria-label="市場配置長條圖">
+            <div class="market-segment us" id="marketBarUS"></div>
+            <div class="market-segment tw" id="marketBarTW"></div>
+          </div>
+          <div class="market-legend" id="marketLegend"></div>
+        </section>
       </article>
       <article class="card">
         <div class="head"><div><div class="title">成本 vs. 目前市值</div><div class="desc">灰色為成本，彩色為目前市值</div></div></div>
@@ -197,11 +226,14 @@ const GOOGLE_SCOPE="https://www.googleapis.com/auth/spreadsheets.readonly";
 const REFRESH_MS=5*60*1000;
 const COLORS={momFirstrade:"var(--mom1)",momIB:"var(--mom2)",brotherUS:"var(--bro1)",brotherTW:"var(--bro2)"};
 let model=null,view="family",syncing=false,ticker=null,tokenClient=null,accessToken=null,refreshTimer=null;
+let loginNeedsAccountSelection=false,loginAttemptedOnce=false;
+const trendState={points:[],activeIndex:-1,dragging:false,pointerId:null,elements:null,bound:false};
 
 const $=s=>document.querySelector(s);
 const fmt=n=>new Intl.NumberFormat("zh-TW",{style:"currency",currency:"TWD",maximumFractionDigits:0}).format(n||0);
 const short=n=>new Intl.NumberFormat("zh-TW",{notation:"compact",maximumFractionDigits:1}).format(n||0);
 const pct=n=>`${((n||0)*100).toFixed(2)}%`;
+const formatMoney=n=>fmt(n);
 const safeNum=v=>{
   if(typeof v==="number"&&Number.isFinite(v))return v;
   if(typeof v==="string"){
@@ -230,16 +262,41 @@ function setStatus(kind,text){
   $("#statusMeta").textContent=new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false});
   $("#syncBtn").disabled=kind==="loading";
 }
+function updateLoginButton(){
+  $("#loginBtn").textContent=loginNeedsAccountSelection?"選擇 Google 帳號":loginAttemptedOnce?"繼續查看投資總覽":"使用 Google 帳號登入";
+}
 function showLogin(message="",isError=false){
   $("#app").hidden=true;
   $("#loginGate").hidden=false;
   $("#loginMessage").textContent=message||"請登入後讀取私人試算表。";
   $("#loginMessage").className="login-message "+(isError?"negative":"");
   $("#loginBtn").disabled=false;
+  updateLoginButton();
 }
 function showApp(){
   $("#loginGate").hidden=true;
   $("#app").hidden=false;
+}
+function resetLoginFlow(){
+  loginNeedsAccountSelection=false;
+  loginAttemptedOnce=false;
+  updateLoginButton();
+}
+function resetPromptFallback(){
+  loginNeedsAccountSelection=false;
+  updateLoginButton();
+}
+function requiresAccountSelection(error){
+  const message=String(error?.error_description||error?.error||error?.message||error?.type||"").toLowerCase();
+  return ["interaction_required","login_required","consent_required","account_selection_required"].some(code=>message.includes(code));
+}
+function readableLoginError(error){
+  const raw=String(error?.error_description||error?.error||error?.message||error?.type||"");
+  const message=raw.toLowerCase();
+  if(message.includes("popup_closed"))return "你已關閉 Google 登入視窗，請再按一次按鈕。";
+  if(message.includes("popup_failed_to_open")||message.includes("popup_blocked"))return "Google 登入視窗被瀏覽器阻擋，請允許跳出視窗後再試一次。";
+  if(message.includes("access_denied"))return "你取消了 Google 授權，請再按一次按鈕重試。";
+  return raw;
 }
 function waitForGoogleIdentity(maxMs=10000){
   return new Promise((resolve,reject)=>{
@@ -263,13 +320,21 @@ async function initAuth(){
       callback:async response=>{
         $("#loginBtn").disabled=false;
         if(response?.error){
-          showLogin(`登入失敗：${response.error_description||response.error}`,true);
+          if(requiresAccountSelection(response)&&!loginNeedsAccountSelection){
+            loginNeedsAccountSelection=true;
+            showLogin("這次需要你手動選擇 Google 帳號，請再按一次按鈕。");
+            return;
+          }
+          showLogin(`登入失敗：${readableLoginError(response)||response.error}`,true);
           return;
         }
         if(!response?.access_token){
           showLogin("沒有取得 Google 存取權杖。",true);
           return;
         }
+        loginNeedsAccountSelection=false;
+        loginAttemptedOnce=true;
+        updateLoginButton();
         accessToken=response.access_token;
         showApp();
         await sync();
@@ -277,9 +342,17 @@ async function initAuth(){
       },
       error_callback:error=>{
         $("#loginBtn").disabled=false;
-        showLogin(`登入視窗未完成：${error?.type||"未知錯誤"}`,true);
+        if(requiresAccountSelection(error)&&!loginNeedsAccountSelection){
+          loginNeedsAccountSelection=true;
+          showLogin("這次需要你手動選擇 Google 帳號，請再按一次按鈕。");
+          return;
+        }
+        const friendly=readableLoginError(error);
+        showLogin(`登入視窗未完成：${friendly||"未知錯誤"}`,true);
       }
     });
+    loginAttemptedOnce=true;
+    updateLoginButton();
     $("#loginMessage").textContent="請使用已被分享試算表權限的 Google 帳號登入。";
     $("#loginBtn").disabled=false;
   }catch(err){
@@ -289,14 +362,18 @@ async function initAuth(){
 function requestLogin(){
   if(!tokenClient){showLogin("Google 登入服務尚未準備完成，請稍後再試。",true);return}
   $("#loginBtn").disabled=true;
-  $("#loginMessage").textContent="正在開啟 Google 登入視窗…";
-  tokenClient.requestAccessToken({prompt:"select_account"});
+  loginAttemptedOnce=true;
+  updateLoginButton();
+  $("#loginMessage").textContent=loginNeedsAccountSelection?"請選擇已授權的 Google 帳號。":"正在檢查 Google 登入狀態…";
+  tokenClient.requestAccessToken({prompt:loginNeedsAccountSelection?"select_account":""});
 }
 function logout(){
   if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null}
   const token=accessToken;
   accessToken=null;model=null;
   $("#dashboard").hidden=true;
+  $("#empty").classList.remove("show");
+  resetLoginFlow();
   if(token&&window.google?.accounts?.oauth2){
     google.accounts.oauth2.revoke(token,()=>showLogin("已安全登出。"));
   }else{
@@ -319,7 +396,9 @@ async function loadSummary(){
   });
   if(res.status===401){
     accessToken=null;
-    throw new Error("登入已過期，請重新登入");
+    if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null}
+    resetPromptFallback();
+    throw new Error("登入已過期，請再次按下按鈕繼續。");
   }
   if(res.status===403){
     throw new Error("此 Google 帳號沒有試算表權限，或尚未啟用 Google Sheets API");
@@ -393,10 +472,25 @@ function filteredAccounts(){
   return model.accounts;
 }
 function viewLabel(){return view==="mom"?"媽媽":view==="brother"?"哥哥":"家庭合計"}
+function marketAllocation(accounts){
+  const usKeys=view==="mom"?["momFirstrade","momIB"]:view==="brother"?["brotherUS"]:["momFirstrade","momIB","brotherUS"];
+  const twKeys=view==="mom"?[]:["brotherTW"];
+  const usValue=accounts.filter(a=>usKeys.includes(a.key)).reduce((sum,a)=>sum+a.value,0);
+  const twValue=accounts.filter(a=>twKeys.includes(a.key)).reduce((sum,a)=>sum+a.value,0);
+  const total=usValue+twValue;
+  return {
+    usValue,
+    twValue,
+    total,
+    usPct:total?usValue/total:0,
+    twPct:total?twValue/total:0
+  };
+}
 function render(){
   const accounts=filteredAccounts();
   const totalValue=accounts.reduce((s,a)=>s+a.value,0),totalCost=accounts.reduce((s,a)=>s+a.cost,0);
   const profit=totalValue-totalCost,rate=totalCost?profit/totalCost:0;
+  const market=marketAllocation(accounts);
   $("#totalValue").textContent=fmt(totalValue);$("#totalCost").textContent=fmt(totalCost);
   $("#profit").textContent=(profit>=0?"+":"")+fmt(profit);$("#profit").className="number money "+(profit>=0?"positive":"negative");
   $("#returnRate").textContent=(rate>=0?"+":"")+pct(rate);$("#returnRate").className="number "+(rate>=0?"positive":"negative");
@@ -410,6 +504,20 @@ function render(){
   $("#legend").innerHTML=accounts.map(a=>`<div class="legend-row"><span class="swatch" style="background:${COLORS[a.key]}"></span>
     <div>${a.name}<small style="display:block;color:var(--muted);margin-top:2px">${a.owner}</small></div>
     <div class="legend-value money">${fmt(a.value)}<small>${pct(totalValue?a.value/totalValue:0)}</small></div></div>`).join("");
+  $("#marketBarUS").style.width=`${market.usPct*100}%`;
+  $("#marketBarTW").style.width=`${market.twPct*100}%`;
+  $("#marketTrack").setAttribute("aria-label",`市場配置，美股 ${pct(market.usPct)}，台股 ${pct(market.twPct)}`);
+  $("#marketLegend").innerHTML=`
+    <div class="market-item">
+      <div class="market-topline"><span class="swatch" style="background:#315bd6"></span><span>美股</span></div>
+      <div class="market-value money">${formatMoney(market.usValue)}</div>
+      <div class="market-meta">${pct(market.usPct)}</div>
+    </div>
+    <div class="market-item">
+      <div class="market-topline"><span class="swatch" style="background:#20a37a"></span><span>台股</span></div>
+      <div class="market-value money">${formatMoney(market.twValue)}</div>
+      <div class="market-meta">${pct(market.twPct)}</div>
+    </div>`;
 
   const max=Math.max(1,...accounts.flatMap(a=>[a.cost,a.value]));
   $("#bars").innerHTML=accounts.map(a=>`<div><div class="bar-name"><strong>${a.name}</strong><span class="${a.profit>=0?"positive":"negative"} money">${a.profit>=0?"+":""}${fmt(a.profit)}</span></div>
@@ -422,10 +530,118 @@ function render(){
     <td class="${a.rate>=0?"positive":"negative"}">${a.rate>=0?"+":""}${pct(a.rate)}</td><td>${pct(totalValue?a.value/totalValue:0)}</td></tr>`).join("");
   renderTrend();
 }
+function bindTrendInteraction(){
+  if(trendState.bound)return;
+  const svg=$("#trend");
+  const pointerToSvgX=event=>{
+    const rect=svg.getBoundingClientRect();
+    const vb=svg.viewBox.baseVal;
+    const width=rect.width||1;
+    return vb.x+((event.clientX-rect.left)/width)*vb.width;
+  };
+  const nearestIndex=x=>{
+    if(!trendState.points.length)return-1;
+    let best=0,bestDist=Infinity;
+    trendState.points.forEach((point,i)=>{
+      const dist=Math.abs(point.x-x);
+      if(dist<bestDist){best=i;bestDist=dist}
+    });
+    return best;
+  };
+  const showIndex=index=>{
+    if(index<0||!trendState.points[index]||!trendState.elements)return;
+    trendState.activeIndex=index;
+    const point=trendState.points[index];
+    const {crosshair,marker,tooltip,tooltipDate,tooltipValue,tooltipRect}=trendState.elements;
+    crosshair.style.display="block";
+    marker.style.display="block";
+    tooltip.style.display="block";
+    crosshair.setAttribute("x1",point.x);
+    crosshair.setAttribute("x2",point.x);
+    crosshair.setAttribute("y1",point.plotTop);
+    crosshair.setAttribute("y2",point.plotBottom);
+    marker.setAttribute("cx",point.x);
+    marker.setAttribute("cy",point.y);
+    tooltipDate.textContent=point.date;
+    tooltipValue.textContent=formatMoney(point.value);
+    const width=Math.max(86,Math.ceil(Math.max(tooltipDate.getComputedTextLength(),tooltipValue.getComputedTextLength())+24));
+    const height=48;
+    tooltipRect.setAttribute("width",width);
+    tooltipRect.setAttribute("height",height);
+    tooltipValue.setAttribute("class","tooltip-value money");
+    tooltipDate.setAttribute("x",12);
+    tooltipDate.setAttribute("y",18);
+    tooltipValue.setAttribute("x",12);
+    tooltipValue.setAttribute("y",36);
+    const vb=svg.viewBox.baseVal;
+    const leftBound=point.plotLeft;
+    const rightBound=point.plotRight-width;
+    const x=Math.min(Math.max(point.x-width/2,leftBound),rightBound);
+    const preferredY=point.y-height-14;
+    const y=preferredY<point.plotTop?point.y+14:preferredY;
+    tooltip.setAttribute("transform",`translate(${x},${y})`);
+    svg.setAttribute("aria-label",$("#app").classList.contains("masked")?`總資產趨勢圖，${point.date}，金額已隱藏`:`總資產趨勢圖，${point.date}，${formatMoney(point.value)}`);
+  };
+  const hideSelection=()=>{
+    if(trendState.elements){
+      trendState.elements.crosshair.style.display="none";
+      trendState.elements.marker.style.display="none";
+      trendState.elements.tooltip.style.display="none";
+    }
+    trendState.activeIndex=-1;
+    svg.setAttribute("aria-label","總資產趨勢圖");
+  };
+  const updateFromEvent=event=>{
+    const index=nearestIndex(pointerToSvgX(event));
+    showIndex(index);
+  };
+  svg.addEventListener("pointerdown",event=>{
+    if(!trendState.points.length)return;
+    trendState.dragging=true;
+    trendState.pointerId=event.pointerId;
+    svg.style.touchAction="none";
+    svg.setPointerCapture?.(event.pointerId);
+    updateFromEvent(event);
+    event.preventDefault();
+  });
+  svg.addEventListener("pointermove",event=>{
+    if(!trendState.points.length)return;
+    if(event.pointerType==="mouse"&&!trendState.dragging){
+      updateFromEvent(event);
+      return;
+    }
+    if(trendState.dragging&&event.pointerId===trendState.pointerId){
+      updateFromEvent(event);
+      if(event.pointerType!=="mouse")event.preventDefault();
+    }
+  });
+  const endPointer=event=>{
+    if(trendState.dragging&&event.pointerId===trendState.pointerId){
+      svg.releasePointerCapture?.(event.pointerId);
+      trendState.dragging=false;
+      trendState.pointerId=null;
+      svg.style.touchAction="pan-y";
+      hideSelection();
+    }else if(event.type==="pointerleave"&&event.pointerType==="mouse"){
+      hideSelection();
+    }
+  };
+  svg.addEventListener("pointerup",endPointer);
+  svg.addEventListener("pointercancel",endPointer);
+  svg.addEventListener("pointerleave",endPointer);
+  trendState.bound=true;
+}
 function renderTrend(){
   const svg=$("#trend"),key=view==="mom"?"mom":view==="brother"?"brother":"family";
   const h=model.history.filter(x=>x[key]>0);
-  if(h.length<2){svg.innerHTML='<text x="350" y="120" text-anchor="middle" class="axis">需要至少兩筆有效歷史資料</text>';return}
+  bindTrendInteraction();
+  if(h.length<2){
+    trendState.points=[];
+    trendState.elements=null;
+    svg.innerHTML='<text x="350" y="120" text-anchor="middle" class="axis">需要至少兩筆有效歷史資料</text>';
+    svg.setAttribute("aria-label","總資產趨勢圖，資料不足");
+    return;
+  }
   const W=700,H=250,p={l:58,r:18,t:12,b:36},vals=h.map(x=>x[key]),mn=Math.min(...vals)*.95,mx=Math.max(...vals)*1.03;
   const X=i=>p.l+(W-p.l-p.r)*(i/(h.length-1)),Y=v=>p.t+(H-p.t-p.b)*(1-(v-mn)/(mx-mn||1));
   let out='<defs><linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--brand)" stop-opacity=".24"/><stop offset="100%" stop-color="var(--brand)" stop-opacity="0"/></linearGradient></defs>';
@@ -433,9 +649,30 @@ function renderTrend(){
   const pts=h.map((d,i)=>[X(i),Y(d[key])]),path=pts.map((q,i)=>(i?"L":"M")+q.join(",")).join(" ");
   const area=path+` L ${pts.at(-1)[0]},${H-p.b} L ${pts[0][0]},${H-p.b} Z`;
   out+=`<path class="area" d="${area}"/><path class="trend" d="${path}"/>`;
-  pts.forEach((q,i)=>{out+=`<circle class="point" cx="${q[0]}" cy="${q[1]}" r="4"><title>${h[i].date} · ${fmt(h[i][key])}</title></circle>`;
+  pts.forEach((q,i)=>{out+=`<circle class="point" cx="${q[0]}" cy="${q[1]}" r="2.5"></circle>`;
     if(i===0||i===pts.length-1||pts.length<=7)out+=`<text class="axis" x="${q[0]}" y="${H-11}" text-anchor="middle">${h[i].date.slice(5).replace("-","/")}</text>`});
+  out+=`<line class="crosshair" id="trendCrosshair" style="display:none"></line>
+    <circle class="selected-point" id="trendMarker" r="5.5" style="display:none"></circle>
+    <g id="trendTooltip" style="display:none">
+      <rect class="tooltip-box" id="trendTooltipRect" rx="12" ry="12"></rect>
+      <text class="tooltip-date" id="trendTooltipDate"></text>
+      <text class="tooltip-value" id="trendTooltipValue"></text>
+    </g>
+    <rect class="interaction-hit" id="trendHit" x="${p.l}" y="${p.t}" width="${W-p.l-p.r}" height="${H-p.t-p.b}"></rect>`;
   svg.innerHTML=out;
+  trendState.points=h.map((d,i)=>({date:d.date,value:d[key],x:pts[i][0],y:pts[i][1],plotLeft:p.l,plotRight:W-p.r,plotTop:p.t,plotBottom:H-p.b}));
+  trendState.elements={
+    crosshair:$("#trendCrosshair"),
+    marker:$("#trendMarker"),
+    tooltip:$("#trendTooltip"),
+    tooltipRect:$("#trendTooltipRect"),
+    tooltipDate:$("#trendTooltipDate"),
+    tooltipValue:$("#trendTooltipValue")
+  };
+  trendState.dragging=false;
+  trendState.pointerId=null;
+  svg.style.touchAction="pan-y";
+  svg.setAttribute("aria-label","總資產趨勢圖");
 }
 async function sync(){
   if(syncing)return;
@@ -457,7 +694,9 @@ async function sync(){
     $("#errorText").textContent=`讀取失敗：${err.message}`;
     setStatus("error",`讀取失敗：${err.message}`);
     if(!accessToken||String(err.message).includes("登入已過期")){
-      setTimeout(()=>showLogin("登入已過期，請重新登入。",true),700);
+      if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null}
+      resetPromptFallback();
+      setTimeout(()=>showLogin("登入已過期，請再次按下按鈕繼續。",true),700);
     }
   }finally{
     clearInterval(ticker);ticker=null;syncing=false;$("#syncBtn").disabled=false;
