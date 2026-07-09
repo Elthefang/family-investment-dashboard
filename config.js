@@ -3,7 +3,9 @@ window.APP_CONFIG = {
 
   GOOGLE_SHEET_ID: "1NUY3EMJvh3JdGIMEa8j9LQjtVihVcUspHYLwpmuc_YQ",
 
-  GOOGLE_SHEET_RANGE: "'總表'!A:Q"
+  GOOGLE_SHEET_RANGE: "'總表'!A:R",
+
+  PAGE_VIEW_ENDPOINT: ""
 };
 
 // Ensure elements using the HTML `hidden` attribute are actually removed

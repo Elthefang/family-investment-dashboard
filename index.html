@@ -27,6 +27,9 @@
     header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:17px}
     h1{font-size:clamp(29px,5vw,43px);line-height:1.05;letter-spacing:-.045em;margin:0}
     .subtitle{margin:8px 0 0;color:var(--muted);font-size:14px}
+    .sheet-link{color:inherit;font-weight:750;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+    .sheet-link:hover{color:var(--brand)}
+    .sheet-link:focus-visible{outline:2px solid var(--brand);outline-offset:3px;border-radius:3px}
     .actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
     .btn{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:999px;
       padding:10px 14px;font-weight:750;cursor:pointer;box-shadow:var(--shadow)}
@@ -40,7 +43,8 @@
       margin-bottom:13px;scrollbar-width:none}.tab{border:1px solid var(--line);background:var(--surface);
       color:var(--muted);padding:9px 15px;border-radius:999px;white-space:nowrap;cursor:pointer;font-weight:750}
     .tab.active{background:var(--text);color:var(--bg);border-color:var(--text)}
-    .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+    .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:12px}
+    .kpis.five-cards{grid-template-columns:repeat(5,minmax(0,1fr))}
     .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
       padding:19px;box-shadow:var(--shadow);min-width:0}.label{font-size:12px;font-weight:750;color:var(--muted);margin-bottom:10px}
     .number{font-size:clamp(23px,3.5vw,34px);font-weight:850;letter-spacing:-.045em;white-space:nowrap}
@@ -64,26 +68,51 @@
     .market-topline .swatch{width:11px;height:11px}
     .market-value{font-size:15px;font-weight:850}
     .market-meta{font-size:12px;color:var(--muted)}
-    .bars{display:grid;gap:16px}.bar-name{display:flex;justify-content:space-between;gap:12px;font-size:12px;margin-bottom:7px}
-    .bar-name strong{font-size:13px}.bar-note{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:11px}
-    .track{height:10px;border-radius:999px;background:var(--surface2);overflow:hidden;margin:5px 0}.fill{height:100%;border-radius:999px}
+    .growth-market{padding-top:16px}
+    .growth-market:first-child{padding-top:0}
+    .growth-market+.growth-market{margin-top:20px;padding-top:20px;border-top:1px solid var(--line)}
+    .growth-market-header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .growth-market-name{font-size:16px;font-weight:850}
+    .growth-current{text-align:right;min-width:0}
+    .growth-current-label{color:var(--muted);font-size:11px}
+    .growth-current-value{margin-top:3px;font-size:17px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .growth-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    .growth-target{min-width:0;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface2)}
+    .growth-target-label{font-size:13px;font-weight:850}
+    .growth-target-value{margin-top:8px;font-size:13px;font-weight:800;overflow-wrap:anywhere}
+    .growth-gap{margin-top:6px;color:var(--muted);font-size:11px;overflow-wrap:anywhere}
+    .growth-track{height:7px;margin-top:10px;overflow:hidden;border-radius:999px;background:var(--surface)}
+    .growth-fill{height:100%;border-radius:inherit}
+    .growth-empty{padding:14px;border:1px dashed var(--line);border-radius:14px;background:var(--surface2);color:var(--muted);font-size:13px}
+    .trend-readout{min-height:58px;margin:-4px 0 8px;display:grid;align-content:start}
+    .trend-readout-value{font-size:clamp(26px,4vw,38px);line-height:1.05;font-weight:850;letter-spacing:-.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .trend-readout-date{margin-top:6px;color:var(--muted);font-size:13px}
     .chart{height:250px}.chart svg{width:100%;height:100%;display:block;overflow:visible;touch-action:pan-y}
     .gridline{stroke:var(--line);stroke-width:1}
     .trend{fill:none;stroke:var(--brand);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
     .area{fill:url(#areaGradient)}.point{fill:var(--surface);stroke:var(--brand);stroke-width:2;opacity:.35}.axis{font-size:10px;fill:var(--muted)}
     .crosshair{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 5;opacity:.65}
     .selected-point{fill:var(--surface);stroke:var(--brand);stroke-width:3}
-    .interaction-hit{fill:transparent;cursor:crosshair}
-    .tooltip-box{fill:var(--surface);stroke:var(--line);stroke-width:1;filter:drop-shadow(0 8px 18px rgba(30,45,70,.16))}
-    .tooltip-date{font-size:11px;fill:var(--muted)}
-    .tooltip-value{font-size:16px;font-weight:800;fill:var(--text)}
+    .interaction-hit{fill:transparent;pointer-events:all;cursor:crosshair}
     .table-card{padding:0;overflow:hidden}.table-head{padding:19px 19px 12px}.table-wrap{overflow:auto}
     table{border-collapse:collapse;width:100%;min-width:760px}th,td{padding:13px 18px;border-top:1px solid var(--line);text-align:right;font-size:13px}
     th{font-size:11px;color:var(--muted);background:var(--surface2)}th:first-child,td:first-child{text-align:left}td:first-child{font-weight:800}
     .empty{display:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
     .empty.show{display:block}.empty h2{margin:0 0 8px;font-size:21px}.empty p,.empty li{color:var(--muted);line-height:1.6;font-size:14px}
     details{margin-top:14px;color:var(--muted);font-size:12px;line-height:1.6}summary{cursor:pointer;color:var(--text);font-weight:800}
+    .site-footer{padding:24px 0 4px;text-align:center;color:var(--muted);font-size:11px}
+    .site-footer strong{color:inherit;font-weight:700}
     .masked .money{filter:blur(8px);user-select:none}.masked .money:hover{filter:none}
+
+    @media (max-width:880px){
+      .growth-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+
+    @media (max-width:420px){
+      .growth-market-header{display:block}
+      .growth-current{margin-top:8px;text-align:left}
+      .growth-grid{grid-template-columns:1fr}
+    }
 
     .login-gate{
       min-height:100svh;display:grid;place-items:center;padding:22px;background:
@@ -134,7 +163,7 @@
 
 <main class="app" id="app" hidden>
   <header>
-    <div><h1>家庭投資總覽</h1><p class="subtitle">媽媽與哥哥的台股、美股投資 · Google Sheet 自動同步</p></div>
+    <div><h1>家庭投資總覽</h1><p class="subtitle">媽媽與哥哥的台股、美股投資 · <a class="sheet-link" href="https://docs.google.com/spreadsheets/d/1NUY3EMJvh3JdGIMEa8j9LQjtVihVcUspHYLwpmuc_YQ/edit?gid=1657097777#gid=1657097777" target="_blank" rel="noopener noreferrer">Google Sheet</a> 自動同步</p></div>
     <div class="actions">
       <button class="btn" id="privacyBtn" type="button">隱藏金額</button>
       <button class="btn" id="syncBtn" type="button">同步 Google Sheet</button>
@@ -165,11 +194,12 @@
       <button class="tab" data-view="brother">哥哥</button>
     </nav>
 
-    <section class="kpis">
+    <section class="kpis" id="kpis">
       <article class="card"><div class="label">目前總資產</div><div class="number money" id="totalValue">—</div><div class="hint" id="valueHint">依最新市值加總</div></article>
       <article class="card"><div class="label">總成本</div><div class="number money" id="totalCost">—</div><div class="hint">依首次投入金額計算</div></article>
       <article class="card"><div class="label">未實現損益</div><div class="number money" id="profit">—</div><div class="hint">目前市值－總成本</div></article>
       <article class="card"><div class="label">總報酬率</div><div class="number" id="returnRate">—</div><div class="hint">未實現損益 ÷ 總成本</div></article>
+      <article class="card" id="annualizedCard" hidden><div class="label">年化報酬率</div><div class="number" id="annualizedReturn">—</div><div class="hint" id="annualizedHint">—</div></article>
     </section>
 
     <section class="grid">
@@ -179,7 +209,7 @@
           <div class="donut" id="donut"><div class="donut-center"><strong class="money" id="donutTotal"></strong><span>總資產</span></div></div>
           <div class="legend" id="legend"></div>
         </div>
-        <section class="market-alloc" aria-labelledby="marketAllocTitle">
+        <section class="market-alloc" id="marketAllocationSection" aria-labelledby="marketAllocTitle">
           <div class="head" style="margin-bottom:12px">
             <div>
               <div class="title" id="marketAllocTitle">市場配置</div>
@@ -194,13 +224,17 @@
         </section>
       </article>
       <article class="card">
-        <div class="head"><div><div class="title">成本 vs. 目前市值</div><div class="desc">灰色為成本，彩色為目前市值</div></div></div>
-        <div class="bars" id="bars"></div>
+        <div class="head"><div><div class="title">美股／台股成長目標</div><div class="desc">以目前淨值計算，顯示距離各成長目標的金額</div></div></div>
+        <div id="growthMarkets"></div>
       </article>
     </section>
 
     <section class="card" style="margin-bottom:12px">
       <div class="head"><div><div class="title">總資產趨勢</div><div class="desc" id="trendDesc">家庭合計歷史變化</div></div></div>
+      <div class="trend-readout" id="trendReadout" aria-live="polite">
+        <div class="trend-readout-value money" id="trendReadoutValue">—</div>
+        <div class="trend-readout-date" id="trendReadoutDate">—</div>
+      </div>
       <div class="chart"><svg id="trend" viewBox="0 0 700 250" aria-label="總資產趨勢圖"></svg></div>
     </section>
 
@@ -215,18 +249,31 @@
   <details><summary>成本與資料來源</summary>
     哥哥的成本由「總表」歷史資料中，美股與台股首次投入金額各 NT$100,000 推導；媽媽的 Firstrade 與 IB 首次投入金額各 NT$200,000。網站使用 Google OAuth 唯讀權限讀取私人「總表」，不會修改試算表，也不會把資產資料儲存在瀏覽器。
   </details>
+  <footer class="site-footer">
+    <span id="pageViewCounter" hidden>
+      瀏覽 <strong id="pageViewCount">—</strong> 次
+    </span>
+  </footer>
 </main>
 
 <script>
 const CONFIG=window.APP_CONFIG||{};
 const SHEET_ID=CONFIG.GOOGLE_SHEET_ID||"";
-const SHEET_RANGE=CONFIG.GOOGLE_SHEET_RANGE||"'總表'!A:Q";
+const SHEET_RANGE=CONFIG.GOOGLE_SHEET_RANGE||"'總表'!A:R";
 const GOOGLE_CLIENT_ID=CONFIG.GOOGLE_CLIENT_ID||"";
+const PAGE_VIEW_ENDPOINT=CONFIG.PAGE_VIEW_ENDPOINT||"";
 const GOOGLE_SCOPE="https://www.googleapis.com/auth/spreadsheets.readonly";
 const REFRESH_MS=5*60*1000;
 const COLORS={momFirstrade:"var(--mom1)",momIB:"var(--mom2)",brotherUS:"var(--bro1)",brotherTW:"var(--bro2)"};
+const GROWTH_TARGETS=[
+  {label:"+25%",multiplier:1.25},
+  {label:"+50%",multiplier:1.5},
+  {label:"翻 1 倍",multiplier:2},
+  {label:"翻 2 倍",multiplier:3}
+];
 let model=null,view="family",syncing=false,ticker=null,tokenClient=null,accessToken=null,refreshTimer=null;
 let loginNeedsAccountSelection=false,loginAttemptedOnce=false;
+let pageViewInitialized=false;
 const trendState={points:[],activeIndex:-1,dragging:false,pointerId:null,elements:null,bound:false};
 
 const $=s=>document.querySelector(s);
@@ -234,6 +281,7 @@ const fmt=n=>new Intl.NumberFormat("zh-TW",{style:"currency",currency:"TWD",maxi
 const short=n=>new Intl.NumberFormat("zh-TW",{notation:"compact",maximumFractionDigits:1}).format(n||0);
 const pct=n=>`${((n||0)*100).toFixed(2)}%`;
 const formatMoney=n=>fmt(n);
+const PAGE_VIEW_SESSION_KEY="familyDashboardViewCounted";
 const safeNum=v=>{
   if(typeof v==="number"&&Number.isFinite(v))return v;
   if(typeof v==="string"){
@@ -244,6 +292,61 @@ const safeNum=v=>{
   return null;
 };
 const norm=v=>String(v??"").trim().toLowerCase().replace(/\s+/g," ");
+function formatViewCount(value){
+  return new Intl.NumberFormat("zh-TW").format(value);
+}
+function resetPageViewCounter(){
+  $("#pageViewCounter").hidden=true;
+  $("#pageViewCount").textContent="—";
+}
+function showPageViewCount(count){
+  const number=Number(count);
+  if(!Number.isFinite(number)||number<0)return;
+  $("#pageViewCount").textContent=formatViewCount(number);
+  $("#pageViewCounter").hidden=false;
+}
+async function updatePageViewCounter(){
+  if(!PAGE_VIEW_ENDPOINT){resetPageViewCounter();return}
+  const isLocal=location.hostname==="localhost"||location.hostname==="127.0.0.1";
+  const alreadyCounted=sessionStorage.getItem(PAGE_VIEW_SESSION_KEY)==="1";
+  const shouldIncrement=!isLocal&&!alreadyCounted;
+  try{
+    const response=await fetch(PAGE_VIEW_ENDPOINT,{
+      method:shouldIncrement?"POST":"GET",
+      headers:{Accept:"application/json"},
+      cache:"no-store"
+    });
+    if(!response.ok)throw new Error(`Page-view request failed: ${response.status}`);
+    const result=await response.json();
+    showPageViewCount(result?.count);
+    if(shouldIncrement)sessionStorage.setItem(PAGE_VIEW_SESSION_KEY,"1");
+  }catch(error){
+    console.warn("Page-view counter unavailable",error);
+    resetPageViewCounter();
+  }
+}
+function showTrendSelection(index){
+  const svg=$("#trend");
+  if(!trendState.elements||index<0||!trendState.points[index]){
+    trendState.activeIndex=-1;
+    svg.setAttribute("aria-label","總資產趨勢圖");
+    return;
+  }
+  trendState.activeIndex=index;
+  const point=trendState.points[index];
+  const {crosshair,marker,readoutValue,readoutDate}=trendState.elements;
+  crosshair.style.display="block";
+  marker.style.display="block";
+  crosshair.setAttribute("x1",point.x);
+  crosshair.setAttribute("x2",point.x);
+  crosshair.setAttribute("y1",point.plotTop);
+  crosshair.setAttribute("y2",point.plotBottom);
+  marker.setAttribute("cx",point.x);
+  marker.setAttribute("cy",point.y);
+  readoutValue.textContent=formatMoney(point.value);
+  readoutDate.textContent=point.date;
+  svg.setAttribute("aria-label",$("#app").classList.contains("masked")?`總資產趨勢圖，${point.date}，金額已隱藏`:`總資產趨勢圖，${point.date}，${formatMoney(point.value)}`);
+}
 function parseDate(v){
   if(v instanceof Date&&!isNaN(v))return v.toISOString().slice(0,10);
   if(typeof v==="number"&&v>20000){
@@ -268,6 +371,7 @@ function updateLoginButton(){
 function showLogin(message="",isError=false){
   $("#app").hidden=true;
   $("#loginGate").hidden=false;
+  resetPageViewCounter();
   $("#loginMessage").textContent=message||"請登入後讀取私人試算表。";
   $("#loginMessage").className="login-message "+(isError?"negative":"");
   $("#loginBtn").disabled=false;
@@ -371,6 +475,8 @@ function logout(){
   if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null}
   const token=accessToken;
   accessToken=null;model=null;
+  pageViewInitialized=false;
+  resetPageViewCounter();
   $("#dashboard").hidden=true;
   $("#empty").classList.remove("show");
   resetLoginFlow();
@@ -432,7 +538,6 @@ function parseSummary(rows){
 
   const current=rows[header-1]||[];
   const historyRows=rows.slice(header+1).filter(r=>parseDate(r?.[6]));
-  const latestHist=historyRows.at(-1)||[];
 
   const currentValue=(col)=>safeNum(current[col])??lastPositive(historyRows,col);
   const brotherUSCost=firstPositive(historyRows,7);
@@ -463,7 +568,15 @@ function parseSummary(rows){
     history.push({date:currentDate,brother:brotherNow,mom:momNow,family:brotherNow+momNow});
   }
   history.sort((a,b)=>a.date.localeCompare(b.date));
-  return {snapshotDate:currentDate||history.at(-1)?.date||"",accounts,history};
+  return {
+    snapshotDate:currentDate||history.at(-1)?.date||"",
+    accounts,
+    history,
+    annualized:{
+      mom:safeNum(rows?.[0]?.[17]),
+      brother:safeNum(rows?.[4]?.[11])
+    }
+  };
 }
 function filteredAccounts(){
   if(!model)return[];
@@ -486,14 +599,68 @@ function marketAllocation(accounts){
     twPct:total?twValue/total:0
   };
 }
+function growthTargets(currentValue){
+  return GROWTH_TARGETS.map(target=>{
+    const targetValue=currentValue*target.multiplier;
+    const gapValue=targetValue-currentValue;
+    return {
+      ...target,
+      currentValue,
+      targetValue,
+      gapValue,
+      progress:targetValue>0?currentValue/targetValue:0
+    };
+  });
+}
+function renderGrowthMarket(name,currentValue,marketClass){
+  const color=marketClass==="us"?"#315bd6":"#20a37a";
+  const currentMarkup=`<div class="growth-current">
+    <div class="growth-current-label">目前淨值</div>
+    <div class="growth-current-value money">${formatMoney(currentValue)}</div>
+  </div>`;
+  if(currentValue<=0){
+    return `<section class="growth-market">
+      <div class="growth-market-header">
+        <div class="growth-market-name">${name}</div>
+        ${currentMarkup}
+      </div>
+      <div class="growth-empty">目前沒有${name}資產資料</div>
+    </section>`;
+  }
+  const items=growthTargets(currentValue).map(target=>`<div class="growth-target">
+      <div class="growth-target-label">${target.label}</div>
+      <div class="growth-target-value money">目標 ${formatMoney(target.targetValue)}</div>
+      <div class="growth-track" aria-hidden="true"><div class="growth-fill" style="width:${Math.max(0,Math.min(target.progress*100,100))}%;background:${color}"></div></div>
+      <div class="growth-gap money">還差 ${formatMoney(target.gapValue)}</div>
+    </div>`).join("");
+  return `<section class="growth-market">
+    <div class="growth-market-header">
+      <div class="growth-market-name">${name}</div>
+      ${currentMarkup}
+    </div>
+    <div class="growth-grid">${items}</div>
+  </section>`;
+}
+function formatRateValue(value){
+  return Number.isFinite(value)?`${value>=0?"+":""}${pct(value)}`:"—";
+}
 function render(){
   const accounts=filteredAccounts();
   const totalValue=accounts.reduce((s,a)=>s+a.value,0),totalCost=accounts.reduce((s,a)=>s+a.cost,0);
   const profit=totalValue-totalCost,rate=totalCost?profit/totalCost:0;
   const market=marketAllocation(accounts);
+  $("#marketAllocationSection").hidden=view==="mom";
+  const showAnnualized=view!=="family";
+  const annualizedValue=view==="mom"?model?.annualized?.mom:view==="brother"?model?.annualized?.brother:null;
+  const annualizedHint=view==="mom"?"取自 Google Sheet 媽媽年化報酬":view==="brother"?"取自 Google Sheet 哥哥年化報酬":"";
+  $("#kpis").classList.toggle("five-cards",showAnnualized);
+  $("#annualizedCard").hidden=!showAnnualized;
   $("#totalValue").textContent=fmt(totalValue);$("#totalCost").textContent=fmt(totalCost);
   $("#profit").textContent=(profit>=0?"+":"")+fmt(profit);$("#profit").className="number money "+(profit>=0?"positive":"negative");
   $("#returnRate").textContent=(rate>=0?"+":"")+pct(rate);$("#returnRate").className="number "+(rate>=0?"positive":"negative");
+  $("#annualizedReturn").textContent=formatRateValue(annualizedValue);
+  $("#annualizedReturn").className=`number ${Number.isFinite(annualizedValue)?annualizedValue>=0?"positive":"negative":""}`.trim();
+  $("#annualizedHint").textContent=annualizedHint||"—";
   $("#donutTotal").textContent=short(totalValue);
   $("#valueHint").textContent=`資料日期：${model.snapshotDate||"—"}`;
   $("#trendDesc").textContent=`${viewLabel()}歷史變化`;
@@ -515,15 +682,13 @@ function render(){
     </div>
     <div class="market-item">
       <div class="market-topline"><span class="swatch" style="background:#20a37a"></span><span>台股</span></div>
-      <div class="market-value money">${formatMoney(market.twValue)}</div>
-      <div class="market-meta">${pct(market.twPct)}</div>
-    </div>`;
-
-  const max=Math.max(1,...accounts.flatMap(a=>[a.cost,a.value]));
-  $("#bars").innerHTML=accounts.map(a=>`<div><div class="bar-name"><strong>${a.name}</strong><span class="${a.profit>=0?"positive":"negative"} money">${a.profit>=0?"+":""}${fmt(a.profit)}</span></div>
-    <div class="bar-note"><span class="money">成本 ${fmt(a.cost)}</span><span class="money">市值 ${fmt(a.value)}</span></div>
-    <div class="track"><div class="fill" style="width:${a.cost/max*100}%;background:var(--muted);opacity:.45"></div></div>
-    <div class="track"><div class="fill" style="width:${a.value/max*100}%;background:${COLORS[a.key]}"></div></div></div>`).join("");
+    <div class="market-value money">${formatMoney(market.twValue)}</div>
+    <div class="market-meta">${pct(market.twPct)}</div>
+  </div>`;
+  $("#growthMarkets").innerHTML=[
+    renderGrowthMarket("美股",market.usValue,"us"),
+    renderGrowthMarket("台股",market.twValue,"tw")
+  ].join("");
 
   $("#rows").innerHTML=accounts.map(a=>`<tr><td>${a.name}</td><td>${a.owner}</td><td class="money">${fmt(a.cost)}</td><td class="money">${fmt(a.value)}</td>
     <td class="${a.profit>=0?"positive":"negative"} money">${a.profit>=0?"+":""}${fmt(a.profit)}</td>
@@ -533,67 +698,30 @@ function render(){
 function bindTrendInteraction(){
   if(trendState.bound)return;
   const svg=$("#trend");
-  const pointerToSvgX=event=>{
-    const rect=svg.getBoundingClientRect();
-    const vb=svg.viewBox.baseVal;
-    const width=rect.width||1;
-    return vb.x+((event.clientX-rect.left)/width)*vb.width;
+  const pointerToSvgPoint=event=>{
+    const matrix=svg.getScreenCTM();
+    if(!matrix)return null;
+    const point=svg.createSVGPoint();
+    point.x=event.clientX;
+    point.y=event.clientY;
+    return point.matrixTransform(matrix.inverse());
   };
   const nearestIndex=x=>{
     if(!trendState.points.length)return-1;
+    const first=trendState.points[0].x,last=trendState.points.at(-1).x;
+    const clampedX=Math.min(Math.max(x,first),last);
     let best=0,bestDist=Infinity;
     trendState.points.forEach((point,i)=>{
-      const dist=Math.abs(point.x-x);
+      const dist=Math.abs(point.x-clampedX);
       if(dist<bestDist){best=i;bestDist=dist}
     });
-    return best;
-  };
-  const showIndex=index=>{
-    if(index<0||!trendState.points[index]||!trendState.elements)return;
-    trendState.activeIndex=index;
-    const point=trendState.points[index];
-    const {crosshair,marker,tooltip,tooltipDate,tooltipValue,tooltipRect}=trendState.elements;
-    crosshair.style.display="block";
-    marker.style.display="block";
-    tooltip.style.display="block";
-    crosshair.setAttribute("x1",point.x);
-    crosshair.setAttribute("x2",point.x);
-    crosshair.setAttribute("y1",point.plotTop);
-    crosshair.setAttribute("y2",point.plotBottom);
-    marker.setAttribute("cx",point.x);
-    marker.setAttribute("cy",point.y);
-    tooltipDate.textContent=point.date;
-    tooltipValue.textContent=formatMoney(point.value);
-    const width=Math.max(86,Math.ceil(Math.max(tooltipDate.getComputedTextLength(),tooltipValue.getComputedTextLength())+24));
-    const height=48;
-    tooltipRect.setAttribute("width",width);
-    tooltipRect.setAttribute("height",height);
-    tooltipValue.setAttribute("class","tooltip-value money");
-    tooltipDate.setAttribute("x",12);
-    tooltipDate.setAttribute("y",18);
-    tooltipValue.setAttribute("x",12);
-    tooltipValue.setAttribute("y",36);
-    const vb=svg.viewBox.baseVal;
-    const leftBound=point.plotLeft;
-    const rightBound=point.plotRight-width;
-    const x=Math.min(Math.max(point.x-width/2,leftBound),rightBound);
-    const preferredY=point.y-height-14;
-    const y=preferredY<point.plotTop?point.y+14:preferredY;
-    tooltip.setAttribute("transform",`translate(${x},${y})`);
-    svg.setAttribute("aria-label",$("#app").classList.contains("masked")?`總資產趨勢圖，${point.date}，金額已隱藏`:`總資產趨勢圖，${point.date}，${formatMoney(point.value)}`);
-  };
-  const hideSelection=()=>{
-    if(trendState.elements){
-      trendState.elements.crosshair.style.display="none";
-      trendState.elements.marker.style.display="none";
-      trendState.elements.tooltip.style.display="none";
-    }
-    trendState.activeIndex=-1;
-    svg.setAttribute("aria-label","總資產趨勢圖");
+    return Math.min(Math.max(best,0),trendState.points.length-1);
   };
   const updateFromEvent=event=>{
-    const index=nearestIndex(pointerToSvgX(event));
-    showIndex(index);
+    const svgPoint=pointerToSvgPoint(event);
+    if(!svgPoint)return;
+    const index=nearestIndex(svgPoint.x);
+    showTrendSelection(index);
   };
   svg.addEventListener("pointerdown",event=>{
     if(!trendState.points.length)return;
@@ -621,28 +749,28 @@ function bindTrendInteraction(){
       trendState.dragging=false;
       trendState.pointerId=null;
       svg.style.touchAction="pan-y";
-      hideSelection();
-    }else if(event.type==="pointerleave"&&event.pointerType==="mouse"){
-      hideSelection();
     }
   };
   svg.addEventListener("pointerup",endPointer);
   svg.addEventListener("pointercancel",endPointer);
-  svg.addEventListener("pointerleave",endPointer);
   trendState.bound=true;
 }
 function renderTrend(){
   const svg=$("#trend"),key=view==="mom"?"mom":view==="brother"?"brother":"family";
+  const readoutValue=$("#trendReadoutValue"),readoutDate=$("#trendReadoutDate");
   const h=model.history.filter(x=>x[key]>0);
   bindTrendInteraction();
   if(h.length<2){
     trendState.points=[];
-    trendState.elements=null;
+    trendState.activeIndex=-1;
+    trendState.elements={crosshair:null,marker:null,readoutValue,readoutDate};
+    readoutValue.textContent="—";
+    readoutDate.textContent="—";
     svg.innerHTML='<text x="350" y="120" text-anchor="middle" class="axis">需要至少兩筆有效歷史資料</text>';
     svg.setAttribute("aria-label","總資產趨勢圖，資料不足");
     return;
   }
-  const W=700,H=250,p={l:58,r:18,t:12,b:36},vals=h.map(x=>x[key]),mn=Math.min(...vals)*.95,mx=Math.max(...vals)*1.03;
+  const W=700,H=250,p={l:58,r:24,t:12,b:36},vals=h.map(x=>x[key]),mn=Math.min(...vals)*.95,mx=Math.max(...vals)*1.03;
   const X=i=>p.l+(W-p.l-p.r)*(i/(h.length-1)),Y=v=>p.t+(H-p.t-p.b)*(1-(v-mn)/(mx-mn||1));
   let out='<defs><linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--brand)" stop-opacity=".24"/><stop offset="100%" stop-color="var(--brand)" stop-opacity="0"/></linearGradient></defs>';
   for(let i=0;i<=4;i++){const v=mn+(mx-mn)*i/4,y=Y(v);out+=`<line class="gridline" x1="${p.l}" y1="${y}" x2="${W-p.r}" y2="${y}"/><text class="axis" x="${p.l-7}" y="${y+4}" text-anchor="end">${short(v)}</text>`}
@@ -650,29 +778,26 @@ function renderTrend(){
   const area=path+` L ${pts.at(-1)[0]},${H-p.b} L ${pts[0][0]},${H-p.b} Z`;
   out+=`<path class="area" d="${area}"/><path class="trend" d="${path}"/>`;
   pts.forEach((q,i)=>{out+=`<circle class="point" cx="${q[0]}" cy="${q[1]}" r="2.5"></circle>`;
-    if(i===0||i===pts.length-1||pts.length<=7)out+=`<text class="axis" x="${q[0]}" y="${H-11}" text-anchor="middle">${h[i].date.slice(5).replace("-","/")}</text>`});
+    if(i===0||i===pts.length-1||pts.length<=7){
+      const isFirst=i===0,isLast=i===pts.length-1;
+      const anchor=isFirst?"start":isLast?"end":"middle";
+      out+=`<text class="axis" x="${q[0]}" y="${H-11}" text-anchor="${anchor}">${h[i].date.slice(5).replace("-","/")}</text>`;
+    }});
   out+=`<line class="crosshair" id="trendCrosshair" style="display:none"></line>
     <circle class="selected-point" id="trendMarker" r="5.5" style="display:none"></circle>
-    <g id="trendTooltip" style="display:none">
-      <rect class="tooltip-box" id="trendTooltipRect" rx="12" ry="12"></rect>
-      <text class="tooltip-date" id="trendTooltipDate"></text>
-      <text class="tooltip-value" id="trendTooltipValue"></text>
-    </g>
-    <rect class="interaction-hit" id="trendHit" x="${p.l}" y="${p.t}" width="${W-p.l-p.r}" height="${H-p.t-p.b}"></rect>`;
+    <rect class="interaction-hit" id="trendHit" x="${p.l}" y="${p.t}" width="${W-p.l-p.r+1}" height="${H-p.t-p.b}"></rect>`;
   svg.innerHTML=out;
   trendState.points=h.map((d,i)=>({date:d.date,value:d[key],x:pts[i][0],y:pts[i][1],plotLeft:p.l,plotRight:W-p.r,plotTop:p.t,plotBottom:H-p.b}));
   trendState.elements={
     crosshair:$("#trendCrosshair"),
     marker:$("#trendMarker"),
-    tooltip:$("#trendTooltip"),
-    tooltipRect:$("#trendTooltipRect"),
-    tooltipDate:$("#trendTooltipDate"),
-    tooltipValue:$("#trendTooltipValue")
+    readoutValue,
+    readoutDate
   };
   trendState.dragging=false;
   trendState.pointerId=null;
   svg.style.touchAction="pan-y";
-  svg.setAttribute("aria-label","總資產趨勢圖");
+  showTrendSelection(h.length-1);
 }
 async function sync(){
   if(syncing)return;
@@ -686,6 +811,10 @@ async function sync(){
     $("#empty").classList.remove("show");
     $("#dashboard").hidden=false;
     render();
+    if(!pageViewInitialized){
+      pageViewInitialized=true;
+      updatePageViewCounter();
+    }
     setStatus("ok",`同步完成 · 資料日期 ${model.snapshotDate||"—"}`);
   }catch(err){
     console.error(err);
@@ -708,6 +837,7 @@ $("#logoutBtn").onclick=logout;
 $("#tabs").querySelectorAll(".tab").forEach(b=>b.onclick=()=>{view=b.dataset.view;$("#tabs").querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));render()});
 $("#privacyBtn").onclick=()=>{
   const masked=$("#app").classList.toggle("masked");$("#privacyBtn").textContent=masked?"顯示金額":"隱藏金額";
+  if(trendState.activeIndex>=0)showTrendSelection(trendState.activeIndex);
 };
 document.addEventListener("visibilitychange",()=>{
   if(document.visibilityState==="visible"&&accessToken)sync();

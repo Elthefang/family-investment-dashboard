@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "family-investment-dashboard-page-view",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-09",
+  "kv_namespaces": [
+    {
+      "binding": "PAGE_VIEWS",
+      "id": "REPLACE_WITH_PRODUCTION_KV_NAMESPACE_ID"
+    }
+  ]
+}
