@@ -113,6 +113,31 @@
     .roadmap-target-value{margin-top:4px;font-size:12px;line-height:1.1;color:var(--muted);white-space:nowrap}
     .roadmap-marker.us{color:#315bd6}
     .roadmap-marker.tw{color:#20a37a}
+    .roadmap-marker-button{
+      appearance:none;border:0;background:transparent;color:inherit;padding:0;cursor:pointer;
+      pointer-events:auto;position:relative;display:block;min-width:20px;min-height:56px
+    }
+    .roadmap-marker-button:focus-visible{outline:2px solid currentColor;outline-offset:4px;border-radius:10px}
+    .roadmap-tooltip{
+      display:none;position:absolute;z-index:10;bottom:78px;left:50%;transform:translateX(-50%);
+      width:min(240px,calc(100vw - 48px));padding:16px;border:1px solid var(--line);border-radius:16px;
+      background:var(--surface);box-shadow:0 14px 36px rgba(15,23,42,.14);color:var(--text);pointer-events:none
+    }
+    .roadmap-marker.edge-start .roadmap-tooltip{left:0;transform:none}
+    .roadmap-marker.edge-end .roadmap-tooltip{left:auto;right:0;transform:none}
+    .roadmap-tooltip-title{font-size:14px;font-weight:850}
+    .roadmap-tooltip-grid{display:grid;gap:10px;margin-top:12px}
+    .roadmap-tooltip-item{display:grid;gap:3px}
+    .roadmap-tooltip-label{font-size:11px;color:var(--muted);font-weight:800}
+    .roadmap-tooltip-value{
+      white-space:nowrap;word-break:keep-all;overflow-wrap:normal;font-variant-numeric:tabular-nums;
+      font-size:15px;font-weight:850
+    }
+    .roadmap-marker.is-open .roadmap-tooltip{display:block}
+    #growthMarkets[data-has-open="0"] .roadmap-marker:focus-within .roadmap-tooltip{display:block}
+    @media (hover:hover){
+      #growthMarkets[data-has-open="0"] .roadmap-marker:hover .roadmap-tooltip{display:block}
+    }
     .roadmap-current-marker{
       position:absolute;top:-5px;width:0;height:26px;border-left:2px solid var(--text);opacity:.85
     }
@@ -120,16 +145,22 @@
       content:"";position:absolute;top:-4px;left:-4px;width:8px;height:8px;border-radius:50%;
       background:var(--text)
     }
-    .roadmap-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-top:16px}
-    .roadmap-stat{
-      min-width:0;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface2)
+    .roadmap-details{display:grid;gap:14px;margin-top:16px}
+    .roadmap-summary{display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-start}
+    .roadmap-summary-item{display:grid;gap:4px;min-width:0}
+    .roadmap-summary-label,.roadmap-next-title,.roadmap-next-label,.roadmap-success{font-size:12px;font-weight:800}
+    .roadmap-summary-label,.roadmap-next-title,.roadmap-next-label{color:var(--muted)}
+    .roadmap-summary-value,.roadmap-next-value{
+      white-space:nowrap;word-break:keep-all;overflow-wrap:normal;font-variant-numeric:tabular-nums;
+      font-size:clamp(18px,2vw,24px);line-height:1.15;font-weight:850
     }
-    .roadmap-stat-label{font-size:12px;font-weight:800;color:var(--muted)}
-    .roadmap-stat-value{
-      margin-top:6px;white-space:nowrap;word-break:keep-all;overflow-wrap:normal;
-      font-variant-numeric:tabular-nums;font-size:clamp(19px,2vw,26px);line-height:1.15
-    }
-    .roadmap-stat-value.muted{color:var(--muted)}
+    .roadmap-next-goals{display:grid;gap:10px}
+    .roadmap-next-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .roadmap-next-card{min-width:0;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface2)}
+    .roadmap-next-target{font-size:15px;font-weight:850;line-height:1.1}
+    .roadmap-next-label{margin-top:8px}
+    .roadmap-next-value{margin-top:4px}
+    .roadmap-success{color:var(--muted)}
     .roadmap-accent-us{color:#315bd6}
     .roadmap-accent-tw{color:#20a37a}
     .trend-readout{min-height:58px;margin:-4px 0 8px;display:grid;align-content:start}
@@ -176,22 +207,16 @@
     .login-help{font-size:11px!important;margin-top:18px!important}
 
     @media(max-width:880px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
-    @media (max-width:900px){
-      .roadmap-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
-    }
     @media(max-width:620px){.app{padding:17px 11px 42px}header{display:block}.actions{justify-content:flex-start;margin-top:15px}
       .kpis{gap:9px}.card{padding:15px;border-radius:17px}.number{font-size:23px}.donut-layout{grid-template-columns:1fr}.donut{width:155px}
       .status{align-items:flex-start}.status-meta{display:none}.market-legend{grid-template-columns:1fr}
       .roadmap-market-header{display:block}
       .roadmap-current{margin-top:8px;text-align:left}
       .roadmap-chart{padding-top:58px}
-      .roadmap-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
       .roadmap-target-label{font-size:12px}
       .roadmap-target-value{display:none}}
     @media(max-width:385px){.kpis{grid-template-columns:1fr}}
-    @media (max-width:390px){
-      .roadmap-stats{grid-template-columns:1fr}
-    }
+    @media (max-width:520px){.roadmap-next-grid{grid-template-columns:1fr}}
   </style>
 
   <link rel="icon" type="image/png" sizes="32x32" href="assets/penguin-favicon-32.png?v=4">
@@ -325,6 +350,8 @@ let model=null,view="family",syncing=false,ticker=null,tokenClient=null,accessTo
 let loginNeedsAccountSelection=false,loginAttemptedOnce=false;
 let pageViewInitialized=false;
 const trendState={points:[],activeIndex:-1,dragging:false,pointerId:null,elements:null,bound:false};
+let activeRoadmapTarget=null;
+let roadmapUiBound=false;
 
 const $=s=>document.querySelector(s);
 const fmt=n=>new Intl.NumberFormat("zh-TW",{style:"currency",currency:"TWD",maximumFractionDigits:0}).format(n||0);
@@ -719,6 +746,33 @@ function roadmapData(cost,currentValue){
     }))
   };
 }
+function roadmapTargetKey(marketClass,label){
+  return `${marketClass}:${label}`;
+}
+function closeRoadmapPopover(shouldRender=true){
+  if(!activeRoadmapTarget)return;
+  activeRoadmapTarget=null;
+  if(shouldRender&&model)render();
+}
+function bindRoadmapInteraction(){
+  if(roadmapUiBound)return;
+  document.addEventListener("click",event=>{
+    const button=event.target.closest(".roadmap-marker-button");
+    if(button){
+      const nextKey=roadmapTargetKey(button.dataset.marketClass||"",button.dataset.targetLabel||"");
+      activeRoadmapTarget=activeRoadmapTarget===nextKey?null:nextKey;
+      if(model)render();
+      return;
+    }
+    if(activeRoadmapTarget&&!event.target.closest(".roadmap-marker"))closeRoadmapPopover();
+  });
+  document.addEventListener("keydown",event=>{
+    if(event.key==="Escape"&&activeRoadmapTarget){
+      closeRoadmapPopover();
+    }
+  });
+  roadmapUiBound=true;
+}
 function renderMarketRoadmap(name,cost,currentValue,marketClass){
   const data=roadmapData(cost,currentValue);
   const currentMarkup=`<div class="roadmap-current">
@@ -736,27 +790,50 @@ function renderMarketRoadmap(name,cost,currentValue,marketClass){
   }
   const targetMarkers=data.targets.map(target=>{
     const edgeClass=roadmapEdgeClass(target.position);
-    return `<div class="roadmap-marker ${marketClass} ${edgeClass}" style="left:${target.position}%">
+    const isOpen=activeRoadmapTarget===roadmapTargetKey(marketClass,target.label);
+    const tooltipStatus=target.reached
+      ? `<div class="roadmap-tooltip-item"><div class="roadmap-tooltip-label">狀態</div><div class="roadmap-tooltip-value ${marketClass==="us"?"roadmap-accent-us":"roadmap-accent-tw"}">已達成</div></div>`
+      : `<div class="roadmap-tooltip-item"><div class="roadmap-tooltip-label">還差</div><div class="roadmap-tooltip-value money">${formatMoney(target.gapValue)}</div></div>`;
+    return `<div class="roadmap-marker ${marketClass} ${edgeClass} ${isOpen?"is-open":""}" style="left:${target.position}%">
       <span class="roadmap-marker-dot" aria-hidden="true"></span>
       <span class="roadmap-marker-line" aria-hidden="true"></span>
-      <div class="roadmap-marker-content">
-        <div class="roadmap-target-label">${target.label}</div>
-        <div class="roadmap-target-value money">${formatMoney(target.targetValue)}</div>
+      <button type="button" class="roadmap-marker-button" data-market-class="${marketClass}" data-target-label="${target.label}" aria-expanded="${isOpen?"true":"false"}" aria-label="${target.label} 目標詳細資料">
+        <div class="roadmap-marker-content">
+          <div class="roadmap-target-label">${target.label}</div>
+          <div class="roadmap-target-value money">${formatMoney(target.targetValue)}</div>
+        </div>
+      </button>
+      <div class="roadmap-tooltip" role="dialog" aria-label="${target.label} 目標">
+        <div class="roadmap-tooltip-title">${target.label} 目標</div>
+        <div class="roadmap-tooltip-grid">
+          <div class="roadmap-tooltip-item"><div class="roadmap-tooltip-label">目標淨值</div><div class="roadmap-tooltip-value money">${formatMoney(target.targetValue)}</div></div>
+          <div class="roadmap-tooltip-item"><div class="roadmap-tooltip-label">目前淨值</div><div class="roadmap-tooltip-value money">${formatMoney(currentValue)}</div></div>
+          ${tooltipStatus}
+        </div>
       </div>
     </div>`;
   }).join("");
-  const stats=[
-    {label:"成本",value:formatMoney(cost),className:"money"},
-    {label:data.profit>=0?"目前獲利":"目前損益",value:`${data.profit>=0?"+":""}${formatMoney(data.profit)}`,className:`money ${data.profit>=0?(marketClass==="us"?"roadmap-accent-us":"roadmap-accent-tw"):"negative"}`},
-    ...data.targets.map(target=>({
-      label:target.reached?`${target.label} 目標`:`距 ${target.label} 還差`,
-      value:target.reached?"已達成":formatMoney(target.gapValue),
-      className:target.reached?(marketClass==="us"?"roadmap-accent-us":"roadmap-accent-tw"):"money muted"
-    }))
-  ].map(item=>`<div class="roadmap-stat">
-      <div class="roadmap-stat-label">${item.label}</div>
-      <div class="roadmap-stat-value ${item.className||""}">${item.value}</div>
-    </div>`).join("");
+  const upcomingTargets=data.targets.filter(target=>!target.reached).slice(0,2);
+  const summary=`<div class="roadmap-summary">
+    <div class="roadmap-summary-item">
+      <span class="roadmap-summary-label">成本</span>
+      <strong class="roadmap-summary-value money">${formatMoney(cost)}</strong>
+    </div>
+    <div class="roadmap-summary-item">
+      <span class="roadmap-summary-label">${data.profit>=0?"目前獲利":"目前損益"}</span>
+      <strong class="roadmap-summary-value money ${data.profit>=0?(marketClass==="us"?"roadmap-accent-us":"roadmap-accent-tw"):"negative"}">${data.profit>=0?"+":""}${formatMoney(data.profit)}</strong>
+    </div>
+  </div>`;
+  const nextGoals=upcomingTargets.length
+    ? `<div class="roadmap-next-goals">
+        <div class="roadmap-next-title">下一個目標</div>
+        <div class="roadmap-next-grid">${upcomingTargets.map(target=>`<div class="roadmap-next-card">
+          <div class="roadmap-next-target ${marketClass==="us"?"roadmap-accent-us":"roadmap-accent-tw"}">${target.label}</div>
+          <div class="roadmap-next-label">還差</div>
+          <div class="roadmap-next-value money">${formatMoney(target.gapValue)}</div>
+        </div>`).join("")}</div>
+      </div>`
+    : `<div class="roadmap-success ${marketClass==="us"?"roadmap-accent-us":"roadmap-accent-tw"}">所有目前設定的成長目標皆已達成</div>`;
   const ariaLabel=$("#app").classList.contains("masked")?`${name}成長進度：成本、目前淨值與百分比目標`:`${name}成長進度：成本 ${formatMoney(cost)}，目前淨值 ${formatMoney(currentValue)}，目標為 +25%、+30%、+50%`;
   return `<section class="roadmap-market">
     <div class="roadmap-market-header">
@@ -771,13 +848,14 @@ function renderMarketRoadmap(name,cost,currentValue,marketClass){
         <div class="roadmap-current-marker" style="left:${data.currentPosition}%"></div>
       </div>
     </div>
-    <div class="roadmap-stats">${stats}</div>
+    <div class="roadmap-details">${summary}${nextGoals}</div>
   </section>`;
 }
 function formatRateValue(value){
   return Number.isFinite(value)?`${value>=0?"+":""}${pct(value)}`:"—";
 }
 function render(){
+  bindRoadmapInteraction();
   const accounts=filteredAccounts();
   const totalValue=accounts.reduce((s,a)=>s+a.value,0),totalCost=accounts.reduce((s,a)=>s+a.cost,0);
   const profit=totalValue-totalCost,rate=totalCost?profit/totalCost:0;
@@ -823,6 +901,7 @@ function render(){
     renderMarketRoadmap("美股",performance.us.cost,performance.us.value,"us"),
     renderMarketRoadmap("台股",performance.tw.cost,performance.tw.value,"tw")
   ].join("");
+  $("#growthMarkets").dataset.hasOpen=activeRoadmapTarget?"1":"0";
 
   $("#rows").innerHTML=accounts.map(a=>`<tr><td>${a.name}</td><td>${a.owner}</td><td class="money">${fmt(a.cost)}</td><td class="money">${fmt(a.value)}</td>
     <td class="${a.profit>=0?"positive":"negative"} money">${a.profit>=0?"+":""}${fmt(a.profit)}</td>
@@ -942,6 +1021,7 @@ async function sync(){
   try{
     const rows=await loadSummary();
     model=parseSummary(rows);
+    activeRoadmapTarget=null;
     $("#empty").classList.remove("show");
     $("#dashboard").hidden=false;
     render();
@@ -968,7 +1048,7 @@ async function sync(){
 $("#syncBtn").onclick=sync;
 $("#loginBtn").onclick=requestLogin;
 $("#logoutBtn").onclick=logout;
-$("#tabs").querySelectorAll(".tab").forEach(b=>b.onclick=()=>{view=b.dataset.view;$("#tabs").querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));render()});
+$("#tabs").querySelectorAll(".tab").forEach(b=>b.onclick=()=>{activeRoadmapTarget=null;view=b.dataset.view;$("#tabs").querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));render()});
 $("#privacyBtn").onclick=()=>{
   const masked=$("#app").classList.toggle("masked");$("#privacyBtn").textContent=masked?"顯示金額":"隱藏金額";
   if(trendState.activeIndex>=0)showTrendSelection(trendState.activeIndex);
