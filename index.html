@@ -77,7 +77,7 @@
     .roadmap-current-label{color:var(--muted);font-size:11px}
     .roadmap-current-value{margin-top:3px;font-size:17px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .roadmap-empty{padding:14px;border:1px dashed var(--line);border-radius:14px;background:var(--surface2);color:var(--muted);font-size:13px}
-    .roadmap-chart{position:relative;padding-top:60px}
+    .roadmap-chart{position:relative;padding-top:74px}
     .roadmap-track{
       position:relative;height:16px;border-radius:999px;background:var(--surface2);
       overflow:visible;border:1px solid color-mix(in srgb,var(--line) 90%,transparent)
@@ -90,10 +90,10 @@
     .roadmap-segment.profit.tw{background:#20a37a}
     .roadmap-marker{
       position:absolute;bottom:100%;margin-bottom:12px;transform:translateX(-50%);
-      display:grid;justify-items:center;gap:5px;min-width:72px;pointer-events:none
+      min-width:0;pointer-events:none
     }
-    .roadmap-marker.edge-start{transform:none;justify-items:start;text-align:left}
-    .roadmap-marker.edge-end{transform:translateX(-100%);justify-items:end;text-align:right}
+    .roadmap-marker.edge-start{transform:none}
+    .roadmap-marker.edge-end{transform:translateX(-100%)}
     .roadmap-marker-dot{
       width:10px;height:10px;border-radius:50%;background:var(--surface);
       border:2px solid currentColor;box-shadow:0 0 0 2px color-mix(in srgb,var(--surface) 85%,transparent)
@@ -103,9 +103,14 @@
     }
     .roadmap-marker.edge-start .roadmap-marker-line{left:5px}
     .roadmap-marker.edge-end .roadmap-marker-line{left:calc(100% - 5px)}
-    .roadmap-marker-content{display:grid;gap:1px}
-    .roadmap-target-label{font-size:11px;font-weight:850;line-height:1.1}
-    .roadmap-target-value{font-size:10px;line-height:1.15;color:var(--muted)}
+    .roadmap-marker-content{
+      position:absolute;bottom:34px;left:50%;transform:translateX(-50%);
+      text-align:center;white-space:nowrap;pointer-events:none
+    }
+    .roadmap-marker.edge-start .roadmap-marker-content{left:0;transform:none;text-align:left}
+    .roadmap-marker.edge-end .roadmap-marker-content{left:auto;right:0;transform:none;text-align:right}
+    .roadmap-target-label{font-size:15px;line-height:1.1;font-weight:800;white-space:nowrap;word-break:keep-all}
+    .roadmap-target-value{margin-top:4px;font-size:12px;line-height:1.1;color:var(--muted);white-space:nowrap}
     .roadmap-marker.us{color:#315bd6}
     .roadmap-marker.tw{color:#20a37a}
     .roadmap-current-marker{
@@ -115,19 +120,15 @@
       content:"";position:absolute;top:-4px;left:-4px;width:8px;height:8px;border-radius:50%;
       background:var(--text)
     }
-    .roadmap-current-chip{
-      position:absolute;top:-28px;transform:translateX(-50%);padding:2px 7px;border-radius:999px;
-      background:var(--surface);border:1px solid var(--line);font-size:10px;font-weight:800;color:var(--muted);
-      white-space:nowrap
-    }
-    .roadmap-current-chip.edge-start{transform:none}
-    .roadmap-current-chip.edge-end{transform:translateX(-100%)}
-    .roadmap-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:16px}
+    .roadmap-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;margin-top:16px}
     .roadmap-stat{
       min-width:0;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--surface2)
     }
     .roadmap-stat-label{font-size:12px;font-weight:800;color:var(--muted)}
-    .roadmap-stat-value{margin-top:6px;font-size:14px;font-weight:850;overflow-wrap:anywhere}
+    .roadmap-stat-value{
+      margin-top:6px;white-space:nowrap;word-break:keep-all;overflow-wrap:normal;
+      font-variant-numeric:tabular-nums;font-size:clamp(19px,2vw,26px);line-height:1.15
+    }
     .roadmap-stat-value.muted{color:var(--muted)}
     .roadmap-accent-us{color:#315bd6}
     .roadmap-accent-tw{color:#20a37a}
@@ -175,7 +176,7 @@
     .login-help{font-size:11px!important;margin-top:18px!important}
 
     @media(max-width:880px){.kpis{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}}
-    @media (max-width:880px){
+    @media (max-width:900px){
       .roadmap-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
     }
     @media(max-width:620px){.app{padding:17px 11px 42px}header{display:block}.actions{justify-content:flex-start;margin-top:15px}
@@ -183,11 +184,10 @@
       .status{align-items:flex-start}.status-meta{display:none}.market-legend{grid-template-columns:1fr}
       .roadmap-market-header{display:block}
       .roadmap-current{margin-top:8px;text-align:left}
-      .roadmap-chart{padding-top:56px}
+      .roadmap-chart{padding-top:58px}
       .roadmap-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
-      .roadmap-target-label{font-size:10px}
-      .roadmap-target-value{font-size:9px}
-      .roadmap-current-chip{top:-26px}}
+      .roadmap-target-label{font-size:12px}
+      .roadmap-target-value{display:none}}
     @media(max-width:385px){.kpis{grid-template-columns:1fr}}
     @media (max-width:390px){
       .roadmap-stats{grid-template-columns:1fr}
@@ -320,6 +320,7 @@ const ROADMAP_TARGETS=[
   {label:"+30%",rate:0.30},
   {label:"+50%",rate:0.50}
 ];
+const ROADMAP_VISUAL={costEnd:58,target25:74,target30:86,target50:98};
 let model=null,view="family",syncing=false,ticker=null,tokenClient=null,accessToken=null,refreshTimer=null;
 let loginNeedsAccountSelection=false,loginAttemptedOnce=false;
 let pageViewInitialized=false;
@@ -674,6 +675,26 @@ function roadmapEdgeClass(position){
   if(position>=90)return"edge-end";
   return"";
 }
+function roadmapCurrentVisualPosition(cost,currentValue){
+  if(cost<=0)return 0;
+  const returnRate=(currentValue-cost)/cost;
+  if(returnRate<=0){
+    return clampPercent(Math.max(currentValue/cost,0)*ROADMAP_VISUAL.costEnd);
+  }
+  if(returnRate<=0.25){
+    const progress=returnRate/0.25;
+    return clampPercent(ROADMAP_VISUAL.costEnd+progress*(ROADMAP_VISUAL.target25-ROADMAP_VISUAL.costEnd));
+  }
+  if(returnRate<=0.30){
+    const progress=(returnRate-0.25)/0.05;
+    return clampPercent(ROADMAP_VISUAL.target25+progress*(ROADMAP_VISUAL.target30-ROADMAP_VISUAL.target25));
+  }
+  if(returnRate<=0.50){
+    const progress=(returnRate-0.30)/0.20;
+    return clampPercent(ROADMAP_VISUAL.target30+progress*(ROADMAP_VISUAL.target50-ROADMAP_VISUAL.target30));
+  }
+  return ROADMAP_VISUAL.target50;
+}
 function roadmapData(cost,currentValue){
   const targets=ROADMAP_TARGETS.map(target=>{
     const targetValue=cost*(1+target.rate);
@@ -684,18 +705,17 @@ function roadmapData(cost,currentValue){
       reached:currentValue>=targetValue
     };
   });
-  const scaleMax=Math.max(targets.at(-1)?.targetValue||0,currentValue,cost,1);
+  const currentPosition=roadmapCurrentVisualPosition(cost,currentValue);
   return {
     cost,
     currentValue,
     profit:currentValue-cost,
-    scaleMax,
-    costWidth:clampPercent(cost/scaleMax*100),
-    profitWidth:clampPercent(Math.max(currentValue-cost,0)/scaleMax*100),
-    currentPosition:clampPercent(currentValue/scaleMax*100),
+    costWidth:ROADMAP_VISUAL.costEnd,
+    profitWidth:Math.max(currentPosition-ROADMAP_VISUAL.costEnd,0),
+    currentPosition,
     targets:targets.map(target=>({
       ...target,
-      position:clampPercent(target.targetValue/scaleMax*100)
+      position:target.rate===0.25?ROADMAP_VISUAL.target25:target.rate===0.30?ROADMAP_VISUAL.target30:ROADMAP_VISUAL.target50
     }))
   };
 }
@@ -714,7 +734,6 @@ function renderMarketRoadmap(name,cost,currentValue,marketClass){
       <div class="roadmap-empty">目前沒有${name}資產資料</div>
     </section>`;
   }
-  const markerLabel=$("#app").classList.contains("masked")?"目前":"目前淨值";
   const targetMarkers=data.targets.map(target=>{
     const edgeClass=roadmapEdgeClass(target.position);
     return `<div class="roadmap-marker ${marketClass} ${edgeClass}" style="left:${target.position}%">
@@ -738,7 +757,6 @@ function renderMarketRoadmap(name,cost,currentValue,marketClass){
       <div class="roadmap-stat-label">${item.label}</div>
       <div class="roadmap-stat-value ${item.className||""}">${item.value}</div>
     </div>`).join("");
-  const currentChipClass=roadmapEdgeClass(data.currentPosition);
   const ariaLabel=$("#app").classList.contains("masked")?`${name}成長進度：成本、目前淨值與百分比目標`:`${name}成長進度：成本 ${formatMoney(cost)}，目前淨值 ${formatMoney(currentValue)}，目標為 +25%、+30%、+50%`;
   return `<section class="roadmap-market">
     <div class="roadmap-market-header">
@@ -751,7 +769,6 @@ function renderMarketRoadmap(name,cost,currentValue,marketClass){
         <div class="roadmap-segment profit ${marketClass}" style="left:${data.costWidth}%;width:${data.profitWidth}%"></div>
         ${targetMarkers}
         <div class="roadmap-current-marker" style="left:${data.currentPosition}%"></div>
-        <div class="roadmap-current-chip ${currentChipClass}" style="left:${data.currentPosition}%">${markerLabel}</div>
       </div>
     </div>
     <div class="roadmap-stats">${stats}</div>
