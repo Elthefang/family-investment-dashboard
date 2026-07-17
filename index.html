@@ -97,8 +97,8 @@
       border-top-left-radius:0;border-bottom-left-radius:0
     }
     .roadmap-milestone-row{
-      position:absolute;left:58%;right:0;bottom:38px;z-index:3;
-      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:8px
+      position:absolute;left:46%;right:0;bottom:34px;z-index:3;
+      display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:6px
     }
     .roadmap-milestone-card{
       appearance:none;border:0;background:transparent;color:inherit;padding:0;min-width:0;
@@ -121,13 +121,7 @@
       content:"";position:absolute;top:-8px;left:-5px;width:10px;height:10px;border-radius:50%;
       background:currentColor
     }
-    .roadmap-target-label,.roadmap-target-value{
-      display:block;white-space:nowrap;word-break:keep-all;overflow:hidden;text-overflow:ellipsis
-    }
-    .roadmap-target-label{font-size:clamp(16px,2vw,22px);line-height:1;font-weight:850}
-    .roadmap-target-value{
-      margin-top:6px;font-size:clamp(12px,1.4vw,15px);line-height:1.1;color:var(--muted)
-    }
+    .roadmap-target-label{display:block;font-size:clamp(16px,2vw,22px);line-height:1;font-weight:850;white-space:nowrap}
     .roadmap-readout{
       min-height:66px;margin-bottom:10px;display:grid;align-content:start;gap:5px
     }
@@ -217,9 +211,8 @@
       .roadmap-readout-value{font-size:22px}
       .roadmap-readout-meta{font-size:11px}
       .roadmap-chart{padding-top:70px}
-      .roadmap-milestone-row{left:48%;gap:4px;bottom:34px}
+      .roadmap-milestone-row{left:46%;gap:4px;bottom:34px}
       .roadmap-target-label{font-size:13px}
-      .roadmap-target-value{display:none}
       .roadmap-marker-line{height:24px}
     }
     @media(max-width:430px){.kpis,.kpis.five-cards{grid-template-columns:1fr}
@@ -353,7 +346,7 @@ const ROADMAP_TARGETS=[
   {label:"+30%",rate:0.30},
   {label:"+50%",rate:0.50}
 ];
-const ROADMAP_VISUAL={costEnd:44,target25:70,target30:83,target50:96};
+const ROADMAP_VISUAL={costEnd:46,target25:64,target30:80,target50:96};
 let model=null,view="family",syncing=false,ticker=null,tokenClient=null,accessToken=null,refreshTimer=null;
 let loginNeedsAccountSelection=false,loginAttemptedOnce=false;
 let pageViewInitialized=false;
@@ -816,7 +809,6 @@ function renderMarketRoadmap(name,cost,currentValue,marketClass){
     const isActive=selectedTarget?.label===target.label;
     return `<button type="button" class="roadmap-milestone-card ${isActive?"is-open":""}" data-market-class="${marketClass}" data-target-label="${target.label}" aria-expanded="${isActive?"true":"false"}" aria-label="${target.label} 目標詳細資料">
       <span class="roadmap-target-label">${target.label}</span>
-      <span class="roadmap-target-value money">${formatMoney(target.targetValue)}</span>
     </button>`;
   }).join("");
   const markerLines=data.targets.map(target=>{
