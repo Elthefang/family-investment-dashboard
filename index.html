@@ -168,7 +168,7 @@
     .calendar-month{font-size:16px;font-weight:850}.calendar-nav{display:flex;gap:7px}.calendar-nav button{width:32px;height:32px;padding:0;border:1px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--text);font-weight:850;cursor:pointer}
     .calendar-nav button:disabled{opacity:.45;cursor:default}
     .calendar-weekdays,.calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;min-width:0}.calendar-weekdays{margin-bottom:5px}.calendar-weekdays span{text-align:center;font-size:11px;color:var(--muted);font-weight:800}
-    .calendar-day{min-height:88px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);padding:8px;min-width:0;text-align:left;color:var(--text)}.calendar-day.empty{visibility:hidden}.calendar-day-number{display:block;font-size:12px;font-weight:850}.calendar-change{display:flex;align-items:center;gap:5px;margin-top:17px;font-size:clamp(11px,1.35vw,14px);font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.calendar-change.muted{color:var(--muted)}.calendar-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:0 0 auto}.calendar-change.positive .calendar-dot{background:var(--positive)}.calendar-change.negative .calendar-dot{background:var(--negative)}.calendar-query-count{display:block;margin-top:5px;font-size:10px;color:var(--muted)}.calendar-empty{padding:22px 12px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed var(--line);border-radius:13px;background:var(--surface2)}
+    .calendar-day{min-height:88px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);padding:8px;min-width:0;text-align:left;color:var(--text)}.calendar-day-placeholder{visibility:hidden;pointer-events:none}.calendar-day-number{display:block;font-size:12px;font-weight:850}.calendar-change{display:block;margin-top:12px;font-size:clamp(11px,1.35vw,14px);font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;min-width:0}.calendar-change .money{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.calendar-change.muted{color:var(--muted)}.calendar-query-count{display:block;margin-top:5px;font-size:10px;color:var(--muted)}.calendar-empty{padding:22px 12px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed var(--line);border-radius:13px;background:var(--surface2)}
     .table-card{padding:0;overflow:hidden}.table-head{padding:19px 19px 12px}.table-wrap{overflow:auto}
     table{border-collapse:collapse;width:100%;min-width:760px}th,td{padding:13px 18px;border-top:1px solid var(--line);text-align:right;font-size:13px}
     th{font-size:11px;color:var(--muted);background:var(--surface2)}th:first-child,td:first-child{text-align:left}td:first-child{font-weight:800}
@@ -214,7 +214,7 @@
       .roadmap-milestone-row{left:46%;gap:4px;bottom:34px}
       .roadmap-target-label{font-size:13px}
       .roadmap-marker-line{height:24px}
-      .calendar-card{padding:15px}.calendar-days{gap:3px}.calendar-weekdays{gap:3px}.calendar-day{min-height:64px;padding:6px;border-radius:9px}.calendar-change{margin-top:10px;font-size:10px;gap:3px}.calendar-dot{width:6px;height:6px}.calendar-query-count{display:none}
+      .calendar-card{padding:15px}.calendar-days{gap:3px}.calendar-weekdays{gap:3px}.calendar-day{min-height:64px;padding:6px;border-radius:9px}.calendar-change{margin-top:8px;font-size:10px;letter-spacing:-.02em}.calendar-query-count{display:none}
     }
     @media(max-width:430px){.kpis,.kpis.five-cards{grid-template-columns:1fr}
       .roadmap-summary{grid-template-columns:1fr}
@@ -1047,8 +1047,16 @@ function parseYMD(dateString){
 function calendarWeekday(year,month,day){return new Date(Date.UTC(year,month-1,day)).getUTCDay()}
 function daysInMonth(year,month){return new Date(Date.UTC(year,month,0)).getUTCDate()}
 function monthFirstWeekday(monthKey){
-  const {year,month}=parseYMD(`${monthKey}-01`);
+  const [year,month]=monthKey.split("-").map(Number);
   return calendarWeekday(year,month,1);
+}
+function formatCalendarChange(value){
+  if(!Number.isFinite(value))return "—";
+  const sign=value>=0?"+":"-",absolute=Math.abs(value);
+  if(window.matchMedia("(max-width: 620px)").matches&&absolute>=1000){
+    return `${sign}$${new Intl.NumberFormat("zh-TW",{notation:"compact",maximumFractionDigits:1}).format(absolute)}`;
+  }
+  return `${value>=0?"+":""}${formatMoney(value)}`;
 }
 function shiftCalendarMonth(monthKey,offset){
   const [year,month]=monthKey.split("-").map(Number);
@@ -1088,16 +1096,17 @@ function renderChangeCalendar(){
   $("#calendarNext").disabled=calendarMonth>=latestMonth;
   const {year,month}=parseYMD(`${calendarMonth}-01`),firstWeekday=monthFirstWeekday(calendarMonth),totalDays=daysInMonth(year,month);
   let markup="";
-  for(let i=0;i<firstWeekday;i++)markup+='<div class="calendar-day empty" aria-hidden="true"></div>';
+  for(let i=0;i<firstWeekday;i++)markup+='<div class="calendar-day calendar-day-placeholder" aria-hidden="true"></div>';
   for(let day=1;day<=totalDays;day++){
     const date=`${calendarMonth}-${String(day).padStart(2,"0")}`,item=data.byDate.get(date);
-    if(!item){markup+=`<div class="calendar-day"><span class="calendar-day-number">${day}</span><div class="calendar-change muted"><span class="calendar-dot"></span><span>—</span></div></div>`;continue}
+    if(!item){markup+=`<div class="calendar-day"><span class="calendar-day-number">${day}</span><div class="calendar-change muted"><span>—</span></div></div>`;continue}
     const state=item.change===null?"muted":item.change>=0?"positive":"negative";
-    const amount=item.change===null?"—":`${item.change>=0?"+":""}${formatMoney(item.change)}`;
-    markup+=`<div class="calendar-day"><span class="calendar-day-number">${day}</span><div class="calendar-change ${state}"><span class="calendar-dot"></span><span class="money">${amount}</span></div>${item.queryCount>1?`<span class="calendar-query-count">${item.queryCount} 次</span>`:""}</div>`;
+    const fullAmount=item.change===null?"—":`${item.change>=0?"+":""}${formatMoney(item.change)}`;
+    const amount=formatCalendarChange(item.change);
+    markup+=`<div class="calendar-day"><span class="calendar-day-number">${day}</span><div class="calendar-change ${state}"><span class="money" data-full-value="${fullAmount}">${amount}</span></div>${item.queryCount>1?`<span class="calendar-query-count">${item.queryCount} 次</span>`:""}</div>`;
   }
   const trailingCells=(7-(firstWeekday+totalDays)%7)%7;
-  for(let i=0;i<trailingCells;i++)markup+='<div class="calendar-day empty" aria-hidden="true"></div>';
+  for(let i=0;i<trailingCells;i++)markup+='<div class="calendar-day calendar-day-placeholder" aria-hidden="true"></div>';
   days.innerHTML=markup;
   if(!data.monthRecords.length)days.innerHTML='<div class="calendar-empty" style="grid-column:1 / -1">這個月份沒有查詢紀錄</div>';
 }
