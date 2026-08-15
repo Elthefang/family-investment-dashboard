@@ -201,10 +201,15 @@
     .google-login:disabled{opacity:.55;cursor:progress}
     .login-message{min-height:22px;margin:12px 0 0!important;font-size:12px!important}
     .login-help{font-size:11px!important;margin-top:18px!important}
+    .currency-selector{display:flex;align-items:center;gap:3px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--surface2)}
+    .currency-option{appearance:none;border:0;border-radius:999px;background:transparent;color:var(--muted);padding:7px 10px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
+    .currency-option[aria-pressed="true"]{background:var(--surface);color:var(--text);box-shadow:0 2px 7px rgba(35,50,80,.12)}
+    .currency-option:focus-visible,.btn:focus-visible,.tab:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
 
     @media(max-width:1100px){.roadmap-chart{padding-top:86px}}
     @media(max-width:880px){.kpis,.kpis.five-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}}
     @media(max-width:620px){.app{padding:17px 11px 42px}header{display:block}.actions{justify-content:flex-start;margin-top:15px}
+      .currency-selector{order:-1}.currency-option{padding:7px 9px}
       .kpis{gap:9px}.card{padding:15px;border-radius:17px}.number{font-size:23px}.donut-layout{grid-template-columns:1fr}.donut{width:155px}
       .status{align-items:flex-start}.status-meta{display:none}.market-legend{grid-template-columns:1fr}
       .roadmap-readout{min-height:58px}
@@ -230,9 +235,9 @@
 <section class="login-gate" id="loginGate">
   <div class="login-card">
     <div class="lock-icon">🔐</div>
-    <h1>家庭投資總覽</h1>
-    <p>請使用已被授權查看私人 Google Sheet 的帳號登入。未授權帳號無法取得任何資產資料。</p>
-    <button class="google-login" id="loginBtn" type="button">使用 Google 帳號登入</button>
+    <h1 data-i18n="loginTitle">家庭投資總覽</h1>
+    <p data-i18n="loginDescription">請使用已被授權查看私人 Google Sheet 的帳號登入。未授權帳號無法取得任何資產資料。</p>
+    <button class="google-login" id="loginBtn" type="button" data-i18n="loginButton">使用 Google 帳號登入</button>
     <p class="login-message" id="loginMessage">正在載入 Google 登入服務…</p>
     <p class="login-help">登入憑證只保存在目前分頁的記憶體中；關閉頁面後即失效。</p>
   </div>
@@ -240,11 +245,16 @@
 
 <main class="app" id="app" hidden>
   <header>
-    <div><h1>家庭投資總覽</h1><p class="subtitle">媽媽與哥哥的台股、美股投資 · <a class="sheet-link" href="https://docs.google.com/spreadsheets/d/1NUY3EMJvh3JdGIMEa8j9LQjtVihVcUspHYLwpmuc_YQ/edit?gid=1657097777#gid=1657097777" target="_blank" rel="noopener noreferrer">Google Sheet</a> 自動同步</p></div>
+    <div><h1 data-i18n="pageTitle">家庭投資總覽</h1><p class="subtitle"><span data-i18n="subtitle">媽媽與哥哥的台股、美股投資 · </span><a class="sheet-link" href="https://docs.google.com/spreadsheets/d/1NUY3EMJvh3JdGIMEa8j9LQjtVihVcUspHYLwpmuc_YQ/edit?gid=1657097777#gid=1657097777">Google Sheet</a> <span data-i18n="autoSync">自動同步</span></p></div>
     <div class="actions">
-      <button class="btn" id="privacyBtn" type="button">隱藏金額</button>
-      <button class="btn" id="syncBtn" type="button">同步 Google Sheet</button>
-      <button class="btn" id="logoutBtn" type="button">登出</button>
+      <div class="currency-selector" role="group" aria-label="Display currency" data-i18n-aria-label="currencySelectorLabel">
+        <button class="currency-option" type="button" data-currency="TWD" aria-pressed="true">TWD</button>
+        <button class="currency-option" type="button" data-currency="USD" aria-pressed="false">USD</button>
+        <button class="currency-option" type="button" data-currency="CNY" aria-pressed="false">RMB</button>
+      </div>
+      <button class="btn" id="privacyBtn" type="button" data-i18n="hideAmounts">隱藏金額</button>
+      <button class="btn" id="syncBtn" type="button" data-i18n="syncSheet">同步 Google Sheet</button>
+      <button class="btn" id="logoutBtn" type="button" data-i18n="logout">登出</button>
     </div>
   </header>
 
@@ -266,31 +276,31 @@
 
   <section id="dashboard" hidden>
     <nav class="tabs" id="tabs">
-      <button class="tab active" data-view="family">家庭合計</button>
-      <button class="tab" data-view="mom">媽媽</button>
-      <button class="tab" data-view="brother">哥哥</button>
+      <button class="tab active" data-view="family" data-i18n="family">家庭合計</button>
+      <button class="tab" data-view="mom" data-i18n="mom">媽媽</button>
+      <button class="tab" data-view="brother" data-i18n="brother">哥哥</button>
     </nav>
 
     <section class="kpis" id="kpis">
-      <article class="card"><div class="label">目前總資產</div><div class="number money" id="totalValue">—</div><div class="hint" id="valueHint">依最新市值加總</div></article>
-      <article class="card"><div class="label">總成本</div><div class="number money" id="totalCost">—</div><div class="hint">依首次投入金額計算</div></article>
-      <article class="card"><div class="label">未實現損益</div><div class="number money" id="profit">—</div><div class="hint">目前市值－總成本</div></article>
-      <article class="card"><div class="label">總報酬率</div><div class="number" id="returnRate">—</div><div class="hint">未實現損益 ÷ 總成本</div></article>
-      <article class="card" id="annualizedCard" hidden><div class="label">年化報酬率</div><div class="number" id="annualizedReturn">—</div><div class="hint" id="annualizedHint">—</div></article>
+      <article class="card"><div class="label" data-i18n="totalAssets">目前總資產</div><div class="number money" id="totalValue">—</div><div class="hint" id="valueHint">依最新市值加總</div></article>
+      <article class="card"><div class="label" data-i18n="totalCost">總成本</div><div class="number money" id="totalCost">—</div><div class="hint" data-i18n="costHint">依首次投入金額計算</div></article>
+      <article class="card"><div class="label" data-i18n="unrealizedGain">未實現損益</div><div class="number money" id="profit">—</div><div class="hint" data-i18n="profitHint">目前市值－總成本</div></article>
+      <article class="card"><div class="label" data-i18n="returnRate">總報酬率</div><div class="number" id="returnRate">—</div><div class="hint" data-i18n="returnHint">未實現損益 ÷ 總成本</div></article>
+      <article class="card" id="annualizedCard" hidden><div class="label" data-i18n="annualizedReturn">年化報酬率</div><div class="number" id="annualizedReturn">—</div><div class="hint" id="annualizedHint">—</div></article>
     </section>
 
     <section class="grid">
       <article class="card">
-        <div class="head"><div><div class="title">目前資產配置</div><div class="desc">依帳戶／市場的目前市值</div></div></div>
+        <div class="head"><div><div class="title" data-i18n="assetAllocation">目前資產配置</div><div class="desc" data-i18n="assetAllocationDescription">依帳戶／市場的目前市值</div></div></div>
         <div class="donut-layout">
-          <div class="donut" id="donut"><div class="donut-center"><strong class="money" id="donutTotal"></strong><span>總資產</span></div></div>
+          <div class="donut" id="donut"><div class="donut-center"><strong class="money" id="donutTotal"></strong><span data-i18n="totalAssets">總資產</span></div></div>
           <div class="legend" id="legend"></div>
         </div>
         <section class="market-alloc" id="marketAllocationSection" aria-labelledby="marketAllocTitle">
           <div class="head" style="margin-bottom:12px">
             <div>
-              <div class="title" id="marketAllocTitle">市場配置</div>
-              <div class="desc">不分帳戶，依市場加總目前市值</div>
+              <div class="title" id="marketAllocTitle" data-i18n="marketAllocation">市場配置</div>
+              <div class="desc" data-i18n="marketAllocationDescription">不分帳戶，依市場加總目前市值</div>
             </div>
           </div>
           <div class="market-track" id="marketTrack" aria-label="市場配置長條圖">
@@ -301,13 +311,13 @@
         </section>
       </article>
       <article class="card">
-        <div class="head"><div><div class="title">成長目標</div><div class="desc">以總成本與目前淨值追蹤投資成長進度</div></div></div>
+        <div class="head"><div><div class="title" data-i18n="growthTargets">成長目標</div><div class="desc" data-i18n="growthTargetsDescription">以總成本與目前淨值追蹤投資成長進度</div></div></div>
         <div id="growthMarkets"></div>
       </article>
     </section>
 
     <section class="card" style="margin-bottom:12px">
-      <div class="head"><div><div class="title">總資產趨勢</div><div class="desc" id="trendDesc">家庭合計歷史變化</div></div></div>
+      <div class="head"><div><div class="title" data-i18n="assetTrend">總資產趨勢</div><div class="desc" id="trendDesc">家庭合計歷史變化</div></div></div>
       <div class="trend-readout" id="trendReadout" aria-live="polite">
         <div class="trend-readout-value money" id="trendReadoutValue">—</div>
         <div class="trend-readout-date" id="trendReadoutDate">—</div>
@@ -316,19 +326,19 @@
     </section>
 
     <section class="card calendar-card" id="changeCalendarSection" aria-labelledby="changeCalendarTitle">
-      <div class="head"><div><div class="title" id="changeCalendarTitle">帳戶變動日曆</div><div class="desc">顯示每日資產與上次查詢的變動金額</div></div></div>
+      <div class="head"><div><div class="title" id="changeCalendarTitle" data-i18n="changeCalendar">帳戶變動日曆</div><div class="desc" data-i18n="changeCalendarDescription">顯示每日資產與上次查詢的變動金額</div></div></div>
       <div class="calendar-toolbar">
         <div class="calendar-month" id="calendarMonthLabel"></div>
         <div class="calendar-nav" aria-label="切換月份"><button type="button" id="calendarPrev" aria-label="上個月">‹</button><button type="button" id="calendarNext" aria-label="下個月">›</button></div>
       </div>
-      <div class="calendar-weekdays" aria-hidden="true"><span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span></div>
+      <div class="calendar-weekdays" aria-hidden="true"><span data-weekday="0">日</span><span data-weekday="1">一</span><span data-weekday="2">二</span><span data-weekday="3">三</span><span data-weekday="4">四</span><span data-weekday="5">五</span><span data-weekday="6">六</span></div>
       <div class="calendar-days" id="calendarDays"></div>
     </section>
 
     <section class="card table-card">
-      <div class="table-head"><div class="title">帳戶明細</div><div class="desc">金額統一以新台幣顯示</div></div>
+      <div class="table-head"><div class="title" data-i18n="accountDetails">帳戶明細</div><div class="desc" id="currencyTableDescription">金額統一以新台幣顯示</div></div>
       <div class="table-wrap">
-        <table><thead><tr><th>帳戶／市場</th><th>持有人</th><th>總成本</th><th>目前市值</th><th>未實現損益</th><th>報酬率</th><th>配置占比</th></tr></thead><tbody id="rows"></tbody></table>
+        <table><thead><tr><th data-i18n="accountMarket">帳戶／市場</th><th data-i18n="owner">持有人</th><th data-i18n="totalCost">總成本</th><th data-i18n="currentValue">目前市值</th><th data-i18n="unrealizedGain">未實現損益</th><th data-i18n="returnRate">報酬率</th><th data-i18n="allocation">配置占比</th></tr></thead><tbody id="rows"></tbody></table>
       </div>
     </section>
   </section>
@@ -358,6 +368,20 @@ const ROADMAP_TARGETS=[
   {label:"+50%",rate:0.50}
 ];
 const ROADMAP_VISUAL={costEnd:46,target25:64,target30:80,target50:96};
+const FX_RATES_FROM_TWD=Object.freeze({TWD:1,USD:0.031,CNY:0.225});
+const CURRENCY_OPTIONS=Object.freeze({
+  TWD:{currency:"TWD",locale:"zh-TW",language:"zh-Hant",label:"TWD"},
+  USD:{currency:"USD",locale:"en-US",language:"en",label:"USD"},
+  CNY:{currency:"CNY",locale:"zh-CN",language:"zh-Hant",label:"RMB"}
+});
+const UI_COPY={
+  "zh-Hant":{
+    pageTitle:"家庭投資總覽",loginTitle:"家庭投資總覽",loginDescription:"請使用已被授權查看私人 Google Sheet 的帳號登入。未授權帳號無法取得任何資產資料。",loginButton:"使用 Google 帳號登入",subtitle:"媽媽與哥哥的台股、美股投資 · ",autoSync:"自動同步",hideAmounts:"隱藏金額",showAmounts:"顯示金額",syncSheet:"同步 Google Sheet",logout:"登出",currencySelectorLabel:"顯示幣別",family:"家庭合計",mom:"媽媽",brother:"哥哥",totalAssets:"目前總資產",totalCost:"總成本",unrealizedGain:"未實現損益",returnRate:"總報酬率",annualizedReturn:"年化報酬率",costHint:"依首次投入金額計算",profitHint:"目前市值－總成本",returnHint:"未實現損益 ÷ 總成本",assetAllocation:"目前資產配置",assetAllocationDescription:"依帳戶／市場的目前市值",marketAllocation:"市場配置",marketAllocationDescription:"不分帳戶，依市場加總目前市值",growthTargets:"成長目標",growthTargetsDescription:"以總成本與目前淨值追蹤投資成長進度",assetTrend:"總資產趨勢",changeCalendar:"帳戶變動日曆",changeCalendarDescription:"顯示每日資產與上次查詢的變動金額",accountDetails:"帳戶明細",accountMarket:"帳戶／市場",owner:"持有人",currentValue:"目前市值",allocation:"配置占比",currencyTableDescription:"金額統一以新台幣顯示"
+  },
+  en:{
+    pageTitle:"Family Investment Dashboard",loginTitle:"Family Investment Dashboard",loginDescription:"Sign in with a Google account that has access to the private Google Sheet. Unauthorized accounts cannot access any asset data.",loginButton:"Sign in with Google",subtitle:"Mom's and brother's Taiwan and U.S. investments · ",autoSync:"auto sync",hideAmounts:"Hide amounts",showAmounts:"Show amounts",syncSheet:"Sync Google Sheet",logout:"Sign out",currencySelectorLabel:"Display currency",family:"Family total",mom:"Mom",brother:"Brother",totalAssets:"Total assets",totalCost:"Total cost",unrealizedGain:"Unrealized gain / loss",returnRate:"Total return",annualizedReturn:"Annualized return",costHint:"Based on initial investment",profitHint:"Current value minus total cost",returnHint:"Unrealized gain / loss divided by total cost",assetAllocation:"Asset allocation",assetAllocationDescription:"Current value by account and market",marketAllocation:"Market allocation",marketAllocationDescription:"Current value grouped by market across accounts",growthTargets:"Growth targets",growthTargetsDescription:"Track investment growth using total cost and current net value",assetTrend:"Total asset trend",changeCalendar:"Account change calendar",changeCalendarDescription:"Daily asset changes since the previous query",accountDetails:"Account details",accountMarket:"Account / market",owner:"Owner",currentValue:"Current value",allocation:"Allocation",currencyTableDescription:"Amounts shown in U.S. dollars"
+  }
+};
 let model=null,view="family",syncing=false,ticker=null,tokenClient=null,accessToken=null,refreshTimer=null;
 let loginNeedsAccountSelection=false,loginAttemptedOnce=false;
 let pageViewInitialized=false;
@@ -365,12 +389,38 @@ const trendState={points:[],activeIndex:-1,dragging:false,pointerId:null,element
 let activeRoadmapTarget=null;
 let roadmapUiBound=false;
 let calendarMonth=null;
+let displayCurrency="TWD";
 
 const $=s=>document.querySelector(s);
-const fmt=n=>new Intl.NumberFormat("zh-TW",{style:"currency",currency:"TWD",maximumFractionDigits:0}).format(n||0);
-const short=n=>new Intl.NumberFormat("zh-TW",{notation:"compact",maximumFractionDigits:1}).format(n||0);
+function currentCurrencyOption(){return CURRENCY_OPTIONS[displayCurrency]||CURRENCY_OPTIONS.TWD}
+function displayValue(value){return (Number.isFinite(Number(value))?Number(value):0)*FX_RATES_FROM_TWD[displayCurrency]}
+function fmt(value){const option=currentCurrencyOption();return new Intl.NumberFormat(option.locale,{style:"currency",currency:option.currency,maximumFractionDigits:0}).format(displayValue(value))}
+function short(value){const option=currentCurrencyOption();return new Intl.NumberFormat(option.locale,{style:"currency",currency:option.currency,notation:"compact",maximumFractionDigits:1}).format(displayValue(value))}
 const pct=n=>`${((n||0)*100).toFixed(2)}%`;
 const formatMoney=n=>fmt(n);
+function formatCompactMoney(value){const option=currentCurrencyOption();return new Intl.NumberFormat(option.locale,{style:"currency",currency:option.currency,notation:"compact",maximumFractionDigits:1}).format(displayValue(value))}
+function currentLanguage(){return currentCurrencyOption().language}
+function copy(key){return UI_COPY[currentLanguage()][key]||UI_COPY["zh-Hant"][key]||key}
+function applyLanguage(){
+  const language=currentLanguage();
+  document.documentElement.lang=language;
+  document.title=copy("pageTitle");
+  document.querySelectorAll("[data-i18n]").forEach(element=>{element.textContent=copy(element.dataset.i18n)});
+  document.querySelectorAll("[data-i18n-aria-label]").forEach(element=>{element.setAttribute("aria-label",copy(element.dataset.i18nAriaLabel))});
+  const weekdayFormatter=new Intl.DateTimeFormat(currentCurrencyOption().locale,{weekday:"short",timeZone:"UTC"});
+  document.querySelectorAll("[data-weekday]").forEach(element=>{
+    element.textContent=weekdayFormatter.format(new Date(Date.UTC(2023,0,1+Number(element.dataset.weekday))));
+  });
+  $("#privacyBtn").textContent=$("#app").classList.contains("masked")?copy("showAmounts"):copy("hideAmounts");
+  $("#currencyTableDescription").textContent=currentLanguage()==="en"?copy("currencyTableDescription"):`金額統一以${displayCurrency==="CNY"?"人民幣":"新台幣"}顯示`;
+}
+function setDisplayCurrency(currency){
+  if(!CURRENCY_OPTIONS[currency])return;
+  displayCurrency=currency;
+  document.querySelectorAll("[data-currency]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.currency===currency)));
+  applyLanguage();
+  if(model)render();
+}
 const PAGE_VIEW_SESSION_KEY="familyDashboardViewCounted";
 const safeNum=v=>{
   if(typeof v==="number"&&Number.isFinite(v))return v;
@@ -389,7 +439,7 @@ function parseOptionalRate(value){
   return Number.isFinite(parsed)?parsed:null;
 }
 function formatViewCount(value){
-  return new Intl.NumberFormat("zh-TW").format(value);
+  return new Intl.NumberFormat(currentCurrencyOption().locale).format(value);
 }
 function resetPageViewCounter(){
   $("#pageViewCounter").hidden=true;
@@ -458,7 +508,7 @@ function parseDate(v){
 function setStatus(kind,text){
   $("#dot").className="dot "+(kind==="loading"?"loading":kind==="ok"?"ok":"error");
   $("#status").textContent=text;
-  $("#statusMeta").textContent=new Date().toLocaleTimeString("zh-TW",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false});
+  $("#statusMeta").textContent=new Date().toLocaleTimeString(currentCurrencyOption().locale,{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false});
   $("#syncBtn").disabled=kind==="loading";
 }
 function updateLoginButton(){
@@ -680,7 +730,7 @@ function filteredAccounts(){
   if(view==="brother")return model.accounts.filter(a=>a.owner==="哥哥");
   return model.accounts;
 }
-function viewLabel(){return view==="mom"?"媽媽":view==="brother"?"哥哥":"家庭合計"}
+function viewLabel(){return view==="mom"?copy("mom"):view==="brother"?copy("brother"):copy("family")}
 function marketAllocation(accounts){
   const usKeys=view==="mom"?["momFirstrade","momIB"]:view==="brother"?["brotherUS"]:["momFirstrade","momIB","brotherUS"];
   const twKeys=view==="mom"?[]:["brotherTW"];
@@ -879,7 +929,7 @@ function render(){
   $("#marketAllocationSection").hidden=view!=="family";
   const showAnnualized=view!=="family";
   const annualizedValue=view==="mom"?model?.annualized?.mom:view==="brother"?model?.annualized?.brother:null;
-  const annualizedHint=view==="mom"?"取自 Google Sheet 媽媽年化報酬":view==="brother"?"取自 Google Sheet 哥哥年化報酬":"";
+  const annualizedHint=view==="mom"?(currentLanguage()==="en"?"From Mom's annualized return in Google Sheet":"取自 Google Sheet 媽媽年化報酬"):view==="brother"?(currentLanguage()==="en"?"From brother's annualized return in Google Sheet":"取自 Google Sheet 哥哥年化報酬"):"";
   $("#kpis").classList.toggle("five-cards",showAnnualized);
   $("#annualizedCard").hidden=!showAnnualized;
   $("#totalValue").textContent=fmt(totalValue);$("#totalCost").textContent=fmt(totalCost);
@@ -889,8 +939,8 @@ function render(){
   $("#annualizedReturn").className=`number ${Number.isFinite(annualizedValue)?annualizedValue>=0?"positive":"negative":""}`.trim();
   $("#annualizedHint").textContent=annualizedHint||"—";
   $("#donutTotal").textContent=short(totalValue);
-  $("#valueHint").textContent=`資料日期：${model.snapshotDate||"—"}`;
-  $("#trendDesc").textContent=`${viewLabel()}歷史變化`;
+  $("#valueHint").textContent=currentLanguage()==="en"?`Data date: ${model.snapshotDate||"—"}`:`資料日期：${model.snapshotDate||"—"}`;
+  $("#trendDesc").textContent=currentLanguage()==="en"?`${viewLabel()} history`:`${viewLabel()}歷史變化`;
 
   let start=0;const stops=[];
   accounts.forEach(a=>{const end=start+(totalValue?a.value/totalValue*100:0);stops.push(`${COLORS[a.key]} ${start}% ${end}%`);start=end});
@@ -900,15 +950,15 @@ function render(){
     <div class="legend-value money">${fmt(a.value)}<small>${pct(totalValue?a.value/totalValue:0)}</small></div></div>`).join("");
   $("#marketBarUS").style.width=`${market.usPct*100}%`;
   $("#marketBarTW").style.width=`${market.twPct*100}%`;
-  $("#marketTrack").setAttribute("aria-label",`市場配置，美股 ${pct(market.usPct)}，台股 ${pct(market.twPct)}`);
+  $("#marketTrack").setAttribute("aria-label",currentLanguage()==="en"?`Market allocation, U.S. equities ${pct(market.usPct)}, Taiwan equities ${pct(market.twPct)}`:`市場配置，美股 ${pct(market.usPct)}，台股 ${pct(market.twPct)}`);
   $("#marketLegend").innerHTML=`
     <div class="market-item">
-      <div class="market-topline"><span class="swatch" style="background:#315bd6"></span><span>美股</span></div>
+      <div class="market-topline"><span class="swatch" style="background:#315bd6"></span><span>${currentLanguage()==="en"?"U.S. equities":"美股"}</span></div>
       <div class="market-value money">${formatMoney(market.usValue)}</div>
       <div class="market-meta">${pct(market.usPct)}</div>
     </div>
     <div class="market-item">
-      <div class="market-topline"><span class="swatch" style="background:#20a37a"></span><span>台股</span></div>
+      <div class="market-topline"><span class="swatch" style="background:#20a37a"></span><span>${currentLanguage()==="en"?"Taiwan equities":"台股"}</span></div>
     <div class="market-value money">${formatMoney(market.twValue)}</div>
     <div class="market-meta">${pct(market.twPct)}</div>
   </div>`;
@@ -1054,7 +1104,7 @@ function formatCalendarChange(value){
   if(!Number.isFinite(value))return "—";
   const sign=value>=0?"+":"-",absolute=Math.abs(value);
   if(window.matchMedia("(max-width: 620px)").matches&&absolute>=1000){
-    return `${sign}$${new Intl.NumberFormat("zh-TW",{notation:"compact",maximumFractionDigits:1}).format(absolute)}`;
+    return `${sign}${formatCompactMoney(absolute)}`;
   }
   return `${value>=0?"+":""}${formatMoney(value)}`;
 }
@@ -1091,10 +1141,10 @@ function renderChangeCalendar(){
   if(!calendarMonth)calendarMonth=latestMonth;
   const data=buildChangeCalendar(history,key,calendarMonth);
   const earliestMonth=calendarMonthKey(data.records[0].date);
-  monthLabel.textContent=`${Number(calendarMonth.slice(0,4))} 年 ${Number(calendarMonth.slice(5,7))} 月`;
+  const {year,month}=parseYMD(`${calendarMonth}-01`),firstWeekday=monthFirstWeekday(calendarMonth),totalDays=daysInMonth(year,month);
+  monthLabel.textContent=new Intl.DateTimeFormat(currentCurrencyOption().locale,{year:"numeric",month:"long"}).format(new Date(Date.UTC(year,month-1,1)));
   $("#calendarPrev").disabled=calendarMonth<=earliestMonth;
   $("#calendarNext").disabled=calendarMonth>=latestMonth;
-  const {year,month}=parseYMD(`${calendarMonth}-01`),firstWeekday=monthFirstWeekday(calendarMonth),totalDays=daysInMonth(year,month);
   let markup="";
   for(let i=0;i<firstWeekday;i++)markup+='<div class="calendar-day calendar-day-placeholder" aria-hidden="true"></div>';
   for(let day=1;day<=totalDays;day++){
@@ -1147,16 +1197,20 @@ async function sync(){
 $("#syncBtn").onclick=sync;
 $("#loginBtn").onclick=requestLogin;
 $("#logoutBtn").onclick=logout;
+document.querySelectorAll("[data-currency]").forEach(button=>{
+  button.onclick=()=>setDisplayCurrency(button.dataset.currency);
+});
 $("#tabs").querySelectorAll(".tab").forEach(b=>b.onclick=()=>{activeRoadmapTarget=null;calendarMonth=null;view=b.dataset.view;$("#tabs").querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));render()});
 $("#calendarPrev").onclick=()=>{if(!calendarMonth)return;calendarMonth=shiftCalendarMonth(calendarMonth,-1);renderChangeCalendar()};
 $("#calendarNext").onclick=()=>{if(!calendarMonth)return;calendarMonth=shiftCalendarMonth(calendarMonth,1);renderChangeCalendar()};
 $("#privacyBtn").onclick=()=>{
-  const masked=$("#app").classList.toggle("masked");$("#privacyBtn").textContent=masked?"顯示金額":"隱藏金額";
+  const masked=$("#app").classList.toggle("masked");$("#privacyBtn").textContent=masked?copy("showAmounts"):copy("hideAmounts");
   if(trendState.activeIndex>=0)showTrendSelection(trendState.activeIndex);
 };
 document.addEventListener("visibilitychange",()=>{
   if(document.visibilityState==="visible"&&accessToken)sync();
 });
+applyLanguage();
 showLogin("正在載入 Google 登入服務…");
 initAuth();
 </script>
