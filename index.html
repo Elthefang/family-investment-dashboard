@@ -205,11 +205,19 @@
     .currency-option{appearance:none;border:0;border-radius:999px;background:transparent;color:var(--muted);padding:7px 10px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
     .currency-option[aria-pressed="true"]{background:var(--surface);color:var(--text);box-shadow:0 2px 7px rgba(35,50,80,.12)}
     .currency-option:focus-visible,.btn:focus-visible,.tab:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+    .export-modal[hidden],.export-notice[hidden]{display:none}
+    .export-modal{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:22px;background:rgba(9,17,31,.62);backdrop-filter:blur(6px)}
+    .export-dialog{width:min(1080px,100%);max-height:min(880px,calc(100svh - 44px));overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.28)}
+    .export-dialog-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}.export-dialog h2{margin:0;font-size:24px}.export-dialog p{margin:6px 0 0;color:var(--muted);font-size:13px}
+    .export-close{border:0;background:transparent;color:var(--muted);font-size:28px;line-height:1;cursor:pointer;padding:4px 8px}.export-close:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:8px}
+    .export-preview-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.export-preview{min-width:0;border:1px solid var(--line);border-radius:16px;padding:10px;background:var(--surface2)}.export-preview img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--line)}.export-preview strong{display:block;margin:10px 2px 8px;font-size:13px}.export-preview .btn{width:100%;box-shadow:none;padding:9px 12px;font-size:12px}
+    .export-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}.export-notice{position:fixed;z-index:40;left:50%;bottom:24px;transform:translateX(-50%);width:min(480px,calc(100% - 32px));padding:13px 16px;border-radius:14px;background:var(--text);color:var(--bg);box-shadow:var(--shadow);font-size:14px;font-weight:700;text-align:center}
 
     @media(max-width:1100px){.roadmap-chart{padding-top:86px}}
     @media(max-width:880px){.kpis,.kpis.five-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}}
     @media(max-width:620px){.app{padding:17px 11px 42px}header{display:block}.actions{justify-content:flex-start;margin-top:15px}
       .currency-selector{order:-1}.currency-option{padding:7px 9px}
+      .export-modal{padding:12px}.export-dialog{max-height:calc(100svh - 24px);padding:17px;border-radius:18px}.export-preview-grid{grid-template-columns:1fr}.export-actions{display:grid;grid-template-columns:1fr}.export-actions .btn{width:100%}
       .kpis{gap:9px}.card{padding:15px;border-radius:17px}.number{font-size:23px}.donut-layout{grid-template-columns:1fr}.donut{width:155px}
       .status{align-items:flex-start}.status-meta{display:none}.market-legend{grid-template-columns:1fr}
       .roadmap-readout{min-height:58px}
@@ -282,7 +290,7 @@
     </nav>
 
     <section class="kpis" id="kpis">
-      <article class="card"><div class="label" data-i18n="totalAssets">目前總資產</div><div class="number money" id="totalValue">—</div><div class="hint" id="valueHint">依最新市值加總</div></article>
+      <article class="card" id="totalAssetsTriggerCard"><div class="label" data-i18n="totalAssets">目前總資產</div><div class="number money" id="totalValue">—</div><div class="hint" id="valueHint">依最新市值加總</div></article>
       <article class="card"><div class="label" data-i18n="totalCost">總成本</div><div class="number money" id="totalCost">—</div><div class="hint" data-i18n="costHint">依首次投入金額計算</div></article>
       <article class="card"><div class="label" data-i18n="unrealizedGain">未實現損益</div><div class="number money" id="profit">—</div><div class="hint" data-i18n="profitHint">目前市值－總成本</div></article>
       <article class="card"><div class="label" data-i18n="returnRate">總報酬率</div><div class="number" id="returnRate">—</div><div class="hint" data-i18n="returnHint">未實現損益 ÷ 總成本</div></article>
@@ -353,6 +361,18 @@
   </footer>
 </main>
 
+<section class="export-modal" id="rednoteExportModal" hidden aria-modal="true" role="dialog" aria-labelledby="rednoteExportTitle">
+  <div class="export-dialog">
+    <div class="export-dialog-header">
+      <div><h2 id="rednoteExportTitle">小红书资产快照</h2><p>已按人民币与简体中文生成，选择单张下载或全部下载。</p></div>
+      <button class="export-close" id="rednoteExportClose" type="button" aria-label="关闭预览">×</button>
+    </div>
+    <div class="export-preview-grid" id="rednoteExportPreviews"></div>
+    <div class="export-actions"><button class="btn" id="rednoteDownloadAll" type="button">下载全部 PNG</button></div>
+  </div>
+</section>
+<div class="export-notice" id="rednoteExportNotice" role="status" aria-live="polite" hidden></div>
+
 <script>
 const CONFIG=window.APP_CONFIG||{};
 const SHEET_ID=CONFIG.GOOGLE_SHEET_ID||"";
@@ -390,6 +410,9 @@ let activeRoadmapTarget=null;
 let roadmapUiBound=false;
 let calendarMonth=null;
 let displayCurrency="TWD";
+const REDNOTE_EXPORT_SIZE={width:1080,height:1440};
+const REDNOTE_COLORS={cash:"#7b8496",tw:"#d74d59",us:"#315bd6",crypto:"#ef8f32"};
+let rednoteExportTapCount=0,rednoteExportTapTimer=null,rednoteExportBusy=false,rednoteExportCooldownUntil=0,rednoteExportImages=[];
 
 const $=s=>document.querySelector(s);
 function currentCurrencyOption(){return CURRENCY_OPTIONS[displayCurrency]||CURRENCY_OPTIONS.TWD}
@@ -420,6 +443,139 @@ function setDisplayCurrency(currency){
   document.querySelectorAll("[data-currency]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.currency===currency)));
   applyLanguage();
   if(model)render();
+}
+function rednoteText(traditional,simplified){return displayCurrency==="CNY"?simplified:traditional}
+function formatRednoteMoney(value){
+  return new Intl.NumberFormat("zh-CN",{style:"currency",currency:"CNY",maximumFractionDigits:0}).format((Number(value)||0)*FX_RATES_FROM_TWD.CNY);
+}
+function roundRect(context,x,y,width,height,radius){
+  const r=Math.min(radius,width/2,height/2);
+  context.beginPath();context.moveTo(x+r,y);context.arcTo(x+width,y,x+width,y+height,r);context.arcTo(x+width,y+height,x,y+height,r);context.arcTo(x,y+height,x,y,r);context.arcTo(x,y,x+width,y,r);context.closePath();
+}
+function fillRoundRect(context,x,y,width,height,radius,fill){
+  context.fillStyle=fill;roundRect(context,x,y,width,height,radius);context.fill();
+}
+function drawSnapshotText(context,text,x,y,size,color="#172033",weight=600,align="left"){
+  context.fillStyle=color;context.font=`${weight} ${size}px "PingFang SC","Microsoft YaHei",sans-serif`;context.textAlign=align;context.textBaseline="alphabetic";context.fillText(String(text),x,y);
+}
+function drawSnapshotWrapped(context,text,x,y,maxWidth,size,lineHeight,color="#6b7587",weight=500){
+  context.fillStyle=color;context.font=`${weight} ${size}px "PingFang SC","Microsoft YaHei",sans-serif`;context.textAlign="left";context.textBaseline="alphabetic";
+  let line="",lineY=y;
+  for(const char of String(text)){
+    const next=line+char;
+    if(context.measureText(next).width>maxWidth&&line){context.fillText(line,x,lineY);line=char;lineY+=lineHeight}else line=next;
+  }
+  if(line)context.fillText(line,x,lineY);
+  return lineY;
+}
+function createSnapshotCanvas(title,subtitle){
+  const canvas=document.createElement("canvas");canvas.width=REDNOTE_EXPORT_SIZE.width;canvas.height=REDNOTE_EXPORT_SIZE.height;
+  const context=canvas.getContext("2d");
+  context.fillStyle="#f6f8fb";context.fillRect(0,0,canvas.width,canvas.height);
+  context.fillStyle="#eef2f7";context.fillRect(0,0,canvas.width,22);
+  context.fillStyle="#315bd6";context.fillRect(54,76,10,50);
+  drawSnapshotText(context,"家庭投资总览",84,112,25,"#315bd6",800);
+  drawSnapshotText(context,title,54,194,52,"#172033",850);
+  drawSnapshotWrapped(context,subtitle,54,238,900,23,34,"#6b7587",500);
+  drawSnapshotText(context,"数据来源：家庭合计 · 人民币展示",54,1375,18,"#6b7587",500);
+  return {canvas,context};
+}
+function drawSnapshotMetric(context,{x,y,width,label,value,accent="#315bd6"}){
+  fillRoundRect(context,x,y,width,186,24,"#ffffff");
+  context.fillStyle=accent;context.fillRect(x,y,7,186);
+  drawSnapshotText(context,label,x+30,y+50,20,"#6b7587",700);
+  drawSnapshotText(context,value,x+30,y+119,36,"#172033",850);
+}
+function snapshotCategory(account){
+  const text=`${account.key||""} ${account.name||""}`.toLowerCase();
+  if(/crypto|加密|比特|btc|eth/.test(text))return "crypto";
+  if(/cash|现金|現金/.test(text))return "cash";
+  if(account.key==="brotherTW"||/台股|tw stock|taiwan/.test(text))return "tw";
+  return "us";
+}
+function snapshotCategories(accounts,total){
+  const labels={cash:"现金",tw:"台股",us:"美股",crypto:"加密货币"};
+  const values={cash:0,tw:0,us:0,crypto:0};
+  accounts.forEach(account=>{values[snapshotCategory(account)]+=Number(account.value)||0});
+  return Object.entries(values).filter(([,value])=>value>0).map(([key,value])=>({key,label:labels[key],value,pct:total?value/total:0,color:REDNOTE_COLORS[key]}));
+}
+function drawSnapshotTrend(context,history){
+  const x=76,y=770,width=928,height=330;
+  fillRoundRect(context,x,y,width,height,24,"#ffffff");
+  drawSnapshotText(context,"资产趋势",x+28,y+48,24,"#172033",800);
+  const values=history.map(item=>Number(item.family)||0).filter(value=>value>0);
+  if(values.length<2){drawSnapshotText(context,"历史数据不足",x+28,y+122,22,"#6b7587",500);return}
+  const min=Math.min(...values)*.96,max=Math.max(...values)*1.04,chartX=x+42,chartY=y+92,chartW=width-80,chartH=180;
+  context.strokeStyle="#e3e8f0";context.lineWidth=2;
+  for(let i=0;i<4;i++){const lineY=chartY+(chartH/3)*i;context.beginPath();context.moveTo(chartX,lineY);context.lineTo(chartX+chartW,lineY);context.stroke()}
+  const points=values.map((value,index)=>({x:chartX+chartW*(index/(values.length-1)),y:chartY+chartH*(1-(value-min)/(max-min||1))}));
+  context.beginPath();points.forEach((point,index)=>index?context.lineTo(point.x,point.y):context.moveTo(point.x,point.y));context.strokeStyle="#315bd6";context.lineWidth=7;context.lineJoin="round";context.lineCap="round";context.stroke();
+  const last=points.at(-1);context.fillStyle="#315bd6";context.beginPath();context.arc(last.x,last.y,9,0,Math.PI*2);context.fill();
+  drawSnapshotText(context,formatRednoteMoney(values.at(-1)),x+28,y+306,22,"#172033",800);
+}
+function drawSnapshotAllocation(context,categories,total){
+  const centerX=300,centerY=610,radius=170;let angle=-Math.PI/2;
+  categories.forEach(category=>{const end=angle+Math.PI*2*category.pct;context.beginPath();context.moveTo(centerX,centerY);context.arc(centerX,centerY,radius,angle,end);context.closePath();context.fillStyle=category.color;context.fill();angle=end});
+  context.fillStyle="#f6f8fb";context.beginPath();context.arc(centerX,centerY,104,0,Math.PI*2);context.fill();
+  drawSnapshotText(context,"总资产",centerX,590,20,"#6b7587",700,"center");drawSnapshotText(context,formatRednoteMoney(total),centerX,636,29,"#172033",850,"center");
+  let y=400;
+  categories.forEach(category=>{fillRoundRect(context,536,y,468,116,18,"#ffffff");context.fillStyle=category.color;context.beginPath();context.arc(572,y+44,10,0,Math.PI*2);context.fill();drawSnapshotText(context,category.label,596,y+51,22,"#172033",750);drawSnapshotText(context,formatRednoteMoney(category.value),596,y+87,23,"#172033",800);drawSnapshotText(context,`${(category.pct*100).toFixed(1)}%`,968,y+51,22,"#6b7587",700,"right");y+=132});
+}
+function drawSnapshotTarget(context,label,target,current,y,color){
+  const reached=current>=target,progress=Math.max(0,Math.min(current/target,1));
+  drawSnapshotText(context,label,76,y,25,"#172033",800);drawSnapshotText(context,`${(progress*100).toFixed(0)}%`,1004,y,23,reached?"#12835f":"#315bd6",800,"right");
+  fillRoundRect(context,76,y+24,928,22,11,"#e3e8f0");fillRoundRect(context,76,y+24,928*progress,22,11,color);
+  drawSnapshotText(context,`${formatRednoteMoney(current)} / ${formatRednoteMoney(target)}`,76,y+82,20,"#6b7587",600);
+}
+function buildRednoteSnapshots(){
+  const accounts=model.accounts||[];
+  const total=accounts.reduce((sum,account)=>sum+(Number(account.value)||0),0);
+  const cost=accounts.reduce((sum,account)=>sum+(Number(account.cost)||0),0);
+  const profit=total-cost,rate=cost?profit/cost:0,history=(model.history||[]).filter(item=>(Number(item.family)||0)>0);
+  const snapshotOne=createSnapshotCanvas("家庭资产快照","记录当前资产、收益与趋势变化");
+  drawSnapshotMetric(snapshotOne.context,{x:54,y:320,width:468,label:"总资产",value:formatRednoteMoney(total)});
+  drawSnapshotMetric(snapshotOne.context,{x:558,y:320,width:468,label:"总成本",value:formatRednoteMoney(cost),accent:"#7b8496"});
+  drawSnapshotMetric(snapshotOne.context,{x:54,y:530,width:468,label:profit>=0?"当前盈利":"当前亏损",value:`${profit>=0?"+":""}${formatRednoteMoney(profit)}`,accent:profit>=0?"#12835f":"#d74d59"});
+  drawSnapshotMetric(snapshotOne.context,{x:558,y:530,width:468,label:"总回报率",value:`${rate>=0?"+":""}${(rate*100).toFixed(2)}%`,accent:"#315bd6"});
+  drawSnapshotTrend(snapshotOne.context,history);
+  const snapshotTwo=createSnapshotCanvas("资产配置快照","按当前市值查看各类资产占比");
+  drawSnapshotAllocation(snapshotTwo.context,snapshotCategories(accounts,total),total);
+  const snapshotThree=createSnapshotCanvas("成长目标快照","以总成本为基准，追踪净值成长进度");
+  drawSnapshotMetric(snapshotThree.context,{x:54,y:320,width:468,label:"当前净值",value:formatRednoteMoney(total)});
+  drawSnapshotMetric(snapshotThree.context,{x:558,y:320,width:468,label:"总成本",value:formatRednoteMoney(cost),accent:"#7b8496"});
+  drawSnapshotText(snapshotThree.context,"成长目标进度",76,610,30,"#172033",850);
+  ROADMAP_TARGETS.forEach((target,index)=>drawSnapshotTarget(snapshotThree.context,target.label,cost*(1+target.rate),total,680+index*150,index===0?"#315bd6":index===1?"#d74d59":"#ef8f32"));
+  return [
+    {title:"家庭资产快照",filename:"family-asset-snapshot.png",canvas:snapshotOne.canvas},
+    {title:"资产配置快照",filename:"asset-allocation-snapshot.png",canvas:snapshotTwo.canvas},
+    {title:"成长目标快照",filename:"growth-target-snapshot.png",canvas:snapshotThree.canvas}
+  ];
+}
+function canvasToPng(canvas){
+  return new Promise((resolve,reject)=>canvas.toBlob(blob=>blob?resolve(blob):reject(new Error("PNG generation failed")),"image/png"));
+}
+function revokeRednoteImages(){rednoteExportImages.forEach(image=>URL.revokeObjectURL(image.url));rednoteExportImages=[]}
+function downloadRednoteImage(image){const link=document.createElement("a");link.href=image.url;link.download=image.filename;document.body.appendChild(link);link.click();link.remove()}
+function closeRednoteExport(){ $("#rednoteExportModal").hidden=true;revokeRednoteImages();$("#rednoteExportPreviews").innerHTML=""; }
+function showRednoteNotice(message){const notice=$("#rednoteExportNotice");notice.textContent=message;notice.hidden=false;clearTimeout(notice._timeout);notice._timeout=setTimeout(()=>notice.hidden=true,4200)}
+async function openRednoteExport(){
+  if(!model?.accounts?.length){showRednoteNotice(rednoteText("請先同步 Google Sheet 後再生成小紅書圖片。","请先同步 Google Sheet 后再生成小红书图片。"));return}
+  if($("#app").classList.contains("masked")){showRednoteNotice(rednoteText("目前已開啟金額隱藏。請先顯示金額再生成小紅書圖片。","当前已开启金额隐藏。请先显示金额再生成小红书图片。"));return}
+  if(rednoteExportBusy)return;
+  rednoteExportBusy=true;
+  try{
+    revokeRednoteImages();
+    const pngs=await Promise.all(buildRednoteSnapshots().map(async image=>({...image,url:URL.createObjectURL(await canvasToPng(image.canvas))})));
+    rednoteExportImages=pngs;
+    $("#rednoteExportPreviews").innerHTML=pngs.map((image,index)=>`<article class="export-preview"><img src="${image.url}" alt="${image.title} 预览"><strong>${image.title}</strong><button class="btn" type="button" data-rednote-download="${index}">下载 PNG</button></article>`).join("");
+    $("#rednoteExportModal").hidden=false;
+  }catch(error){console.error("Rednote export failed",error);showRednoteNotice(rednoteText("生成小紅書圖片失敗，請稍後再試。","生成小红书图片失败，请稍后再试。"))}finally{rednoteExportBusy=false;rednoteExportCooldownUntil=Date.now()+2500}
+}
+function resetRednoteExportTap(){rednoteExportTapCount=0;if(rednoteExportTapTimer){clearTimeout(rednoteExportTapTimer);rednoteExportTapTimer=null}}
+function handleRednoteExportTap(){
+  if(Date.now()<rednoteExportCooldownUntil||rednoteExportBusy)return;
+  rednoteExportTapCount+=1;clearTimeout(rednoteExportTapTimer);rednoteExportTapTimer=setTimeout(resetRednoteExportTap,3000);
+  if(rednoteExportTapCount>=5){resetRednoteExportTap();openRednoteExport()}
 }
 const PAGE_VIEW_SESSION_KEY="familyDashboardViewCounted";
 const safeNum=v=>{
@@ -1197,6 +1353,15 @@ async function sync(){
 $("#syncBtn").onclick=sync;
 $("#loginBtn").onclick=requestLogin;
 $("#logoutBtn").onclick=logout;
+$("#totalAssetsTriggerCard").addEventListener("click",handleRednoteExportTap);
+$("#rednoteExportClose").onclick=closeRednoteExport;
+$("#rednoteExportModal").addEventListener("click",event=>{if(event.target===$("#rednoteExportModal"))closeRednoteExport()});
+$("#rednoteExportPreviews").addEventListener("click",event=>{
+  const index=Number(event.target.closest("[data-rednote-download]")?.dataset.rednoteDownload);
+  if(Number.isInteger(index)&&rednoteExportImages[index])downloadRednoteImage(rednoteExportImages[index]);
+});
+$("#rednoteDownloadAll").onclick=()=>rednoteExportImages.forEach((image,index)=>setTimeout(()=>downloadRednoteImage(image),index*180));
+document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!$("#rednoteExportModal").hidden)closeRednoteExport()});
 document.querySelectorAll("[data-currency]").forEach(button=>{
   button.onclick=()=>setDisplayCurrency(button.dataset.currency);
 });
