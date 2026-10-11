@@ -60,15 +60,6 @@
     .legend{display:grid;gap:11px}.legend-row{display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;font-size:13px}
     .swatch{width:10px;height:10px;border-radius:99px}.legend-value{text-align:right;font-weight:800}
     .legend-value small{display:block;color:var(--muted);font-weight:500;margin-top:2px}
-    .market-alloc{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
-    .market-track{height:14px;border-radius:999px;background:var(--surface2);overflow:hidden;display:flex}
-    .market-segment{height:100%}.market-segment.us{background:#315bd6}.market-segment.tw{background:#20a37a}
-    .market-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:13px}
-    .market-item{display:grid;gap:4px}
-    .market-topline{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;font-weight:700}
-    .market-topline .swatch{width:11px;height:11px}
-    .market-value{font-size:15px;font-weight:850}
-    .market-meta{font-size:12px;color:var(--muted)}
     .roadmap-market{padding-top:16px;min-width:0;max-width:100%}
     .roadmap-market:first-child{padding-top:0}
     .roadmap-market+.roadmap-market{margin-top:20px;padding-top:20px;border-top:1px solid var(--line)}
@@ -154,6 +145,13 @@
     .roadmap-accent-us{color:#315bd6}
     .roadmap-accent-tw{color:#20a37a}
     .roadmap-accent-family{color:var(--brand)}
+    .allocation-modes{display:flex;gap:3px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--surface2)}
+    .allocation-mode{appearance:none;border:0;border-radius:999px;background:transparent;color:var(--muted);padding:7px 10px;font-size:11px;font-weight:800;white-space:nowrap;cursor:pointer}
+    .allocation-mode[aria-pressed="true"]{background:var(--surface);color:var(--text);box-shadow:0 2px 7px rgba(35,50,80,.12)}
+    .allocation-mode:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+    .trend-controls{margin-left:auto;display:flex;align-items:center;gap:8px}
+    .trend-range{appearance:none;border:1px solid var(--line);border-radius:11px;background:var(--surface2);color:var(--text);padding:9px 12px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+    .trend-range:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
     .trend-readout{min-height:58px;margin:-4px 0 8px;display:grid;align-content:start}
     .trend-readout-value{font-size:clamp(26px,4vw,38px);line-height:1.05;font-weight:850;letter-spacing:-.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .trend-readout-date{margin-top:6px;color:var(--muted);font-size:13px}
@@ -218,19 +216,30 @@
     @media(max-width:620px){.app{padding:17px 11px 42px}header{display:block}.actions{justify-content:flex-start;margin-top:15px}
       .currency-selector{order:-1}.currency-option{padding:7px 9px}
       .export-modal{padding:12px}.export-dialog{max-height:calc(100svh - 24px);padding:17px;border-radius:18px}.export-preview-grid{grid-template-columns:1fr}.export-actions{display:grid;grid-template-columns:1fr}.export-actions .btn{width:100%}
-      .kpis{gap:9px}.card{padding:15px;border-radius:17px}.number{font-size:23px}.donut-layout{grid-template-columns:1fr}.donut{width:155px}
-      .status{align-items:flex-start}.status-meta{display:none}.market-legend{grid-template-columns:1fr}
+      .kpis,.kpis.five-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+      .card{padding:15px;border-radius:17px}.number{font-size:23px}
+      .donut-layout{grid-template-columns:minmax(110px,140px) minmax(0,1fr);gap:12px;align-items:center}
+      .donut{width:100%;max-width:140px}
+      .legend{gap:9px}.legend-row{grid-template-columns:auto minmax(0,1fr) auto;gap:6px;font-size:12px}
+      .legend-value{font-size:12px}.legend-value small{font-size:10px}
       .roadmap-readout{min-height:58px}
+      .chart{height:auto;aspect-ratio:700 / 250}
       .roadmap-readout-value{font-size:22px}
       .roadmap-readout-meta{font-size:11px}
       .roadmap-chart{padding-top:70px}
       .roadmap-milestone-row{left:46%;gap:4px;bottom:34px}
       .roadmap-target-label{font-size:13px}
       .roadmap-marker-line{height:24px}
-      .calendar-card{padding:15px}.calendar-days{gap:3px}.calendar-weekdays{gap:3px}.calendar-day{min-height:64px;padding:6px;border-radius:9px}.calendar-change{margin-top:8px;font-size:10px;letter-spacing:-.02em}.calendar-query-count{display:none}
+      .calendar-card{padding:14px 12px}.calendar-card .head{margin-bottom:12px}.calendar-card .desc{max-width:30ch;line-height:1.45}
+      .calendar-toolbar{margin-bottom:10px}.calendar-month{font-size:15px}.calendar-nav button{width:36px;height:36px}
+      .calendar-days{gap:3px}.calendar-weekdays{gap:3px;margin-bottom:4px}.calendar-weekdays span{font-size:10px}
+      .calendar-day{min-height:56px;padding:5px 4px;border-radius:9px}.calendar-day-number{font-size:12px}
+      .calendar-change{margin-top:6px;font-size:9px;line-height:1.15;letter-spacing:-.03em;white-space:normal;overflow-wrap:anywhere}
+      .calendar-change .money{white-space:normal;overflow-wrap:anywhere;line-height:1.15}
+      .calendar-query-count{display:none}
     }
-    @media(max-width:430px){.kpis,.kpis.five-cards{grid-template-columns:1fr}
-      .roadmap-summary{grid-template-columns:1fr}
+    @media(max-width:360px){.kpis,.kpis.five-cards{grid-template-columns:1fr}}
+    @media(max-width:430px){.roadmap-summary{grid-template-columns:1fr}
       .roadmap-summary-value{font-size:20px}}
   </style>
 
@@ -299,24 +308,17 @@
 
     <section class="grid">
       <article class="card">
-        <div class="head"><div><div class="title" data-i18n="assetAllocation">目前資產配置</div><div class="desc" data-i18n="assetAllocationDescription">依帳戶／市場的目前市值</div></div></div>
+        <div class="head allocation-head">
+          <div><div class="title" data-i18n="assetAllocation">目前資產配置</div><div class="desc" id="allocationDesc">依市場分類目前市值</div></div>
+          <div class="allocation-modes" id="allocationModes" role="group" aria-label="資產配置分類">
+            <button class="allocation-mode" type="button" data-allocation-mode="market" aria-pressed="true">市場</button>
+            <button class="allocation-mode" type="button" data-allocation-mode="owner" aria-pressed="false">持有人</button>
+          </div>
+        </div>
         <div class="donut-layout">
           <div class="donut" id="donut"><div class="donut-center"><strong class="money" id="donutTotal"></strong><span data-i18n="totalAssets">總資產</span></div></div>
           <div class="legend" id="legend"></div>
         </div>
-        <section class="market-alloc" id="marketAllocationSection" aria-labelledby="marketAllocTitle">
-          <div class="head" style="margin-bottom:12px">
-            <div>
-              <div class="title" id="marketAllocTitle" data-i18n="marketAllocation">市場配置</div>
-              <div class="desc" data-i18n="marketAllocationDescription">不分帳戶，依市場加總目前市值</div>
-            </div>
-          </div>
-          <div class="market-track" id="marketTrack" aria-label="市場配置長條圖">
-            <div class="market-segment us" id="marketBarUS"></div>
-            <div class="market-segment tw" id="marketBarTW"></div>
-          </div>
-          <div class="market-legend" id="marketLegend"></div>
-        </section>
       </article>
       <article class="card">
         <div class="head"><div><div class="title" data-i18n="growthTargets">成長目標</div><div class="desc" data-i18n="growthTargetsDescription">以總成本與目前淨值追蹤投資成長進度</div></div></div>
@@ -325,7 +327,15 @@
     </section>
 
     <section class="card" style="margin-bottom:12px">
-      <div class="head"><div><div class="title" data-i18n="assetTrend">總資產趨勢</div><div class="desc" id="trendDesc">家庭合計歷史變化</div></div></div>
+      <div class="head">
+        <div><div class="title" data-i18n="assetTrend">總資產趨勢</div><div class="desc" id="trendDesc">家庭合計歷史變化</div></div>
+        <div class="trend-controls">
+          <select class="trend-range" id="trendRange" aria-label="圖表期間">
+            <option value="all">全部期間</option>
+            <option value="ytd">本年至今</option>
+          </select>
+        </div>
+      </div>
       <div class="trend-readout" id="trendReadout" aria-live="polite">
         <div class="trend-readout-value money" id="trendReadoutValue">—</div>
         <div class="trend-readout-date" id="trendReadoutDate">—</div>
@@ -396,10 +406,10 @@ const CURRENCY_OPTIONS=Object.freeze({
 });
 const UI_COPY={
   "zh-Hant":{
-    pageTitle:"家庭投資總覽",loginTitle:"家庭投資總覽",loginDescription:"請使用已被授權查看私人 Google Sheet 的帳號登入。未授權帳號無法取得任何資產資料。",loginButton:"使用 Google 帳號登入",subtitle:"媽媽與哥哥的台股、美股投資 · ",autoSync:"自動同步",hideAmounts:"隱藏金額",showAmounts:"顯示金額",syncSheet:"同步 Google Sheet",logout:"登出",currencySelectorLabel:"顯示幣別",family:"家庭合計",mom:"媽媽",brother:"哥哥",totalAssets:"目前總資產",totalCost:"總成本",unrealizedGain:"未實現損益",returnRate:"總報酬率",annualizedReturn:"年化報酬率",costHint:"依首次投入金額計算",profitHint:"目前市值－總成本",returnHint:"未實現損益 ÷ 總成本",assetAllocation:"目前資產配置",assetAllocationDescription:"依帳戶／市場的目前市值",marketAllocation:"市場配置",marketAllocationDescription:"不分帳戶，依市場加總目前市值",growthTargets:"成長目標",growthTargetsDescription:"以總成本與目前淨值追蹤投資成長進度",assetTrend:"總資產趨勢",changeCalendar:"帳戶變動日曆",changeCalendarDescription:"顯示每日資產與上次查詢的變動金額",accountDetails:"帳戶明細",accountMarket:"帳戶／市場",owner:"持有人",currentValue:"目前市值",allocation:"配置占比",currencyTableDescription:"金額統一以新台幣顯示"
+    pageTitle:"家庭投資總覽",loginTitle:"家庭投資總覽",loginDescription:"請使用已被授權查看私人 Google Sheet 的帳號登入。未授權帳號無法取得任何資產資料。",loginButton:"使用 Google 帳號登入",subtitle:"媽媽與哥哥的台股、美股投資 · ",autoSync:"自動同步",hideAmounts:"隱藏金額",showAmounts:"顯示金額",syncSheet:"同步 Google Sheet",logout:"登出",currencySelectorLabel:"顯示幣別",family:"家庭合計",mom:"媽媽",brother:"哥哥",totalAssets:"目前總資產",totalCost:"總成本",unrealizedGain:"未實現損益",returnRate:"總報酬率",annualizedReturn:"年化報酬率",costHint:"依首次投入金額計算",profitHint:"目前市值－總成本",returnHint:"未實現損益 ÷ 總成本",assetAllocation:"目前資產配置",allocationByMarketDescription:"依市場分類目前市值",allocationByOwnerDescription:"依持有人分類目前市值",allocationCategoryLabel:"資產配置分類",marketMode:"市場",ownerMode:"持有人",usEquities:"美股",twEquities:"台股",growthTargets:"成長目標",growthTargetsDescription:"以總成本與目前淨值追蹤投資成長進度",assetTrend:"總資產趨勢",allPeriod:"全部期間",yearToDate:"本年至今",trendPeriodLabel:"圖表期間",changeCalendar:"帳戶變動日曆",changeCalendarDescription:"顯示每日資產與上次查詢的變動金額",accountDetails:"帳戶明細",accountMarket:"帳戶／市場",owner:"持有人",currentValue:"目前市值",allocation:"配置占比",currencyTableDescription:"金額統一以新台幣顯示"
   },
   en:{
-    pageTitle:"Family Investment Dashboard",loginTitle:"Family Investment Dashboard",loginDescription:"Sign in with a Google account that has access to the private Google Sheet. Unauthorized accounts cannot access any asset data.",loginButton:"Sign in with Google",subtitle:"Mom's and brother's Taiwan and U.S. investments · ",autoSync:"auto sync",hideAmounts:"Hide amounts",showAmounts:"Show amounts",syncSheet:"Sync Google Sheet",logout:"Sign out",currencySelectorLabel:"Display currency",family:"Family total",mom:"Mom",brother:"Brother",totalAssets:"Total assets",totalCost:"Total cost",unrealizedGain:"Unrealized gain / loss",returnRate:"Total return",annualizedReturn:"Annualized return",costHint:"Based on initial investment",profitHint:"Current value minus total cost",returnHint:"Unrealized gain / loss divided by total cost",assetAllocation:"Asset allocation",assetAllocationDescription:"Current value by account and market",marketAllocation:"Market allocation",marketAllocationDescription:"Current value grouped by market across accounts",growthTargets:"Growth targets",growthTargetsDescription:"Track investment growth using total cost and current net value",assetTrend:"Total asset trend",changeCalendar:"Account change calendar",changeCalendarDescription:"Daily asset changes since the previous query",accountDetails:"Account details",accountMarket:"Account / market",owner:"Owner",currentValue:"Current value",allocation:"Allocation",currencyTableDescription:"Amounts shown in U.S. dollars"
+    pageTitle:"Family Investment Dashboard",loginTitle:"Family Investment Dashboard",loginDescription:"Sign in with a Google account that has access to the private Google Sheet. Unauthorized accounts cannot access any asset data.",loginButton:"Sign in with Google",subtitle:"Mom's and brother's Taiwan and U.S. investments · ",autoSync:"auto sync",hideAmounts:"Hide amounts",showAmounts:"Show amounts",syncSheet:"Sync Google Sheet",logout:"Sign out",currencySelectorLabel:"Display currency",family:"Family total",mom:"Mom",brother:"Brother",totalAssets:"Total assets",totalCost:"Total cost",unrealizedGain:"Unrealized gain / loss",returnRate:"Total return",annualizedReturn:"Annualized return",costHint:"Based on initial investment",profitHint:"Current value minus total cost",returnHint:"Unrealized gain / loss divided by total cost",assetAllocation:"Asset allocation",allocationByMarketDescription:"Current value by market",allocationByOwnerDescription:"Current value by owner",allocationCategoryLabel:"Allocation category",marketMode:"Market",ownerMode:"Owner",usEquities:"U.S. equities",twEquities:"Taiwan equities",growthTargets:"Growth targets",growthTargetsDescription:"Track investment growth using total cost and current net value",assetTrend:"Total asset trend",allPeriod:"All time",yearToDate:"Year to date",trendPeriodLabel:"Chart period",changeCalendar:"Account change calendar",changeCalendarDescription:"Daily asset changes since the previous query",accountDetails:"Account details",accountMarket:"Account / market",owner:"Owner",currentValue:"Current value",allocation:"Allocation",currencyTableDescription:"Amounts shown in U.S. dollars"
   }
 };
 let model=null,view="family",syncing=false,ticker=null,tokenClient=null,accessToken=null,refreshTimer=null;
@@ -407,6 +417,7 @@ let loginNeedsAccountSelection=false,loginAttemptedOnce=false;
 let pageViewInitialized=false;
 const trendState={points:[],activeIndex:-1,dragging:false,pointerId:null,elements:null,bound:false};
 let activeRoadmapTarget=null;
+let allocationMode="market";
 let roadmapUiBound=false;
 let calendarMonth=null;
 let displayCurrency="TWD";
@@ -430,6 +441,12 @@ function applyLanguage(){
   document.title=copy("pageTitle");
   document.querySelectorAll("[data-i18n]").forEach(element=>{element.textContent=copy(element.dataset.i18n)});
   document.querySelectorAll("[data-i18n-aria-label]").forEach(element=>{element.setAttribute("aria-label",copy(element.dataset.i18nAriaLabel))});
+  $("#trendRange").setAttribute("aria-label",copy("trendPeriodLabel"));
+  $("#allocationModes").setAttribute("aria-label",copy("allocationCategoryLabel"));
+  document.querySelector('[data-allocation-mode="market"]').textContent=copy("marketMode");
+  document.querySelector('[data-allocation-mode="owner"]').textContent=copy("ownerMode");
+  $("#trendRange").querySelector("option[value=all]").textContent=copy("allPeriod");
+  $("#trendRange").querySelector("option[value=ytd]").textContent=copy("yearToDate");
   const weekdayFormatter=new Intl.DateTimeFormat(currentCurrencyOption().locale,{weekday:"short",timeZone:"UTC"});
   document.querySelectorAll("[data-weekday]").forEach(element=>{
     element.textContent=weekdayFormatter.format(new Date(Date.UTC(2023,0,1+Number(element.dataset.weekday))));
@@ -887,19 +904,17 @@ function filteredAccounts(){
   return model.accounts;
 }
 function viewLabel(){return view==="mom"?copy("mom"):view==="brother"?copy("brother"):copy("family")}
-function marketAllocation(accounts){
-  const usKeys=view==="mom"?["momFirstrade","momIB"]:view==="brother"?["brotherUS"]:["momFirstrade","momIB","brotherUS"];
-  const twKeys=view==="mom"?[]:["brotherTW"];
-  const usValue=accounts.filter(a=>usKeys.includes(a.key)).reduce((sum,a)=>sum+a.value,0);
-  const twValue=accounts.filter(a=>twKeys.includes(a.key)).reduce((sum,a)=>sum+a.value,0);
-  const total=usValue+twValue;
-  return {
-    usValue,
-    twValue,
-    total,
-    usPct:total?usValue/total:0,
-    twPct:total?twValue/total:0
-  };
+function allocationGroups(accounts){
+  if(allocationMode==="owner"){
+    return [
+      {key:"mom",label:copy("mom"),color:"var(--mom1)",value:accounts.filter(account=>account.owner==="媽媽").reduce((sum,account)=>sum+account.value,0)},
+      {key:"brother",label:copy("brother"),color:"var(--bro1)",value:accounts.filter(account=>account.owner==="哥哥").reduce((sum,account)=>sum+account.value,0)}
+    ];
+  }
+  return [
+    {key:"us",label:copy("usEquities"),color:"var(--bro1)",value:accounts.filter(account=>account.key!=="brotherTW").reduce((sum,account)=>sum+account.value,0)},
+    {key:"tw",label:copy("twEquities"),color:"var(--bro2)",value:accounts.filter(account=>account.key==="brotherTW").reduce((sum,account)=>sum+account.value,0)}
+  ];
 }
 function marketPerformance(accounts){
   const usKeys=view==="mom"?["momFirstrade","momIB"]:view==="brother"?["brotherUS"]:["momFirstrade","momIB","brotherUS"];
@@ -1081,8 +1096,14 @@ function render(){
   const accounts=filteredAccounts();
   const totalValue=accounts.reduce((s,a)=>s+a.value,0),totalCost=accounts.reduce((s,a)=>s+a.cost,0);
   const profit=totalValue-totalCost,rate=totalCost?profit/totalCost:0;
-  const market=marketAllocation(accounts);
-  $("#marketAllocationSection").hidden=view!=="family";
+  if(view!=="family"&&allocationMode==="owner")allocationMode="market";
+  const allocation=allocationGroups(accounts);
+  const allocationTotal=allocation.reduce((sum,group)=>sum+group.value,0);
+  document.querySelectorAll("[data-allocation-mode]").forEach(button=>{
+    button.setAttribute("aria-pressed",String(button.dataset.allocationMode===allocationMode));
+    button.hidden=button.dataset.allocationMode==="owner"&&view!=="family";
+  });
+  $("#allocationDesc").textContent=allocationMode==="owner"?copy("allocationByOwnerDescription"):copy("allocationByMarketDescription");
   const showAnnualized=view!=="family";
   const annualizedValue=view==="mom"?model?.annualized?.mom:view==="brother"?model?.annualized?.brother:null;
   const annualizedHint=view==="mom"?(currentLanguage()==="en"?"From Mom's annualized return in Google Sheet":"取自 Google Sheet 媽媽年化報酬"):view==="brother"?(currentLanguage()==="en"?"From brother's annualized return in Google Sheet":"取自 Google Sheet 哥哥年化報酬"):"";
@@ -1094,30 +1115,22 @@ function render(){
   $("#annualizedReturn").textContent=formatRateValue(annualizedValue);
   $("#annualizedReturn").className=`number ${Number.isFinite(annualizedValue)?annualizedValue>=0?"positive":"negative":""}`.trim();
   $("#annualizedHint").textContent=annualizedHint||"—";
-  $("#donutTotal").textContent=short(totalValue);
+  $("#donutTotal").textContent=short(allocationTotal);
   $("#valueHint").textContent=currentLanguage()==="en"?`Data date: ${model.snapshotDate||"—"}`:`資料日期：${model.snapshotDate||"—"}`;
-  $("#trendDesc").textContent=currentLanguage()==="en"?`${viewLabel()} history`:`${viewLabel()}歷史變化`;
+  const period=$("#trendRange").value;
+  $("#trendDesc").textContent=currentLanguage()==="en"?viewLabel()+" "+(period==="ytd"?"year to date":"history"):viewLabel()+(period==="ytd"?"本年至今":"歷史變化");
 
   let start=0;const stops=[];
-  accounts.forEach(a=>{const end=start+(totalValue?a.value/totalValue*100:0);stops.push(`${COLORS[a.key]} ${start}% ${end}%`);start=end});
+  allocation.forEach(group=>{
+    const end=start+(allocationTotal?group.value/allocationTotal*100:0);
+    stops.push(`${group.color} ${start}% ${end}%`);
+    start=end;
+  });
   $("#donut").style.background=stops.length?`conic-gradient(${stops.join(",")})`:"var(--surface2)";
-  $("#legend").innerHTML=accounts.map(a=>`<div class="legend-row"><span class="swatch" style="background:${COLORS[a.key]}"></span>
-    <div>${a.name}<small style="display:block;color:var(--muted);margin-top:2px">${a.owner}</small></div>
-    <div class="legend-value money">${fmt(a.value)}<small>${pct(totalValue?a.value/totalValue:0)}</small></div></div>`).join("");
-  $("#marketBarUS").style.width=`${market.usPct*100}%`;
-  $("#marketBarTW").style.width=`${market.twPct*100}%`;
-  $("#marketTrack").setAttribute("aria-label",currentLanguage()==="en"?`Market allocation, U.S. equities ${pct(market.usPct)}, Taiwan equities ${pct(market.twPct)}`:`市場配置，美股 ${pct(market.usPct)}，台股 ${pct(market.twPct)}`);
-  $("#marketLegend").innerHTML=`
-    <div class="market-item">
-      <div class="market-topline"><span class="swatch" style="background:#315bd6"></span><span>${currentLanguage()==="en"?"U.S. equities":"美股"}</span></div>
-      <div class="market-value money">${formatMoney(market.usValue)}</div>
-      <div class="market-meta">${pct(market.usPct)}</div>
-    </div>
-    <div class="market-item">
-      <div class="market-topline"><span class="swatch" style="background:#20a37a"></span><span>${currentLanguage()==="en"?"Taiwan equities":"台股"}</span></div>
-    <div class="market-value money">${formatMoney(market.twValue)}</div>
-    <div class="market-meta">${pct(market.twPct)}</div>
-  </div>`;
+  $("#donut").setAttribute("aria-label",allocationMode==="owner"?"持有人資產配置":"市場資產配置");
+  $("#legend").innerHTML=allocation.filter(group=>group.value>0).map(group=>`<div class="legend-row"><span class="swatch" style="background:${group.color}"></span>
+    <div>${group.label}</div>
+    <div class="legend-value money">${fmt(group.value)}<small>${pct(allocationTotal?group.value/allocationTotal:0)}</small></div></div>`).join("");
   if(view==="family"){
     const combined={
       cost:accounts.reduce((sum,account)=>sum+account.cost,0),
@@ -1204,7 +1217,10 @@ function bindTrendInteraction(){
 function renderTrend(){
   const svg=$("#trend"),key=view==="mom"?"mom":view==="brother"?"brother":"family";
   const readoutValue=$("#trendReadoutValue"),readoutDate=$("#trendReadoutDate");
-  const h=model.history.filter(x=>x[key]>0);
+  const range=$("#trendRange").value;
+  const currentYear=String(new Date().getFullYear());
+  $("#trendDesc").textContent=currentLanguage()==="en"?viewLabel()+" "+(range==="ytd"?"year to date":"history"):viewLabel()+(range==="ytd"?"本年至今":"歷史變化");
+  const h=model.history.filter(x=>x[key]>0&&(range!=="ytd"||x.date.slice(0,4)===currentYear));
   bindTrendInteraction();
   if(h.length<2){
     trendState.points=[];
@@ -1351,6 +1367,13 @@ async function sync(){
   }
 }
 $("#syncBtn").onclick=sync;
+$("#trendRange").onchange=renderTrend;
+$("#allocationModes").addEventListener("click",event=>{
+  const button=event.target.closest("[data-allocation-mode]");
+  if(!button||button.dataset.allocationMode===allocationMode)return;
+  allocationMode=button.dataset.allocationMode;
+  render();
+});
 $("#loginBtn").onclick=requestLogin;
 $("#logoutBtn").onclick=logout;
 $("#totalAssetsTriggerCard").addEventListener("click",handleRednoteExportTap);
