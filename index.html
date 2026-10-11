@@ -171,7 +171,7 @@
     .calendar-weekdays,.calendar-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;min-width:0}.calendar-weekdays{margin-bottom:5px}.calendar-weekdays span{text-align:center;font-size:11px;color:var(--muted);font-weight:800}
     .calendar-day{min-height:88px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);padding:8px;min-width:0;text-align:left;color:var(--text)}.calendar-day-placeholder{visibility:hidden;pointer-events:none}.calendar-day-number{display:block;font-size:12px;font-weight:850}.calendar-change{display:block;margin-top:12px;font-size:clamp(11px,1.35vw,14px);font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;min-width:0}.calendar-change .money{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.calendar-change.muted{color:var(--muted)}.calendar-query-count{display:block;margin-top:5px;font-size:10px;color:var(--muted)}.calendar-empty{padding:22px 12px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed var(--line);border-radius:13px;background:var(--surface2)}
     .table-card{padding:0;overflow:hidden}.table-head{padding:19px 19px 12px}.table-wrap{overflow:auto}
-    table{border-collapse:collapse;width:100%;min-width:760px}th,td{padding:13px 18px;border-top:1px solid var(--line);text-align:right;font-size:13px}
+    table{border-collapse:collapse;width:100%;min-width:840px}th,td{padding:13px 18px;border-top:1px solid var(--line);text-align:right;font-size:13px}
     th{font-size:11px;color:var(--muted);background:var(--surface2)}th:first-child,td:first-child{text-align:left}td:first-child{font-weight:800}
     .empty{display:none;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
     .empty.show{display:block}.empty h2{margin:0 0 8px;font-size:21px}.empty p,.empty li{color:var(--muted);line-height:1.6;font-size:14px}
@@ -363,7 +363,7 @@
     <section class="card table-card">
       <div class="table-head"><div class="title" data-i18n="accountDetails">帳戶明細</div><div class="desc" id="currencyTableDescription">金額統一以新台幣顯示</div></div>
       <div class="table-wrap">
-        <table><thead><tr><th data-i18n="accountMarket">帳戶／市場</th><th data-i18n="owner">持有人</th><th data-i18n="totalCost">總成本</th><th data-i18n="currentValue">目前市值</th><th data-i18n="unrealizedGain">未實現損益</th><th data-i18n="returnRate">報酬率</th><th data-i18n="allocation">配置占比</th></tr></thead><tbody id="rows"></tbody></table>
+        <table><thead><tr><th data-i18n="accountMarket">帳戶／市場</th><th data-i18n="owner">持有人</th><th data-i18n="investmentDuration">投資時間（年）</th><th data-i18n="totalCost">總成本</th><th data-i18n="currentValue">目前市值</th><th data-i18n="unrealizedGain">未實現損益</th><th data-i18n="returnRate">報酬率</th><th data-i18n="allocation">配置占比</th></tr></thead><tbody id="rows"></tbody></table>
       </div>
     </section>
   </section>
@@ -413,10 +413,10 @@ const CURRENCY_OPTIONS=Object.freeze({
 });
 const UI_COPY={
   "zh-Hant":{
-    pageTitle:"家庭投資總覽",loginTitle:"家庭投資總覽",loginDescription:"請使用已被授權查看私人 Google Sheet 的帳號登入。未授權帳號無法取得任何資產資料。",loginButton:"使用 Google 帳號登入",subtitle:"媽媽與哥哥的台股、美股投資 · ",autoSync:"自動同步",hideAmounts:"隱藏金額",showAmounts:"顯示金額",syncSheet:"同步 Google Sheet",logout:"登出",currencySelectorLabel:"顯示幣別",family:"家庭合計",mom:"媽媽",brother:"哥哥",totalAssets:"目前總資產",totalCost:"總成本",unrealizedGain:"未實現損益",returnRate:"總報酬率",annualizedReturn:"年化報酬率",costHint:"依首次投入金額計算",profitHint:"目前市值－總成本",returnHint:"未實現損益 ÷ 總成本",assetAllocation:"目前資產配置",allocationByMarketDescription:"依市場分類目前市值",allocationByOwnerDescription:"依持有人分類目前市值",allocationCategoryLabel:"資產配置分類",marketMode:"市場",ownerMode:"持有人",usEquities:"美股",twEquities:"台股",growthTargets:"成長目標",growthTargetsDescription:"以總成本與目前淨值追蹤投資成長進度",assetTrend:"總資產趨勢",allPeriod:"全部期間",yearToDate:"本年至今",trendPeriodLabel:"圖表期間",changeCalendar:"帳戶變動日曆",changeCalendarDescription:"顯示每日資產與上次查詢的變動金額",accountDetails:"帳戶明細",accountMarket:"帳戶／市場",owner:"持有人",currentValue:"目前市值",allocation:"配置占比",currencyTableDescription:"金額統一以新台幣顯示"
+    pageTitle:"家庭投資總覽",loginTitle:"家庭投資總覽",loginDescription:"請使用已被授權查看私人 Google Sheet 的帳號登入。未授權帳號無法取得任何資產資料。",loginButton:"使用 Google 帳號登入",subtitle:"媽媽與哥哥的台股、美股投資 · ",autoSync:"自動同步",hideAmounts:"隱藏金額",showAmounts:"顯示金額",syncSheet:"同步 Google Sheet",logout:"登出",currencySelectorLabel:"顯示幣別",family:"家庭合計",mom:"媽媽",brother:"哥哥",totalAssets:"目前總資產",totalCost:"總成本",unrealizedGain:"未實現損益",returnRate:"總報酬率",annualizedReturn:"年化報酬率",costHint:"依首次投入金額計算",profitHint:"目前市值－總成本",returnHint:"未實現損益 ÷ 總成本",assetAllocation:"目前資產配置",allocationByMarketDescription:"依市場分類目前市值",allocationByOwnerDescription:"依持有人分類目前市值",allocationCategoryLabel:"資產配置分類",marketMode:"市場",ownerMode:"持有人",usEquities:"美股",twEquities:"台股",growthTargets:"成長目標",growthTargetsDescription:"以總成本與目前淨值追蹤投資成長進度",assetTrend:"總資產趨勢",allPeriod:"全部期間",yearToDate:"本年至今",trendPeriodLabel:"圖表期間",changeCalendar:"帳戶變動日曆",changeCalendarDescription:"顯示每日資產與上次查詢的變動金額",accountDetails:"帳戶明細",accountMarket:"帳戶／市場",owner:"持有人",investmentDuration:"投資時間（年）",currentValue:"目前市值",allocation:"配置占比",currencyTableDescription:"金額統一以新台幣顯示"
   },
   en:{
-    pageTitle:"Family Investment Dashboard",loginTitle:"Family Investment Dashboard",loginDescription:"Sign in with a Google account that has access to the private Google Sheet. Unauthorized accounts cannot access any asset data.",loginButton:"Sign in with Google",subtitle:"Mom's and brother's Taiwan and U.S. investments · ",autoSync:"auto sync",hideAmounts:"Hide amounts",showAmounts:"Show amounts",syncSheet:"Sync Google Sheet",logout:"Sign out",currencySelectorLabel:"Display currency",family:"Family total",mom:"Mom",brother:"Brother",totalAssets:"Total assets",totalCost:"Total cost",unrealizedGain:"Unrealized gain / loss",returnRate:"Total return",annualizedReturn:"Annualized return",costHint:"Based on initial investment",profitHint:"Current value minus total cost",returnHint:"Unrealized gain / loss divided by total cost",assetAllocation:"Asset allocation",allocationByMarketDescription:"Current value by market",allocationByOwnerDescription:"Current value by owner",allocationCategoryLabel:"Allocation category",marketMode:"Market",ownerMode:"Owner",usEquities:"U.S. equities",twEquities:"Taiwan equities",growthTargets:"Growth targets",growthTargetsDescription:"Track investment growth using total cost and current net value",assetTrend:"Total asset trend",allPeriod:"All time",yearToDate:"Year to date",trendPeriodLabel:"Chart period",changeCalendar:"Account change calendar",changeCalendarDescription:"Daily asset changes since the previous query",accountDetails:"Account details",accountMarket:"Account / market",owner:"Owner",currentValue:"Current value",allocation:"Allocation",currencyTableDescription:"Amounts shown in U.S. dollars"
+    pageTitle:"Family Investment Dashboard",loginTitle:"Family Investment Dashboard",loginDescription:"Sign in with a Google account that has access to the private Google Sheet. Unauthorized accounts cannot access any asset data.",loginButton:"Sign in with Google",subtitle:"Mom's and brother's Taiwan and U.S. investments · ",autoSync:"auto sync",hideAmounts:"Hide amounts",showAmounts:"Show amounts",syncSheet:"Sync Google Sheet",logout:"Sign out",currencySelectorLabel:"Display currency",family:"Family total",mom:"Mom",brother:"Brother",totalAssets:"Total assets",totalCost:"Total cost",unrealizedGain:"Unrealized gain / loss",returnRate:"Total return",annualizedReturn:"Annualized return",costHint:"Based on initial investment",profitHint:"Current value minus total cost",returnHint:"Unrealized gain / loss divided by total cost",assetAllocation:"Asset allocation",allocationByMarketDescription:"Current value by market",allocationByOwnerDescription:"Current value by owner",allocationCategoryLabel:"Allocation category",marketMode:"Market",ownerMode:"Owner",usEquities:"U.S. equities",twEquities:"Taiwan equities",growthTargets:"Growth targets",growthTargetsDescription:"Track investment growth using total cost and current net value",assetTrend:"Total asset trend",allPeriod:"All time",yearToDate:"Year to date",trendPeriodLabel:"Chart period",changeCalendar:"Account change calendar",changeCalendarDescription:"Daily asset changes since the previous query",accountDetails:"Account details",accountMarket:"Account / market",owner:"Owner",investmentDuration:"Investment (years)",currentValue:"Current value",allocation:"Allocation",currencyTableDescription:"Amounts shown in U.S. dollars"
   }
 };
 let model=null,view="family",syncing=false,ticker=null,tokenClient=null,accessToken=null,refreshTimer=null;
@@ -857,6 +857,15 @@ function firstPositive(rows,col){
   for(const r of rows){const n=safeNum(r?.[col]);if(n!==null&&n>0)return n}
   return 0;
 }
+function firstPositiveDate(rows,col){
+  for(const r of rows){if((safeNum(r?.[col])??0)>0){const date=parseDate(r?.[6]);if(date)return date}}
+  return "";
+}
+function formatInvestmentDuration(startDate,endDate){
+  if(!startDate||!endDate)return "—";
+  const years=Math.max(0,(Date.parse(`${endDate}T00:00:00Z`)-Date.parse(`${startDate}T00:00:00Z`))/(365.2425*86400000));
+  return currentLanguage()==="en"?`${years.toFixed(1)} yrs`:`${years.toFixed(1)} 年`;
+}
 function lastPositive(rows,col){
   for(let i=rows.length-1;i>=0;i--){const n=safeNum(rows[i]?.[col]);if(n!==null&&n>0)return n}
   return 0;
@@ -879,10 +888,10 @@ function parseSummary(rows){
   const momIBCost=firstPositive(historyRows,14);
 
   const accounts=[
-    {key:"momFirstrade",owner:"媽媽",name:"Firstrade",cost:momFirstradeCost,value:currentValue(13)},
-    {key:"momIB",owner:"媽媽",name:"IB",cost:momIBCost,value:currentValue(14)},
-    {key:"brotherUS",owner:"哥哥",name:"美股",cost:brotherUSCost,value:currentValue(7)},
-    {key:"brotherTW",owner:"哥哥",name:"台股",cost:brotherTWCost,value:currentValue(8)}
+    {key:"momFirstrade",owner:"媽媽",name:"Firstrade",cost:momFirstradeCost,value:currentValue(13),investedSince:firstPositiveDate(historyRows,13)},
+    {key:"momIB",owner:"媽媽",name:"IB",cost:momIBCost,value:currentValue(14),investedSince:firstPositiveDate(historyRows,14)},
+    {key:"brotherUS",owner:"哥哥",name:"美股",cost:brotherUSCost,value:currentValue(7),investedSince:firstPositiveDate(historyRows,7)},
+    {key:"brotherTW",owner:"哥哥",name:"台股",cost:brotherTWCost,value:currentValue(8),investedSince:firstPositiveDate(historyRows,8)}
   ];
   accounts.forEach(a=>{a.profit=a.value-a.cost;a.rate=a.cost?a.profit/a.cost:0});
 
@@ -1162,7 +1171,7 @@ function render(){
     $("#growthMarkets").innerHTML=renderMarketRoadmap("美股",performance.us.cost,performance.us.value,"us");
   }
 
-  $("#rows").innerHTML=accounts.map(a=>`<tr><td>${a.name}</td><td>${a.owner}</td><td class="money">${fmt(a.cost)}</td><td class="money">${fmt(a.value)}</td>
+  $("#rows").innerHTML=accounts.map(a=>`<tr><td>${a.name}</td><td>${a.owner}</td><td title="${a.investedSince||""}">${formatInvestmentDuration(a.investedSince,model.snapshotDate)}</td><td class="money">${fmt(a.cost)}</td><td class="money">${fmt(a.value)}</td>
     <td class="${a.profit>=0?"positive":"negative"} money">${a.profit>=0?"+":""}${fmt(a.profit)}</td>
     <td class="${a.rate>=0?"positive":"negative"}">${a.rate>=0?"+":""}${pct(a.rate)}</td><td>${pct(totalValue?a.value/totalValue:0)}</td></tr>`).join("");
   renderTrend();
