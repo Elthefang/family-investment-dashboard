@@ -40,13 +40,12 @@
     .icon-btn{width:42px;height:42px;padding:0;display:inline-grid;place-items:center;flex:0 0 auto}
     .icon-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     .icon-btn .eye-off{display:none}.icon-btn.is-masked .eye{display:none}.icon-btn.is-masked .eye-off{display:block}
-    .btn:disabled{opacity:.55;cursor:progress}.status{display:flex;align-items:center;gap:9px;
-      background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;
-      margin-bottom:13px;color:var(--muted);font-size:13px}
-    .dot{width:9px;height:9px;border-radius:50%;background:var(--brand);flex:0 0 auto}
+    .btn:disabled{opacity:.55;cursor:progress}.status{display:flex;align-items:center;gap:7px;min-width:0;
+      margin:6px 0 0;padding:0;color:var(--muted);font-size:12px}
+    .dot{width:7px;height:7px;border-radius:50%;background:var(--brand);flex:0 0 auto}
     .dot.loading{animation:pulse 1s infinite}.dot.ok{background:var(--positive)}.dot.error{background:var(--negative)}
     @keyframes pulse{50%{opacity:.25;transform:scale(.75)}}.status-text{min-width:0;overflow-wrap:anywhere}
-    .status-meta{margin-left:auto;white-space:nowrap}.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:5px;
+    .status-meta{white-space:nowrap;opacity:.75;flex:0 0 auto}.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:5px;
       margin-bottom:13px;scrollbar-width:none}.tab{border:1px solid var(--line);background:var(--surface);
       color:var(--muted);padding:9px 15px;border-radius:999px;white-space:nowrap;cursor:pointer;font-weight:750}
     .tab.active{background:var(--text);color:var(--bg);border-color:var(--text)}
@@ -266,7 +265,14 @@
 
 <main class="app" id="app" hidden>
   <header>
-    <div><h1 data-i18n="pageTitle">家庭投資總覽</h1></div>
+    <div>
+      <h1 data-i18n="pageTitle">家庭投資總覽</h1>
+      <div class="status">
+        <span class="dot loading" id="dot"></span>
+        <span class="status-text" id="status">正在連線 Google Sheet…</span>
+        <span class="status-meta" id="statusMeta"></span>
+      </div>
+    </div>
     <div class="actions">
       <select class="currency-selector" id="currencySelector" aria-label="顯示幣別" data-i18n-aria-label="currencySelectorLabel">
         <option value="TWD">TWD</option><option value="USD">USD</option><option value="CNY">RMB</option>
@@ -278,12 +284,6 @@
       <button class="btn" id="logoutBtn" type="button" data-i18n="logout">登出</button>
     </div>
   </header>
-
-  <div class="status">
-    <span class="dot loading" id="dot"></span>
-    <span class="status-text" id="status">正在連線 Google Sheet…</span>
-    <span class="status-meta" id="statusMeta"></span>
-  </div>
 
   <section class="empty" id="empty">
     <h2>尚未取得資料</h2>
