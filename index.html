@@ -165,6 +165,22 @@
     .trend-readout-value{font-size:clamp(26px,4vw,38px);line-height:1.05;font-weight:850;letter-spacing:-.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .trend-readout-date{margin-top:6px;color:var(--muted);font-size:13px}
     .chart{height:250px}.chart svg{width:100%;height:100%;display:block;overflow:visible;touch-action:pan-y}
+    .benchmark-section{margin-bottom:12px}
+    .benchmark-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .benchmark-panel{min-width:0;padding:13px 12px 8px;border:1px solid var(--line);border-radius:16px;background:var(--surface2)}
+    .benchmark-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 3px 4px}
+    .benchmark-name{font-size:14px;font-weight:850;color:var(--text)}
+    .benchmark-symbol{margin-top:2px;color:var(--muted);font-size:11px}
+    .benchmark-dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+    .benchmark-tw .benchmark-dot{background:var(--market-tw)}
+    .benchmark-us .benchmark-dot{background:var(--market-us)}
+    .benchmark-widget{width:100%;height:226px;min-width:0}
+    .benchmark-widget .tradingview-widget-container,.benchmark-widget .tradingview-widget-container__widget{width:100%;height:100%}
+    .benchmark-widget .tradingview-widget-copyright{padding:0 0 3px;text-align:right;font-size:9px;line-height:1.2;color:var(--muted)}
+    .benchmark-widget .tradingview-widget-copyright a{color:var(--muted);text-decoration:none}
+    .benchmark-widget .trademark{color:var(--muted)}
+    @media(max-width:620px){.benchmark-grid{grid-template-columns:1fr}.benchmark-widget{height:230px}}
+    
     .gridline{stroke:var(--line);stroke-width:1}
     .trend{fill:none;stroke:var(--brand);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
     .area{fill:url(#areaGradient)}.point{fill:var(--surface);stroke:var(--brand);stroke-width:2;opacity:.35}.axis{font-size:10px;fill:var(--muted)}
@@ -354,6 +370,31 @@
       <div class="chart"><svg id="trend" viewBox="0 0 700 250" aria-label="總資產趨勢圖"></svg></div>
     </section>
 
+    <section class="card benchmark-section" id="benchmarkComparison" aria-labelledby="benchmarkComparisonTitle">
+      <div class="head">
+        <div>
+          <div class="title" id="benchmarkComparisonTitle" data-i18n="benchmarkComparisonTitle">大盤走勢比較</div>
+          <div class="desc" data-i18n="benchmarkComparisonDescription">台股與美股分開顯示，期間同步上方趨勢圖</div>
+        </div>
+      </div>
+      <div class="benchmark-grid">
+        <article class="benchmark-panel benchmark-tw">
+          <div class="benchmark-panel-head">
+            <div><div class="benchmark-name" data-i18n="benchmarkTaiwan">台股大盤</div><div class="benchmark-symbol" data-i18n="benchmarkTaiwanIndex">臺灣加權指數</div></div>
+            <span class="benchmark-dot" aria-hidden="true"></span>
+          </div>
+          <div class="benchmark-widget" id="benchmarkTwChart" role="img" aria-label="台灣加權指數走勢圖"></div>
+        </article>
+        <article class="benchmark-panel benchmark-us">
+          <div class="benchmark-panel-head">
+            <div><div class="benchmark-name" data-i18n="benchmarkUS">美股大盤</div><div class="benchmark-symbol" data-i18n="benchmarkUSIndex">S&P 500</div></div>
+            <span class="benchmark-dot" aria-hidden="true"></span>
+          </div>
+          <div class="benchmark-widget" id="benchmarkUsChart" role="img" aria-label="S&P 500 index chart"></div>
+        </article>
+      </div>
+    </section>
+
     <section class="card calendar-card" id="changeCalendarSection" aria-labelledby="changeCalendarTitle">
       <div class="head"><div><div class="title" id="changeCalendarTitle" data-i18n="changeCalendar">帳戶變動日曆</div><div class="desc" data-i18n="changeCalendarDescription">顯示每日資產與上次查詢的變動金額</div></div></div>
       <div class="calendar-toolbar">
@@ -417,10 +458,10 @@ const CURRENCY_OPTIONS=Object.freeze({
 });
 const UI_COPY={
   "zh-Hant":{
-    pageTitle:"家庭投資總覽",loginTitle:"家庭投資總覽",loginDescription:"請使用已被授權查看私人 Google Sheet 的帳號登入。未授權帳號無法取得任何資產資料。",loginButton:"使用 Google 帳號登入",subtitle:"媽媽與哥哥的台股、美股投資 · ",autoSync:"自動同步",hideAmounts:"隱藏金額",showAmounts:"顯示金額",syncSheet:"同步 Google Sheet",logout:"登出",currencySelectorLabel:"顯示幣別",family:"家庭合計",mom:"媽媽",brother:"哥哥",totalAssets:"目前總資產",totalCost:"總成本",unrealizedGain:"未實現損益",returnRate:"總報酬率",annualizedReturn:"年化報酬率",costHint:"依首次投入金額計算",profitHint:"目前市值－總成本",returnHint:"未實現損益 ÷ 總成本",assetAllocation:"目前資產配置",allocationByMarketDescription:"依市場分類目前市值",allocationByOwnerDescription:"依持有人分類目前市值",allocationCategoryLabel:"資產配置分類",marketMode:"市場",ownerMode:"持有人",usEquities:"美股",twEquities:"台股",growthTargets:"成長目標",growthTargetsDescription:"以總成本與目前淨值追蹤投資成長進度",assetTrend:"總資產趨勢",allPeriod:"全部期間",yearToDate:"本年至今",trendPeriodLabel:"圖表期間",changeCalendar:"帳戶變動日曆",changeCalendarDescription:"顯示每日資產與上次查詢的變動金額",accountDetails:"帳戶明細",accountMarket:"帳戶／市場",owner:"持有人",investmentDuration:"投資時間（年）",currentValue:"目前市值",allocation:"配置占比",currencyTableDescription:"金額統一以新台幣顯示"
+    pageTitle:"家庭投資總覽",loginTitle:"家庭投資總覽",loginDescription:"請使用已被授權查看私人 Google Sheet 的帳號登入。未授權帳號無法取得任何資產資料。",loginButton:"使用 Google 帳號登入",subtitle:"媽媽與哥哥的台股、美股投資 · ",autoSync:"自動同步",hideAmounts:"隱藏金額",showAmounts:"顯示金額",syncSheet:"同步 Google Sheet",logout:"登出",currencySelectorLabel:"顯示幣別",family:"家庭合計",mom:"媽媽",brother:"哥哥",totalAssets:"目前總資產",totalCost:"總成本",unrealizedGain:"未實現損益",returnRate:"總報酬率",annualizedReturn:"年化報酬率",costHint:"依首次投入金額計算",profitHint:"目前市值－總成本",returnHint:"未實現損益 ÷ 總成本",assetAllocation:"目前資產配置",allocationByMarketDescription:"依市場分類目前市值",allocationByOwnerDescription:"依持有人分類目前市值",allocationCategoryLabel:"資產配置分類",marketMode:"市場",ownerMode:"持有人",usEquities:"美股",twEquities:"台股",growthTargets:"成長目標",growthTargetsDescription:"以總成本與目前淨值追蹤投資成長進度",assetTrend:"總資產趨勢",allPeriod:"全部期間",yearToDate:"本年至今",trendPeriodLabel:"圖表期間",changeCalendar:"帳戶變動日曆",changeCalendarDescription:"顯示每日資產與上次查詢的變動金額",accountDetails:"帳戶明細",accountMarket:"帳戶／市場",owner:"持有人",investmentDuration:"投資時間（年）",currentValue:"目前市值",allocation:"配置占比",currencyTableDescription:"金額統一以新台幣顯示",benchmarkComparisonTitle:"大盤走勢比較",benchmarkComparisonDescription:"台股與美股分開顯示，期間同步上方趨勢圖",benchmarkTaiwan:"台股大盤",benchmarkTaiwanIndex:"臺灣加權指數",benchmarkUS:"美股大盤",benchmarkUSIndex:"S&P 500",benchmarkChartLabel:"走勢圖"
   },
   en:{
-    pageTitle:"Family Investment Dashboard",loginTitle:"Family Investment Dashboard",loginDescription:"Sign in with a Google account that has access to the private Google Sheet. Unauthorized accounts cannot access any asset data.",loginButton:"Sign in with Google",subtitle:"Mom's and brother's Taiwan and U.S. investments · ",autoSync:"auto sync",hideAmounts:"Hide amounts",showAmounts:"Show amounts",syncSheet:"Sync Google Sheet",logout:"Sign out",currencySelectorLabel:"Display currency",family:"Family total",mom:"Mom",brother:"Brother",totalAssets:"Total assets",totalCost:"Total cost",unrealizedGain:"Unrealized gain / loss",returnRate:"Total return",annualizedReturn:"Annualized return",costHint:"Based on initial investment",profitHint:"Current value minus total cost",returnHint:"Unrealized gain / loss divided by total cost",assetAllocation:"Asset allocation",allocationByMarketDescription:"Current value by market",allocationByOwnerDescription:"Current value by owner",allocationCategoryLabel:"Allocation category",marketMode:"Market",ownerMode:"Owner",usEquities:"U.S. equities",twEquities:"Taiwan equities",growthTargets:"Growth targets",growthTargetsDescription:"Track investment growth using total cost and current net value",assetTrend:"Total asset trend",allPeriod:"All time",yearToDate:"Year to date",trendPeriodLabel:"Chart period",changeCalendar:"Account change calendar",changeCalendarDescription:"Daily asset changes since the previous query",accountDetails:"Account details",accountMarket:"Account / market",owner:"Owner",investmentDuration:"Investment (years)",currentValue:"Current value",allocation:"Allocation",currencyTableDescription:"Amounts shown in U.S. dollars"
+    pageTitle:"Family Investment Dashboard",loginTitle:"Family Investment Dashboard",loginDescription:"Sign in with a Google account that has access to the private Google Sheet. Unauthorized accounts cannot access any asset data.",loginButton:"Sign in with Google",subtitle:"Mom's and brother's Taiwan and U.S. investments · ",autoSync:"auto sync",hideAmounts:"Hide amounts",showAmounts:"Show amounts",syncSheet:"Sync Google Sheet",logout:"Sign out",currencySelectorLabel:"Display currency",family:"Family total",mom:"Mom",brother:"Brother",totalAssets:"Total assets",totalCost:"Total cost",unrealizedGain:"Unrealized gain / loss",returnRate:"Total return",annualizedReturn:"Annualized return",costHint:"Based on initial investment",profitHint:"Current value minus total cost",returnHint:"Unrealized gain / loss divided by total cost",assetAllocation:"Asset allocation",allocationByMarketDescription:"Current value by market",allocationByOwnerDescription:"Current value by owner",allocationCategoryLabel:"Allocation category",marketMode:"Market",ownerMode:"Owner",usEquities:"U.S. equities",twEquities:"Taiwan equities",growthTargets:"Growth targets",growthTargetsDescription:"Track investment growth using total cost and current net value",assetTrend:"Total asset trend",allPeriod:"All time",yearToDate:"Year to date",trendPeriodLabel:"Chart period",changeCalendar:"Account change calendar",changeCalendarDescription:"Daily asset changes since the previous query",accountDetails:"Account details",accountMarket:"Account / market",owner:"Owner",investmentDuration:"Investment (years)",currentValue:"Current value",allocation:"Allocation",currencyTableDescription:"Amounts shown in U.S. dollars",benchmarkComparisonTitle:"Market benchmark trends",benchmarkComparisonDescription:"Taiwan and U.S. indexes are shown separately over the same period",benchmarkTaiwan:"Taiwan market",benchmarkTaiwanIndex:"TAIEX",benchmarkUS:"U.S. market",benchmarkUSIndex:"S&P 500"
   }
 };
 let model=null,view="family",syncing=false,ticker=null,tokenClient=null,accessToken=null,refreshTimer=null;
@@ -1159,6 +1200,51 @@ function renderMarketRoadmap(name,cost,currentValue,marketClass,options={}){
 function formatRateValue(value){
   return Number.isFinite(value)?`${value>=0?"+":""}${pct(value)}`:"—";
 }
+let benchmarkWidgetKey="";
+function benchmarkColorWithAlpha(hex,alpha){
+  const value=String(hex||"").trim().replace("#","");
+  if(!/^[0-9a-f]{6}$/i.test(value))return `rgba(32,52,93,${alpha})`;
+  return `rgba(${parseInt(value.slice(0,2),16)},${parseInt(value.slice(2,4),16)},${parseInt(value.slice(4,6),16)},${alpha})`;
+}
+function mountBenchmarkWidget(containerId,symbol,link,color,range,locale,theme,label){
+  const container=$(`#${containerId}`);
+  if(!container)return;
+  const safeSymbol=encodeURIComponent(symbol);
+  container.innerHTML=`<div class="tradingview-widget-container">
+    <div class="tradingview-widget-container__widget"></div>
+    <div class="tradingview-widget-copyright"><a href="${link}" rel="noopener nofollow" target="_blank">${label}</a><span class="trademark"> · TradingView</span></div>
+  </div>`;
+  const widget=container.querySelector(".tradingview-widget-container");
+  const config={
+    symbol,width:"100%",height:"100%",locale,dateRange:range,colorTheme:theme,
+    trendLineColor:color,underLineColor:benchmarkColorWithAlpha(color,.24),
+    underLineBottomColor:benchmarkColorWithAlpha(color,0),
+    isTransparent:true,autosize:true,largeChartUrl:"",chartOnly:true,noTimeScale:false
+  };
+  const script=document.createElement("script");
+  script.type="text/javascript";
+  script.src="https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
+  script.async=true;
+  script.textContent=JSON.stringify(config);
+  widget.appendChild(script);
+  container.setAttribute("aria-label",label+" "+copy("benchmarkChartLabel"));
+}
+function renderMarketBenchmarks(force=false){
+  if(!$("#benchmarkTwChart")||!$("#benchmarkUsChart"))return;
+  const period=$("#trendRange")?.value||"all";
+  const range=period==="ytd"?"YTD":"ALL";
+  const language=currentLanguage();
+  const locale=language==="en"?"en":language==="zh-Hans"?"zh_CN":"zh_TW";
+  const theme=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
+  const rootStyle=getComputedStyle(document.documentElement);
+  const usColor=rootStyle.getPropertyValue("--market-us").trim();
+  const twColor=rootStyle.getPropertyValue("--market-tw").trim();
+  const key=[range,locale,theme,usColor,twColor].join("|");
+  if(!force&&benchmarkWidgetKey===key)return;
+  benchmarkWidgetKey=key;
+  mountBenchmarkWidget("benchmarkTwChart","INDEX:TAIEX","https://www.tradingview.com/symbols/INDEX-TAIEX/",twColor,range,locale,theme,copy("benchmarkTaiwanIndex"));
+  mountBenchmarkWidget("benchmarkUsChart","SP:SPX","https://www.tradingview.com/symbols/SPX/",usColor,range,locale,theme,copy("benchmarkUSIndex"));
+}
 function render(){
   bindRoadmapInteraction();
   const accounts=filteredAccounts();
@@ -1221,6 +1307,7 @@ function render(){
     <td class="${a.rate>=0?"positive":"negative"}">${a.rate>=0?"+":""}${pct(a.rate)}</td><td>${pct(totalValue?a.value/totalValue:0)}</td></tr>`).join("");
   renderTrend();
   renderChangeCalendar();
+  renderMarketBenchmarks();
 }
 function bindTrendInteraction(){
   if(trendState.bound)return;
@@ -1435,7 +1522,7 @@ async function sync(){
   }
 }
 $("#currencySelector").onchange=event=>setDisplayCurrency(event.target.value);
-$("#trendRange").onchange=renderTrend;
+$("#trendRange").onchange=()=>{renderTrend();renderMarketBenchmarks(true)};
 $("#allocationModes").addEventListener("click",event=>{
   const button=event.target.closest("[data-allocation-mode]");
   if(!button||button.dataset.allocationMode===allocationMode)return;
