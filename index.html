@@ -202,10 +202,8 @@
     .google-login:disabled{opacity:.55;cursor:progress}
     .login-message{min-height:22px;margin:12px 0 0!important;font-size:12px!important}
     .login-help{font-size:11px!important;margin-top:18px!important}
-    .currency-selector{display:flex;align-items:center;gap:3px;padding:3px;border:1px solid var(--line);border-radius:999px;background:var(--surface2)}
-    .currency-option{appearance:none;border:0;border-radius:999px;background:transparent;color:var(--muted);padding:7px 10px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap}
-    .currency-option[aria-pressed="true"]{background:var(--surface);color:var(--text);box-shadow:0 2px 7px rgba(35,50,80,.12)}
-    .currency-option:focus-visible,.btn:focus-visible,.tab:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+    .currency-selector{appearance:none;min-width:90px;height:42px;padding:0 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface2);color:var(--text);font:inherit;font-size:12px;font-weight:800;cursor:pointer;box-shadow:var(--shadow)}
+    .currency-selector:focus-visible,.btn:focus-visible,.tab:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
     .export-modal[hidden],.export-notice[hidden]{display:none}
     .export-modal{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:22px;background:rgba(9,17,31,.62);backdrop-filter:blur(6px)}
     .export-dialog{width:min(1080px,100%);max-height:min(880px,calc(100svh - 44px));overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.28)}
@@ -216,9 +214,8 @@
 
     @media(max-width:1100px){.roadmap-chart{padding-top:86px}}
     @media(max-width:880px){.kpis,.kpis.five-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}}
-    @media(max-width:620px){.app{padding:17px 11px 42px}header{display:block;position:relative}.app header>div:first-child{padding-right:72px}.actions{justify-content:flex-start;margin-top:15px;width:100%}
-      #logoutBtn{position:absolute;right:0;top:0;padding:8px 12px}
-      .currency-selector{order:-1}.currency-option{padding:7px 9px}
+    @media(max-width:620px){.app{padding:17px 11px 42px}header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:8px}.app header h1{font-size:clamp(20px,6vw,26px);overflow-wrap:anywhere}.actions{justify-content:flex-end;gap:5px;flex-wrap:nowrap;min-width:0}
+      .currency-selector{min-width:78px;width:84px;height:38px;padding:0 7px;font-size:11px}.icon-btn{width:38px;height:38px}#logoutBtn{padding:8px 10px;white-space:nowrap}
       .export-modal{padding:12px}.export-dialog{max-height:calc(100svh - 24px);padding:17px;border-radius:18px}.export-preview-grid{grid-template-columns:1fr}.export-actions{display:grid;grid-template-columns:1fr}.export-actions .btn{width:100%}
       .kpis,.kpis.five-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
       .card{padding:15px;border-radius:17px}.number{font-size:23px}
@@ -268,16 +265,13 @@
   <header>
     <div><h1 data-i18n="pageTitle">家庭投資總覽</h1></div>
     <div class="actions">
-      <div class="currency-selector" role="group" aria-label="Display currency" data-i18n-aria-label="currencySelectorLabel">
-        <button class="currency-option" type="button" data-currency="TWD" aria-pressed="true">TWD</button>
-        <button class="currency-option" type="button" data-currency="USD" aria-pressed="false">USD</button>
-        <button class="currency-option" type="button" data-currency="CNY" aria-pressed="false">RMB</button>
-      </div>
+      <select class="currency-selector" id="currencySelector" aria-label="顯示幣別" data-i18n-aria-label="currencySelectorLabel">
+        <option value="TWD">TWD</option><option value="USD">USD</option><option value="CNY">RMB</option>
+      </select>
       <button class="btn icon-btn" id="privacyBtn" type="button" aria-label="隱藏金額" title="隱藏金額">
         <svg class="eye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg>
         <svg class="eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 6.2A10.7 10.7 0 0 1 12 6c6.1 0 9.5 6 9.5 6a16 16 0 0 1-3.1 3.8M6.2 6.3C3.8 7.9 2.5 12 2.5 12s3.4 6 9.5 6c1.2 0 2.3-.2 3.3-.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
       </button>
-      <button class="btn" id="syncBtn" type="button" data-i18n="syncSheet">同步 Google Sheet</button>
       <button class="btn" id="logoutBtn" type="button" data-i18n="logout">登出</button>
     </div>
   </header>
@@ -471,7 +465,7 @@ function syncPrivacyButton(){
 function setDisplayCurrency(currency){
   if(!CURRENCY_OPTIONS[currency])return;
   displayCurrency=currency;
-  document.querySelectorAll("[data-currency]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.currency===currency)));
+  $("#currencySelector").value=currency;
   applyLanguage();
   if(model)render();
 }
@@ -696,7 +690,6 @@ function setStatus(kind,text){
   $("#dot").className="dot "+(kind==="loading"?"loading":kind==="ok"?"ok":"error");
   $("#status").textContent=text;
   $("#statusMeta").textContent=new Date().toLocaleTimeString(currentCurrencyOption().locale,{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false});
-  $("#syncBtn").disabled=kind==="loading";
 }
 function updateLoginButton(){
   $("#loginBtn").textContent=loginNeedsAccountSelection?"選擇 Google 帳號":loginAttemptedOnce?"繼續查看投資總覽":"使用 Google 帳號登入";
@@ -1386,10 +1379,10 @@ async function sync(){
       setTimeout(()=>showLogin("登入已過期，請再次按下按鈕繼續。",true),700);
     }
   }finally{
-    clearInterval(ticker);ticker=null;syncing=false;$("#syncBtn").disabled=false;
+    clearInterval(ticker);ticker=null;syncing=false;
   }
 }
-$("#syncBtn").onclick=sync;
+$("#currencySelector").onchange=event=>setDisplayCurrency(event.target.value);
 $("#trendRange").onchange=renderTrend;
 $("#allocationModes").addEventListener("click",event=>{
   const button=event.target.closest("[data-allocation-mode]");
@@ -1408,9 +1401,6 @@ $("#rednoteExportPreviews").addEventListener("click",event=>{
 });
 $("#rednoteDownloadAll").onclick=()=>rednoteExportImages.forEach((image,index)=>setTimeout(()=>downloadRednoteImage(image),index*180));
 document.addEventListener("keydown",event=>{if(event.key==="Escape"&&!$("#rednoteExportModal").hidden)closeRednoteExport()});
-document.querySelectorAll("[data-currency]").forEach(button=>{
-  button.onclick=()=>setDisplayCurrency(button.dataset.currency);
-});
 $("#tabs").querySelectorAll(".tab").forEach(b=>b.onclick=()=>{activeRoadmapTarget=null;calendarMonth=null;view=b.dataset.view;$("#tabs").querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===b));render()});
 $("#calendarPrev").onclick=()=>{if(!calendarMonth)return;calendarMonth=shiftCalendarMonth(calendarMonth,-1);renderChangeCalendar()};
 $("#calendarNext").onclick=()=>{if(!calendarMonth)return;calendarMonth=shiftCalendarMonth(calendarMonth,1);renderChangeCalendar()};
