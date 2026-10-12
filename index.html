@@ -628,10 +628,10 @@ function rednoteYears(startDate,endDate){
 function drawSnapshotHeroPerformance(context,{annualized,totalReturn}){
   fillRoundRect(context,72,354,936,300,28,"#20345d");
   drawSnapshotText(context,"当前年化回报",112,413,23,"#dbe3f1",700);
-  drawSnapshotText(context,rednoteRate(annualized),112,526,82,annualized>=0?"#ffffff":"#ffb9b9",850);
+  drawSnapshotText(context,rednoteRate(annualized),112,526,82,Number.isFinite(annualized)?"#ffffff":"#dbe3f1",850);
   context.fillStyle="#dca23b";context.fillRect(112,568,856,3);
   drawSnapshotText(context,"总回报",112,615,20,"#dbe3f1",650);
-  drawSnapshotText(context,rednoteRate(totalReturn),968,615,31,totalReturn>=0?"#ffffff":"#ffb9b9",850,"right");
+  drawSnapshotText(context,rednoteRate(totalReturn),968,615,31,Number.isFinite(totalReturn)?"#ffffff":"#dbe3f1",850,"right");
 }
 function drawSnapshotSummaryMetric(context,{x,y,width,label,value,accent="#20345d"}){
   fillRoundRect(context,x,y,width,168,23,"#f5f6f5");
@@ -657,9 +657,9 @@ function drawSnapshotTrendChart(context,history){
 }
 async function getRednoteBenchmarkResults(history){
   const flows=model?.cashFlows||[];
-  const scopeFlows=flows.filter(flow=>flow.owner==="mom"||flow.owner==="brother");
+  const scopeFlows=flows.filter(flow=>Number.isFinite(Number(flow.delta))&&flow.date);
   if(!scopeFlows.length||history.length<2)return[];
-  const firstFlow=scopeFlows[0].date,startDate=firstFlow<history[0].date?firstFlow:history[0].date,endDate=history.at(-1).date;
+  const firstFlow=scopeFlows.map(flow=>flow.date).sort()[0],startDate=firstFlow<history[0].date?firstFlow:history[0].date,endDate=history.at(-1).date;
   try{
     const [taiwan,us,fx]=await Promise.all([
       fetchBenchmarkSeries("TaiwanStockPrice","TAIEX",startDate,endDate,"close"),
@@ -755,7 +755,7 @@ async function buildRednoteSnapshots(){
   drawSnapshotText(snapshotThree.context,formatRednoteMoney(cost),260,964,19,"#171d2a",750);
   drawSnapshotText(snapshotThree.context,"当前净值",536,964,16,"#707b8a",600);
   drawSnapshotText(snapshotThree.context,formatRednoteMoney(total),692,964,19,"#20345d",800);
-  const growth=Math.max(0,Math.min(total/cost,1));
+  const growth=cost>0?Math.max(0,Math.min(total/cost,1)):0;
   fillRoundRect(snapshotThree.context,104,1000,872,18,9,"#e1e5e8");
   fillRoundRect(snapshotThree.context,104,1000,872*growth,18,9,"#16816c");
   const resultText=verdict.total?verdict.summary:"持续记录投入，逐步积累长期成果。";
@@ -776,7 +776,7 @@ function revokeRednoteImages(){rednoteExportImages.forEach(image=>URL.revokeObje
 function downloadRednoteImage(image){const link=document.createElement("a");link.href=image.url;link.download=image.filename;document.body.appendChild(link);link.click();link.remove()}
 function closeRednoteExport(){ $("#rednoteExportModal").hidden=true;revokeRednoteImages();$("#rednoteExportPreviews").innerHTML=""; }
 function showRednoteNotice(message){const notice=$("#rednoteExportNotice");notice.textContent=message;notice.hidden=false;clearTimeout(notice._timeout);notice._timeout=setTimeout(()=>notice.hidden=true,4200)}
-async function openRednoteExport(){
+async async function openRednoteExport(){
   if(!model?.accounts?.length){showRednoteNotice(rednoteText("請先同步 Google Sheet 後再生成小紅書圖片。","请先同步 Google Sheet 后再生成小红书图片。"));return}
   if($("#app").classList.contains("masked")){showRednoteNotice(rednoteText("目前已開啟金額隱藏。請先顯示金額再生成小紅書圖片。","当前已开启金额隐藏。请先显示金额再生成小红书图片。"));return}
   if(rednoteExportBusy)return;
