@@ -175,8 +175,8 @@
     .trend-comparison-result.ahead{color:var(--positive)}
     .trend-comparison-result.behind{color:var(--negative)}
     .trend-comparison-empty{color:var(--muted);font-size:10px}
-    .chart{height:250px}.chart svg{width:100%;height:100%;display:block;overflow:visible;touch-action:pan-y}
-    .trend-legend{display:flex;flex-wrap:wrap;gap:9px 18px;align-items:center;margin-top:12px}
+    .chart{height:300px}.chart svg{width:100%;height:100%;display:block;overflow:visible;touch-action:pan-y}
+    .trend-legend{position:absolute;top:5px;right:8px;z-index:2;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px 16px;align-items:center;margin:0;padding:7px 10px;border:1px solid var(--line);border-radius:12px;background:color-mix(in srgb,var(--surface) 94%,transparent);box-shadow:0 3px 10px rgba(32,52,93,.08)}
     .trend-legend-item{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;font-weight:750}
     .trend-legend-line{display:inline-block;width:20px;border-top:3px solid var(--brand);border-radius:4px}
     .trend-legend-line.tw{border-color:var(--market-tw)}
@@ -387,10 +387,9 @@
         <div class="trend-readout-date" id="trendReadoutDate">—</div>
         <div class="trend-comparison" id="trendComparison" hidden aria-live="polite"></div>
       </div>
-      <div class="chart"><svg id="trend" viewBox="0 0 700 250" aria-label="總資產趨勢圖"></svg>
+      <div class="chart"><div class="trend-legend" id="trendLegend" aria-label="折線圖圖例"></div><svg id="trend" viewBox="0 0 700 300" aria-label="總資產趨勢圖"></svg>
         <div class="cashflow-tooltip" id="cashflowTooltip" role="status" hidden><strong class="cashflow-tooltip-date"></strong><div class="cashflow-tooltip-items"></div></div>
       </div>
-      <div class="trend-legend" id="trendLegend" aria-label="折線圖圖例"></div>
       <div class="benchmark-data-note" id="benchmarkDataStatus" aria-live="polite"></div>
     </section>
 
@@ -858,7 +857,7 @@ function showCashFlowTooltip(index,pinned){
   if(!group||!position||!tooltip||!svg)return;
   const chart=svg.parentElement,chartRect=chart.getBoundingClientRect(),svgRect=svg.getBoundingClientRect();
   const rawX=(svgRect.left-chartRect.left)+(position.x/700)*svgRect.width;
-  const rawY=(svgRect.top-chartRect.top)+(position.y/250)*svgRect.height;
+  const rawY=(svgRect.top-chartRect.top)+(position.y/300)*svgRect.height;
   const left=Math.max(112,Math.min(chart.clientWidth-112,rawX));
   const top=Math.max(42,Math.min(chart.clientHeight-12,rawY-9));
   tooltip.style.left=left+"px";tooltip.style.top=top+"px";
@@ -1700,7 +1699,7 @@ function renderTrend(){
   const overlay=benchmarkOverlayState.key===requestKey&&benchmarkOverlayState.status==="ready"?benchmarkOverlayState.series:[];
   trendState.benchmarkSeries=overlay;
   const overlayValues=overlay.flatMap(series=>series.points.filter(Boolean).map(point=>point.value));
-  const W=700,H=250,p={l:58,r:24,t:12,b:36},vals=h.map(x=>x[key]),allValues=vals.concat(overlayValues),mn=Math.min(...allValues)*.95,mx=Math.max(...allValues)*1.03;
+  const W=700,H=300,p={l:58,r:24,t:60,b:36},vals=h.map(x=>x[key]),allValues=vals.concat(overlayValues),mn=Math.min(...allValues)*.95,mx=Math.max(...allValues)*1.03;
   const X=i=>p.l+(W-p.l-p.r)*(i/(h.length-1)),Y=v=>p.t+(H-p.t-p.b)*(1-(v-mn)/(mx-mn||1));
   let out='<defs><linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--brand)" stop-opacity=".24"/><stop offset="100%" stop-color="var(--brand)" stop-opacity="0"/></linearGradient></defs>';
   for(let i=0;i<=4;i++){const v=mn+(mx-mn)*i/4,y=Y(v);out+=`<line class="gridline" x1="${p.l}" y1="${y}" x2="${W-p.r}" y2="${y}"/><text class="axis" x="${p.l-7}" y="${y+4}" text-anchor="end">${short(v)}</text>`}
