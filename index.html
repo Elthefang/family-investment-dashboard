@@ -1218,7 +1218,7 @@ async function fetchBenchmarkSeries(dataset,dataId,startDate,endDate,valueField)
   try{return await request}
   catch(error){benchmarkDataCache.delete(cacheKey);throw error}
 }
-function benchmarkHistoryKey(history,key){return key+"|"+history.map(item=>item.date).join(",")}
+function benchmarkHistoryKey(history,key){const scope=view==="mom"?"mom":view==="brother"?"brother":"family";const flowKey=(model?.cashFlows||[]).filter(flow=>scope==="family"||flow.owner===scope).map(flow=>flow.date+":"+flow.delta+":"+flow.owner).join(",");return key+"|"+history.map(item=>item.date).join(",")+"|"+flowKey}
 function marketCloseOnOrBefore(records,date){
   let low=0,high=records.length-1,best=-1;
   while(low<=high){const middle=(low+high)>>1;if(records[middle].date<=date){best=middle;low=middle+1}else high=middle-1}
