@@ -14,14 +14,14 @@
     :root{
       --bg:#f4f5f2;--surface:#fff;--surface2:#f5f6f6;--text:#171d2a;--muted:#707b8a;
       --line:#e1e5e8;--brand:#20345d;--gold:#e2aa43;--beak:#e25259;
-      --positive:#16816c;--negative:var(--beak);--market-us:#20345d;--market-tw:var(--gold);
+      --positive:#16816c;--negative:var(--beak);--market-us:#657da9;--market-tw:var(--gold);
       --mom1:#1e2e50;--mom2:#75839a;--bro1:var(--gold);--bro2:#e25259;
       --shadow:0 12px 34px rgba(35,50,80,.08);--radius:20px;
     }
     @media(prefers-color-scheme:dark){
       :root{--bg:#0b1018;--surface:#131b28;--surface2:#1a2636;--text:#f4f5f4;--muted:#a4aebb;
         --line:#303d4f;--brand:#a9bee6;--gold:#f0bf60;--beak:#ff777c;
-        --positive:#55c2a2;--negative:var(--beak);--market-us:#a9bee6;--market-tw:var(--gold);
+        --positive:#55c2a2;--negative:var(--beak);--market-us:#7892c0;--market-tw:var(--gold);
         --mom1:#a9bee6;--mom2:#8292aa;--bro1:var(--gold);--bro2:#ff777c;
         --shadow:0 14px 35px rgba(0,0,0,.25)}
     }
@@ -166,22 +166,13 @@
     .trend-readout-value{font-size:clamp(26px,4vw,38px);line-height:1.05;font-weight:850;letter-spacing:-.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .trend-readout-date{margin-top:6px;color:var(--muted);font-size:13px}
     .chart{height:250px}.chart svg{width:100%;height:100%;display:block;overflow:visible;touch-action:pan-y}
-    .benchmark-comparison{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
-    .benchmark-heading{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:12px}
-    .benchmark-period,.benchmark-data-note{font-size:11px;color:var(--muted)}
-    .benchmark-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-    .benchmark-panel{min-width:0;padding:12px 12px 8px;border:1px solid var(--line);border-radius:15px;background:var(--surface2)}
-    .benchmark-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 3px 2px}
-    .benchmark-name{font-size:13px;font-weight:850;color:var(--text)}
-    .benchmark-symbol{margin-top:2px;color:var(--muted);font-size:10px}
-    .benchmark-return{font-size:18px;line-height:1.1;font-variant-numeric:tabular-nums}
-    .benchmark-tw .benchmark-return{color:var(--market-tw)}
-    .benchmark-us .benchmark-return{color:var(--market-us)}
-    .benchmark-chart{display:block;width:100%;height:138px;overflow:visible}
-    .benchmark-chart .benchmark-gridline{stroke:var(--line);stroke-width:1}
-    .benchmark-chart .benchmark-axis{fill:var(--muted);font-size:10px}
-    .benchmark-data-note{margin-top:9px}
-    @media(max-width:620px){.benchmark-grid{grid-template-columns:1fr}.benchmark-chart{height:126px}.benchmark-heading{align-items:flex-start;flex-direction:column;gap:4px}}
+    .trend-legend{display:flex;flex-wrap:wrap;gap:9px 18px;align-items:center;margin-top:12px}
+    .trend-legend-item{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;font-weight:750}
+    .trend-legend-line{display:inline-block;width:20px;border-top:3px solid var(--brand);border-radius:4px}
+    .trend-legend-line.tw{border-color:var(--market-tw)}
+    .trend-legend-line.us{border-color:var(--market-us);border-top-style:dashed}
+    .trend-legend-item strong{font-variant-numeric:tabular-nums;color:var(--text)}
+    .benchmark-data-note{min-height:14px;margin-top:8px;color:var(--muted);font-size:10px}
     
     .gridline{stroke:var(--line);stroke-width:1}
     .trend{fill:none;stroke:var(--brand);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
@@ -370,32 +361,8 @@
         <div class="trend-readout-date" id="trendReadoutDate">—</div>
       </div>
       <div class="chart"><svg id="trend" viewBox="0 0 700 250" aria-label="總資產趨勢圖"></svg></div>
-      <section class="benchmark-comparison" id="benchmarkComparison" aria-labelledby="benchmarkComparisonTitle">
-        <div class="benchmark-heading">
-          <div>
-            <div class="title" id="benchmarkComparisonTitle" data-i18n="benchmarkComparisonTitle">大盤走勢比較</div>
-            <div class="desc" data-i18n="benchmarkComparisonDescription">同資產區間的台股與美股每日報酬</div>
-          </div>
-          <div class="benchmark-period" id="benchmarkPeriod">—</div>
-        </div>
-        <div class="benchmark-grid">
-          <article class="benchmark-panel benchmark-tw">
-            <div class="benchmark-panel-head">
-              <div><div class="benchmark-name" data-i18n="benchmarkTaiwan">台股大盤</div><div class="benchmark-symbol" data-i18n="benchmarkTaiwanIndex">臺灣加權指數</div></div>
-              <strong class="benchmark-return" id="benchmarkTwReturn">—</strong>
-            </div>
-            <svg class="benchmark-chart" id="benchmarkTwChart" viewBox="0 0 700 160" role="img" aria-label="台灣加權指數區間報酬走勢"></svg>
-          </article>
-          <article class="benchmark-panel benchmark-us">
-            <div class="benchmark-panel-head">
-              <div><div class="benchmark-name" data-i18n="benchmarkUS">美股大盤</div><div class="benchmark-symbol" data-i18n="benchmarkUSIndex">S&amp;P 500</div></div>
-              <strong class="benchmark-return" id="benchmarkUsReturn">—</strong>
-            </div>
-            <svg class="benchmark-chart" id="benchmarkUsChart" viewBox="0 0 700 160" role="img" aria-label="S&amp;P 500 index return over the selected period"></svg>
-          </article>
-        </div>
-        <div class="benchmark-data-note" id="benchmarkDataStatus" aria-live="polite"></div>
-      </section>
+      <div class="trend-legend" id="trendLegend" aria-label="折線圖圖例"></div>
+      <div class="benchmark-data-note" id="benchmarkDataStatus" aria-live="polite"></div>
     </section>
 
     <section class="card calendar-card" id="changeCalendarSection" aria-labelledby="changeCalendarTitle">
@@ -461,10 +428,10 @@ const CURRENCY_OPTIONS=Object.freeze({
 });
 const UI_COPY={
   "zh-Hant":{
-    pageTitle:"家庭投資總覽",loginTitle:"家庭投資總覽",loginDescription:"請使用已被授權查看私人 Google Sheet 的帳號登入。未授權帳號無法取得任何資產資料。",loginButton:"使用 Google 帳號登入",subtitle:"媽媽與哥哥的台股、美股投資 · ",autoSync:"自動同步",hideAmounts:"隱藏金額",showAmounts:"顯示金額",syncSheet:"同步 Google Sheet",logout:"登出",currencySelectorLabel:"顯示幣別",family:"家庭合計",mom:"媽媽",brother:"哥哥",totalAssets:"目前總資產",totalCost:"總成本",unrealizedGain:"未實現損益",returnRate:"總報酬率",annualizedReturn:"年化報酬率",costHint:"依首次投入金額計算",profitHint:"目前市值－總成本",returnHint:"未實現損益 ÷ 總成本",assetAllocation:"目前資產配置",allocationByMarketDescription:"依市場分類目前市值",allocationByOwnerDescription:"依持有人分類目前市值",allocationCategoryLabel:"資產配置分類",marketMode:"市場",ownerMode:"持有人",usEquities:"美股",twEquities:"台股",growthTargets:"成長目標",growthTargetsDescription:"以總成本與目前淨值追蹤投資成長進度",assetTrend:"總資產趨勢",allPeriod:"全部期間",yearToDate:"本年至今",trendPeriodLabel:"圖表期間",changeCalendar:"帳戶變動日曆",changeCalendarDescription:"顯示每日資產與上次查詢的變動金額",accountDetails:"帳戶明細",accountMarket:"帳戶／市場",owner:"持有人",investmentDuration:"投資時間（年）",currentValue:"目前市值",allocation:"配置占比",currencyTableDescription:"金額統一以新台幣顯示",benchmarkComparisonTitle:"大盤走勢比較",benchmarkComparisonDescription:"依總資產資料起訖日對齊台股與美股每日報酬",benchmarkTaiwan:"台股大盤",benchmarkTaiwanIndex:"臺灣加權指數",benchmarkUS:"美股大盤",benchmarkUSIndex:"S&P 500",benchmarkChartLabel:"走勢圖"
+    pageTitle:"家庭投資總覽",loginTitle:"家庭投資總覽",loginDescription:"請使用已被授權查看私人 Google Sheet 的帳號登入。未授權帳號無法取得任何資產資料。",loginButton:"使用 Google 帳號登入",subtitle:"媽媽與哥哥的台股、美股投資 · ",autoSync:"自動同步",hideAmounts:"隱藏金額",showAmounts:"顯示金額",syncSheet:"同步 Google Sheet",logout:"登出",currencySelectorLabel:"顯示幣別",family:"家庭合計",mom:"媽媽",brother:"哥哥",totalAssets:"目前總資產",totalCost:"總成本",unrealizedGain:"未實現損益",returnRate:"總報酬率",annualizedReturn:"年化報酬率",costHint:"依首次投入金額計算",profitHint:"目前市值－總成本",returnHint:"未實現損益 ÷ 總成本",assetAllocation:"目前資產配置",allocationByMarketDescription:"依市場分類目前市值",allocationByOwnerDescription:"依持有人分類目前市值",allocationCategoryLabel:"資產配置分類",marketMode:"市場",ownerMode:"持有人",usEquities:"美股",twEquities:"台股",growthTargets:"成長目標",growthTargetsDescription:"以總成本與目前淨值追蹤投資成長進度",assetTrend:"總資產趨勢",allPeriod:"全部期間",yearToDate:"本年至今",trendPeriodLabel:"圖表期間",changeCalendar:"帳戶變動日曆",changeCalendarDescription:"顯示每日資產與上次查詢的變動金額",accountDetails:"帳戶明細",accountMarket:"帳戶／市場",owner:"持有人",investmentDuration:"投資時間（年）",currentValue:"目前市值",allocation:"配置占比",currencyTableDescription:"金額統一以新台幣顯示",benchmarkComparisonTitle:"大盤走勢比較",benchmarkComparisonDescription:"依企鵝資產快照日期對齊大盤，並換算為相同起始金額",benchmarkPortfolio:"企鵝（資產快照）",benchmarkTaiwan:"台股大盤",benchmarkUS:"美股大盤"
   },
   en:{
-    pageTitle:"Family Investment Dashboard",loginTitle:"Family Investment Dashboard",loginDescription:"Sign in with a Google account that has access to the private Google Sheet. Unauthorized accounts cannot access any asset data.",loginButton:"Sign in with Google",subtitle:"Mom's and brother's Taiwan and U.S. investments · ",autoSync:"auto sync",hideAmounts:"Hide amounts",showAmounts:"Show amounts",syncSheet:"Sync Google Sheet",logout:"Sign out",currencySelectorLabel:"Display currency",family:"Family total",mom:"Mom",brother:"Brother",totalAssets:"Total assets",totalCost:"Total cost",unrealizedGain:"Unrealized gain / loss",returnRate:"Total return",annualizedReturn:"Annualized return",costHint:"Based on initial investment",profitHint:"Current value minus total cost",returnHint:"Unrealized gain / loss divided by total cost",assetAllocation:"Asset allocation",allocationByMarketDescription:"Current value by market",allocationByOwnerDescription:"Current value by owner",allocationCategoryLabel:"Allocation category",marketMode:"Market",ownerMode:"Owner",usEquities:"U.S. equities",twEquities:"Taiwan equities",growthTargets:"Growth targets",growthTargetsDescription:"Track investment growth using total cost and current net value",assetTrend:"Total asset trend",allPeriod:"All time",yearToDate:"Year to date",trendPeriodLabel:"Chart period",changeCalendar:"Account change calendar",changeCalendarDescription:"Daily asset changes since the previous query",accountDetails:"Account details",accountMarket:"Account / market",owner:"Owner",investmentDuration:"Investment (years)",currentValue:"Current value",allocation:"Allocation",currencyTableDescription:"Amounts shown in U.S. dollars",benchmarkComparisonTitle:"Market benchmark trends",benchmarkComparisonDescription:"Taiwan and U.S. index returns over the same asset date range",benchmarkTaiwan:"Taiwan market",benchmarkTaiwanIndex:"TAIEX",benchmarkUS:"U.S. market",benchmarkUSIndex:"S&P 500"
+    pageTitle:"Family Investment Dashboard",loginTitle:"Family Investment Dashboard",loginDescription:"Sign in with a Google account that has access to the private Google Sheet. Unauthorized accounts cannot access any asset data.",loginButton:"Sign in with Google",subtitle:"Mom's and brother's Taiwan and U.S. investments · ",autoSync:"auto sync",hideAmounts:"Hide amounts",showAmounts:"Show amounts",syncSheet:"Sync Google Sheet",logout:"Sign out",currencySelectorLabel:"Display currency",family:"Family total",mom:"Mom",brother:"Brother",totalAssets:"Total assets",totalCost:"Total cost",unrealizedGain:"Unrealized gain / loss",returnRate:"Total return",annualizedReturn:"Annualized return",costHint:"Based on initial investment",profitHint:"Current value minus total cost",returnHint:"Unrealized gain / loss divided by total cost",assetAllocation:"Asset allocation",allocationByMarketDescription:"Current value by market",allocationByOwnerDescription:"Current value by owner",allocationCategoryLabel:"Allocation category",marketMode:"Market",ownerMode:"Owner",usEquities:"U.S. equities",twEquities:"Taiwan equities",growthTargets:"Growth targets",growthTargetsDescription:"Track investment growth using total cost and current net value",assetTrend:"Total asset trend",allPeriod:"All time",yearToDate:"Year to date",trendPeriodLabel:"Chart period",changeCalendar:"Account change calendar",changeCalendarDescription:"Daily asset changes since the previous query",accountDetails:"Account details",accountMarket:"Account / market",owner:"Owner",investmentDuration:"Investment (years)",currentValue:"Current value",allocation:"Allocation",currencyTableDescription:"Amounts shown in U.S. dollars",benchmarkComparisonTitle:"Market benchmark trends",benchmarkComparisonDescription:"Market lines aligned to Penguin asset snapshot dates and scaled to the same starting amount",benchmarkPortfolio:"Penguin portfolio",benchmarkTaiwan:"Taiwan market",benchmarkUS:"U.S. market"
   }
 };
 let model=null,view="family",syncing=false,ticker=null,tokenClient=null,accessToken=null,refreshTimer=null;
@@ -1219,15 +1186,11 @@ function renderMarketRoadmap(name,cost,currentValue,marketClass,options={}){
   </section>`;
 }
 function formatRateValue(value){
-  return Number.isFinite(value)?`${value>=0?"+":""}${pct(value)}`:"—";
+  return Number.isFinite(value)?(value>=0?"+":"")+pct(value):"—";
 }
 let benchmarkRequestKey="",benchmarkRequestId=0;
 const benchmarkDataCache=new Map();
-function benchmarkColorWithAlpha(hex,alpha){
-  const value=String(hex||"").trim().replace("#","");
-  if(!/^[0-9a-f]{6}$/i.test(value))return `rgba(32,52,93,${alpha})`;
-  return `rgba(${parseInt(value.slice(0,2),16)},${parseInt(value.slice(2,4),16)},${parseInt(value.slice(4,6),16)},${alpha})`;
-}
+let benchmarkOverlayState={key:"",status:"idle",series:[],error:""};
 function shiftDate(dateString,days){
   const date=new Date(dateString+"T00:00:00Z");
   date.setUTCDate(date.getUTCDate()+days);
@@ -1249,82 +1212,63 @@ async function fetchBenchmarkSeries(dataset,dataId,startDate,endDate,valueField)
   })();
   benchmarkDataCache.set(cacheKey,request);
   try{return await request}
-  catch(error){
-    benchmarkDataCache.delete(cacheKey);
-    throw error;
-  }
+  catch(error){benchmarkDataCache.delete(cacheKey);throw error}
 }
-function renderBenchmarkLine(svg,records,startDate,endDate,color){
-  if(!svg)return null;
-  const W=700,H=160,p={l:52,r:18,t:12,b:25};
-  const prior=records.filter(item=>item.date<=startDate).at(-1);
-  const visible=records.filter(item=>item.date>=startDate&&item.date<=endDate);
-  const baseline=prior||visible[0];
-  if(!baseline||visible.length<2){
-    svg.innerHTML='<text class="benchmark-axis" x="350" y="82" text-anchor="middle">此區間的大盤資料不足</text>';
-    return null;
-  }
-  const points=[{date:startDate,value:baseline.value},...visible.filter(item=>item.date>startDate)];
-  if(points.length<2){
-    svg.innerHTML='<text class="benchmark-axis" x="350" y="82" text-anchor="middle">此區間的大盤資料不足</text>';
-    return null;
-  }
-  const values=points.map(item=>item.value/baseline.value-1);
-  let min=Math.min(0,...values),max=Math.max(0,...values);
-  const padding=Math.max((max-min)*.16,.004);
-  min-=padding;max+=padding;
-  const startTime=Date.parse(startDate+"T00:00:00Z"),endTime=Date.parse(endDate+"T00:00:00Z");
-  const X=date=>p.l+(W-p.l-p.r)*(endTime===startTime?.5:(Date.parse(date+"T00:00:00Z")-startTime)/(endTime-startTime));
-  const Y=value=>p.t+(H-p.t-p.b)*(1-(value-min)/(max-min||1));
-  let out="";
-  for(let i=0;i<=2;i++){
-    const value=min+(max-min)*i/2,y=Y(value);
-    out+=`<line class="benchmark-gridline" x1="${p.l}" y1="${y}" x2="${W-p.r}" y2="${y}"/><text class="benchmark-axis" x="${p.l-6}" y="${y+3}" text-anchor="end">${(value*100).toFixed(1)}%</text>`;
-  }
-  const plotted=points.map((item,index)=>({x:X(item.date),y:Y(values[index]),date:item.date}));
-  const path=plotted.map((point,index)=>(index?"L":"M")+point.x+","+point.y).join(" ");
-  const zero=Y(0),area=path+` L ${plotted.at(-1).x},${zero} L ${plotted[0].x},${zero} Z`;
-  out+=`<path d="${area}" fill="${benchmarkColorWithAlpha(color,.12)}"/><path d="${path}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
-  out+=`<text class="benchmark-axis" x="${p.l}" y="${H-5}" text-anchor="start">${startDate.slice(5).replace("-","/")}</text><text class="benchmark-axis" x="${W-p.r}" y="${H-5}" text-anchor="end">${endDate.slice(5).replace("-","/")}</text>`;
-  svg.innerHTML=out;
-  return values.at(-1);
+function benchmarkHistoryKey(history,key){return key+"|"+history.map(item=>item.date).join(",")}
+function alignBenchmarkToSnapshots(records,history,key,id,color){
+  let cursor=0,last=null;
+  const quotes=history.map(snapshot=>{
+    while(cursor<records.length&&records[cursor].date<=snapshot.date){last=records[cursor];cursor++}
+    return last;
+  });
+  const baseline=quotes[0];
+  if(!baseline)return null;
+  const firstAmount=history[0][key];
+  const points=quotes.map((quote,index)=>quote?{date:history[index].date,value:firstAmount*quote.value/baseline.value}:null);
+  const valid=points.filter(Boolean);
+  if(valid.length<2)return null;
+  return {id:id,color:color,points:points,rate:valid.at(-1).value/firstAmount-1};
 }
-function renderBenchmarkComparison(history){
-  const section=$("#benchmarkComparison"),status=$("#benchmarkDataStatus");
-  if(!section||!status)return;
-  const startDate=history[0]?.date,endDate=history.at(-1)?.date;
-  if(!startDate||!endDate){status.textContent="";return}
-  const requestKey=[startDate,endDate].join("|");
-  if(benchmarkRequestKey===requestKey)return;
+function requestBenchmarkOverlay(history,key,requestKey){
+  if(benchmarkOverlayState.key===requestKey&&benchmarkOverlayState.status!=="error")return;
+  benchmarkOverlayState={key:requestKey,status:"loading",series:[],error:""};
   benchmarkRequestKey=requestKey;
   const requestId=++benchmarkRequestId;
-  $("#benchmarkPeriod").textContent=startDate+" — "+endDate;
-  status.textContent=currentLanguage()==="en"?"Loading free daily closing data…":"正在載入免費每日收盤資料…";
-  const rootStyle=getComputedStyle(document.documentElement);
-  const twColor=rootStyle.getPropertyValue("--market-tw").trim();
-  const usColor=rootStyle.getPropertyValue("--market-us").trim();
+  const status=$("#benchmarkDataStatus");
+  if(status)status.textContent=currentLanguage()==="en"?"Loading daily market closes…":"正在載入大盤每日收盤資料…";
   Promise.all([
-    fetchBenchmarkSeries("TaiwanStockPrice","TAIEX",startDate,endDate,"close"),
-    fetchBenchmarkSeries("USStockPrice","^GSPC",startDate,endDate,"Close")
+    fetchBenchmarkSeries("TaiwanStockPrice","TAIEX",history[0].date,history.at(-1).date,"close"),
+    fetchBenchmarkSeries("USStockPrice","^GSPC",history[0].date,history.at(-1).date,"Close")
   ]).then(([taiwan,us])=>{
     if(requestId!==benchmarkRequestId)return;
-    const twReturn=renderBenchmarkLine($("#benchmarkTwChart"),taiwan,startDate,endDate,twColor);
-    const usReturn=renderBenchmarkLine($("#benchmarkUsChart"),us,startDate,endDate,usColor);
-    $("#benchmarkTwReturn").textContent=Number.isFinite(twReturn)?(twReturn>=0?"+":"")+pct(twReturn):"—";
-    $("#benchmarkUsReturn").textContent=Number.isFinite(usReturn)?(usReturn>=0?"+":"")+pct(usReturn):"—";
-    const language=currentLanguage();
-    status.textContent=language==="en"?"FinMind · daily closes · delayed data":"資料來源：FinMind · 每日收盤 · 非即時";
+    const rootStyle=getComputedStyle(document.documentElement);
+    const series=[
+      alignBenchmarkToSnapshots(taiwan,history,key,"tw",rootStyle.getPropertyValue("--market-tw").trim()),
+      alignBenchmarkToSnapshots(us,history,key,"us",rootStyle.getPropertyValue("--market-us").trim())
+    ].filter(Boolean);
+    if(!series.length)throw new Error("No market observations matched the snapshot dates");
+    benchmarkOverlayState={key:requestKey,status:"ready",series:series,error:""};
+    renderTrend();
   }).catch(error=>{
     if(requestId!==benchmarkRequestId)return;
     console.warn("Market comparison data unavailable",error);
-    $("#benchmarkTwReturn").textContent="—";
-    $("#benchmarkUsReturn").textContent="—";
-    $("#benchmarkTwChart").innerHTML='<text class="benchmark-axis" x="350" y="82" text-anchor="middle">大盤資料暫時無法載入</text>';
-    $("#benchmarkUsChart").innerHTML='<text class="benchmark-axis" x="350" y="82" text-anchor="middle">大盤資料暫時無法載入</text>';
-    status.textContent=currentLanguage()==="en"?"Free market data could not be loaded. Please try again later.":"免費大盤資料暫時無法載入，請稍後重試。";
-    benchmarkRequestKey="";
+    benchmarkOverlayState={key:requestKey,status:"error",series:[],error:String(error?.message||error)};
+    if($("#benchmarkDataStatus"))$("#benchmarkDataStatus").textContent=currentLanguage()==="en"?"Free daily market data could not be loaded.":"大盤資料暫時無法載入，稍後會再嘗試。";
   });
 }
+function renderTrendLegend(series,requestKey){
+  const legend=$("#trendLegend"),status=$("#benchmarkDataStatus");
+  if(!legend||!status)return;
+  const visible=benchmarkOverlayState.key===requestKey&&benchmarkOverlayState.status==="ready"?series:[];
+  const tw=visible.find(item=>item.id==="tw"),us=visible.find(item=>item.id==="us");
+  legend.innerHTML='<span class="trend-legend-item"><i class="trend-legend-line portfolio"></i>'+copy("benchmarkPortfolio")+'</span>'+
+    '<span class="trend-legend-item"><i class="trend-legend-line tw"></i>'+copy("benchmarkTaiwan")+(tw?' <strong>'+formatRateValue(tw.rate)+'</strong>':'')+'</span>'+
+    '<span class="trend-legend-item"><i class="trend-legend-line us"></i>'+copy("benchmarkUS")+(us?' <strong>'+formatRateValue(us.rate)+'</strong>':'')+'</span>';
+  if(benchmarkOverlayState.key===requestKey&&benchmarkOverlayState.status==="ready"){
+    status.textContent=currentLanguage()==="en"?"FinMind · daily closes aligned to asset snapshots · delayed data":"資料來源：FinMind · 依資產快照日期對齊 · 每日收盤 · 非即時";
+  }
+}
+
 function render(){
   bindRoadmapInteraction();
   const accounts=filteredAccounts();
@@ -1456,7 +1400,6 @@ function renderTrend(){
   $("#trendDesc").textContent=currentLanguage()==="en"?viewLabel()+" "+(range==="ytd"?"year to date":"history"):viewLabel()+(range==="ytd"?"本年至今":"歷史變化");
   const h=model.history.filter(x=>x[key]>0&&(range!=="ytd"||x.date.slice(0,4)===currentYear));
   bindTrendInteraction();
-  renderBenchmarkComparison(h);
   if(h.length<2){
     trendState.points=[];
     trendState.activeIndex=-1;
@@ -1467,13 +1410,23 @@ function renderTrend(){
     svg.setAttribute("aria-label","總資產趨勢圖，資料不足");
     return;
   }
-  const W=700,H=250,p={l:58,r:24,t:12,b:36},vals=h.map(x=>x[key]),mn=Math.min(...vals)*.95,mx=Math.max(...vals)*1.03;
+  const requestKey=benchmarkHistoryKey(h,key);
+  requestBenchmarkOverlay(h,key,requestKey);
+  const overlay=benchmarkOverlayState.key===requestKey&&benchmarkOverlayState.status==="ready"?benchmarkOverlayState.series:[];
+  const overlayValues=overlay.flatMap(series=>series.points.filter(Boolean).map(point=>point.value));
+  const W=700,H=250,p={l:58,r:24,t:12,b:36},vals=h.map(x=>x[key]),allValues=vals.concat(overlayValues),mn=Math.min(...allValues)*.95,mx=Math.max(...allValues)*1.03;
   const X=i=>p.l+(W-p.l-p.r)*(i/(h.length-1)),Y=v=>p.t+(H-p.t-p.b)*(1-(v-mn)/(mx-mn||1));
   let out='<defs><linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--brand)" stop-opacity=".24"/><stop offset="100%" stop-color="var(--brand)" stop-opacity="0"/></linearGradient></defs>';
   for(let i=0;i<=4;i++){const v=mn+(mx-mn)*i/4,y=Y(v);out+=`<line class="gridline" x1="${p.l}" y1="${y}" x2="${W-p.r}" y2="${y}"/><text class="axis" x="${p.l-7}" y="${y+4}" text-anchor="end">${short(v)}</text>`}
   const pts=h.map((d,i)=>[X(i),Y(d[key])]),path=pts.map((q,i)=>(i?"L":"M")+q.join(",")).join(" ");
   const area=path+` L ${pts.at(-1)[0]},${H-p.b} L ${pts[0][0]},${H-p.b} Z`;
-  out+=`<path class="area" d="${area}"/><path class="trend" d="${path}"/>`;
+  overlay.forEach(series=>{
+    const plotted=series.points.map((point,index)=>point?{x:X(index),y:Y(point.value)}:null);
+    const marketPath=plotted.map((point,index)=>point?(index===0||!plotted[index-1]?"M":"L")+point.x+","+point.y:"").filter(Boolean).join(" ");
+    out+='<path d="'+marketPath+'" fill="none" stroke="'+series.color+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"'+(series.id==="us"?' stroke-dasharray="6 4"':'')+'/>';
+    plotted.forEach(point=>{if(point)out+='<circle cx="'+point.x+'" cy="'+point.y+'" r="2.2" fill="'+series.color+'"/>'});
+  });
+  out+=`<path class="area" d="${area}"/><path class="trend" d="${path}"/`;
   pts.forEach((q,i)=>{out+=`<circle class="point" cx="${q[0]}" cy="${q[1]}" r="2.5"></circle>`;
     if(i===0||i===pts.length-1||pts.length<=7){
       const isFirst=i===0,isLast=i===pts.length-1;
@@ -1484,6 +1437,7 @@ function renderTrend(){
     <circle class="selected-point" id="trendMarker" r="5.5" style="display:none"></circle>
     <rect class="interaction-hit" id="trendHit" x="${p.l}" y="${p.t}" width="${W-p.l-p.r+1}" height="${H-p.t-p.b}"></rect>`;
   svg.innerHTML=out;
+  renderTrendLegend(overlay,requestKey);
   trendState.points=h.map((d,i)=>({date:d.date,value:d[key],x:pts[i][0],y:pts[i][1],plotLeft:p.l,plotRight:W-p.r,plotTop:p.t,plotBottom:H-p.b}));
   trendState.elements={
     crosshair:$("#trendCrosshair"),
