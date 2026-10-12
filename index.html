@@ -429,7 +429,7 @@ const CURRENCY_OPTIONS=Object.freeze({
 });
 const UI_COPY={
   "zh-Hant":{
-    pageTitle:"家庭投資總覽",loginTitle:"家庭投資總覽",loginDescription:"請使用已被授權查看私人 Google Sheet 的帳號登入。未授權帳號無法取得任何資產資料。",loginButton:"使用 Google 帳號登入",subtitle:"媽媽與哥哥的台股、美股投資 · ",autoSync:"自動同步",hideAmounts:"隱藏金額",showAmounts:"顯示金額",syncSheet:"同步 Google Sheet",logout:"登出",currencySelectorLabel:"顯示幣別",family:"家庭合計",mom:"媽媽",brother:"哥哥",totalAssets:"目前總資產",totalCost:"總成本",unrealizedGain:"未實現損益",returnRate:"總報酬率",annualizedReturn:"年化報酬率",costHint:"依首次投入金額計算",profitHint:"目前市值－總成本",returnHint:"未實現損益 ÷ 總成本",assetAllocation:"目前資產配置",allocationByMarketDescription:"依市場分類目前市值",allocationByOwnerDescription:"依持有人分類目前市值",allocationCategoryLabel:"資產配置分類",marketMode:"市場",ownerMode:"持有人",usEquities:"美股",twEquities:"台股",growthTargets:"成長目標",growthTargetsDescription:"以總成本與目前淨值追蹤投資成長進度",assetTrend:"總資產趨勢",allPeriod:"全部期間",yearToDate:"本年至今",trendPeriodLabel:"圖表期間",changeCalendar:"帳戶變動日曆",changeCalendarDescription:"顯示每日資產與上次查詢的變動金額",accountDetails:"帳戶明細",accountMarket:"帳戶／市場",owner:"持有人",investmentDuration:"投資時間（年）",currentValue:"目前市值",allocation:"配置占比",currencyTableDescription:"金額統一以新台幣顯示",benchmarkComparisonTitle:"大盤走勢比較",benchmarkComparisonDescription:"依日期同步套用入金與出金，換算台股與美股資產累積",benchmarkPortfolio:"企鵝（資產快照）",benchmarkTaiwan:"台股大盤",benchmarkUS:"美股大盤",benchmarkCashFlowAdjusted:"相同入出金"
+    pageTitle:"家庭投資總覽",loginTitle:"家庭投資總覽",loginDescription:"請使用已被授權查看私人 Google Sheet 的帳號登入。未授權帳號無法取得任何資產資料。",loginButton:"使用 Google 帳號登入",subtitle:"媽媽與哥哥的台股、美股投資 · ",autoSync:"自動同步",hideAmounts:"隱藏金額",showAmounts:"顯示金額",syncSheet:"同步 Google Sheet",logout:"登出",currencySelectorLabel:"顯示幣別",family:"家庭合計",mom:"媽媽",brother:"哥哥",totalAssets:"目前總資產",totalCost:"總成本",unrealizedGain:"未實現損益",returnRate:"總報酬率",annualizedReturn:"年化報酬率",costHint:"依首次投入金額計算",profitHint:"目前市值－總成本",returnHint:"未實現損益 ÷ 總成本",assetAllocation:"目前資產配置",allocationByMarketDescription:"依市場分類目前市值",allocationByOwnerDescription:"依持有人分類目前市值",allocationCategoryLabel:"資產配置分類",marketMode:"市場",ownerMode:"持有人",usEquities:"美股",twEquities:"台股",growthTargets:"成長目標",growthTargetsDescription:"以總成本與目前淨值追蹤投資成長進度",assetTrend:"總資產趨勢",allPeriod:"全部期間",yearToDate:"本年至今",trendPeriodLabel:"圖表期間",changeCalendar:"帳戶變動日曆",changeCalendarDescription:"顯示每日資產與上次查詢的變動金額",accountDetails:"帳戶明細",accountMarket:"帳戶／市場",owner:"持有人",investmentDuration:"投資時間（年）",currentValue:"目前市值",allocation:"配置占比",currencyTableDescription:"金額統一以新台幣顯示",benchmarkComparisonTitle:"大盤走勢比較",benchmarkComparisonDescription:"按資金異動表的日期與原幣投入，對照企鵝資產快照；美股換算新台幣",benchmarkPortfolio:"企鵝（資產快照）",benchmarkTaiwan:"台股大盤",benchmarkUS:"美股大盤",benchmarkCashFlowAdjusted:"相同入出金"
   },
   en:{
     pageTitle:"Family Investment Dashboard",loginTitle:"Family Investment Dashboard",loginDescription:"Sign in with a Google account that has access to the private Google Sheet. Unauthorized accounts cannot access any asset data.",loginButton:"Sign in with Google",subtitle:"Mom's and brother's Taiwan and U.S. investments · ",autoSync:"auto sync",hideAmounts:"Hide amounts",showAmounts:"Show amounts",syncSheet:"Sync Google Sheet",logout:"Sign out",currencySelectorLabel:"Display currency",family:"Family total",mom:"Mom",brother:"Brother",totalAssets:"Total assets",totalCost:"Total cost",unrealizedGain:"Unrealized gain / loss",returnRate:"Total return",annualizedReturn:"Annualized return",costHint:"Based on initial investment",profitHint:"Current value minus total cost",returnHint:"Unrealized gain / loss divided by total cost",assetAllocation:"Asset allocation",allocationByMarketDescription:"Current value by market",allocationByOwnerDescription:"Current value by owner",allocationCategoryLabel:"Allocation category",marketMode:"Market",ownerMode:"Owner",usEquities:"U.S. equities",twEquities:"Taiwan equities",growthTargets:"Growth targets",growthTargetsDescription:"Track investment growth using total cost and current net value",assetTrend:"Total asset trend",allPeriod:"All time",yearToDate:"Year to date",trendPeriodLabel:"Chart period",changeCalendar:"Account change calendar",changeCalendarDescription:"Daily asset changes since the previous query",accountDetails:"Account details",accountMarket:"Account / market",owner:"Owner",investmentDuration:"Investment (years)",currentValue:"Current value",allocation:"Allocation",currencyTableDescription:"Amounts shown in U.S. dollars",benchmarkComparisonTitle:"Market benchmark trends",benchmarkComparisonDescription:"Market benchmarks receive the same deposits and withdrawals on their recorded dates",benchmarkPortfolio:"Penguin portfolio",benchmarkTaiwan:"Taiwan market",benchmarkUS:"U.S. market",benchmarkCashFlowAdjusted:"matched cash flows"
@@ -917,18 +917,25 @@ function parseCashFlows(rows){
   const headers=(rows[0]||[]).map(value=>norm(value));
   const dateColumn=headers.findIndex(value=>value.includes("日期"));
   const typeColumn=headers.findIndex(value=>value.includes("項目")||value.includes("類型"));
-  const amountColumn=headers.findIndex(value=>value.includes("金額")&&(/twd|台幣|新台幣/.test(value)));
+  const twdColumn=headers.findIndex(value=>value.includes("金額")&&(/twd|台幣|新台幣/.test(value)));
   const ownerColumn=headers.findIndex(value=>value.includes("帳戶")||value.includes("持有人"));
-  if(dateColumn<0||typeColumn<0||amountColumn<0)throw new Error("「資金異動」分頁需有「日期」、「項目」及「金額（TWD）」欄位。");
+  const originalColumn=headers.findIndex(value=>value.includes("原幣")||value.includes("幣別"));
+  if(dateColumn<0||typeColumn<0||twdColumn<0)throw new Error("「資金異動」分頁需有「日期」、「項目」及「金額（TWD）」欄位。");
   return rows.slice(1).map(row=>{
     const date=parseDate(row?.[dateColumn]);
     const type=String(row?.[typeColumn]??"").trim().toLowerCase();
-    const amount=Math.abs(safeNum(row?.[amountColumn])??0);
+    const twdAmount=Math.abs(safeNum(row?.[twdColumn])??0);
+    const originalText=String(originalColumn>=0?row?.[originalColumn]??"":"").trim();
+    const currency=/\bUSD\b|美金|美元/i.test(originalText)?"USD":/\bTWD\b|\bNTD\b|\bNT\b|NT\$|台幣|新台幣/i.test(originalText)?"TWD":"";
+    const amountMatch=originalText.replace(/,/g,"").match(/[-+]?\d+(?:\.\d+)?/);
+    const originalAmount=amountMatch?Math.abs(Number(amountMatch[0])):0;
     const ownerText=String(ownerColumn>=0?row?.[ownerColumn]??"":"").toLowerCase();
     const owner=/媽媽|妈妈|mom/.test(ownerText)?"mom":/哥哥|brother/.test(ownerText)?"brother":"family";
+    const market=currency==="USD"||/美股|us stock|\bib\b/.test(ownerText)?"us":currency==="TWD"||/台股|taiwan stock/.test(ownerText)?"tw":"";
     const kind=/入金|存入|deposit|contribution/.test(type)?"deposit":/出金|提領|提款|withdraw/.test(type)?"withdrawal":"";
-    if(!date||!amount||!kind)return null;
-    return {date:date,delta:kind==="deposit"?amount:-amount,owner:owner};
+    const nativeAmount=originalAmount||twdAmount;
+    if(!date||!nativeAmount||!kind||!market)return null;
+    return {date:date,delta:kind==="deposit"?nativeAmount:-nativeAmount,owner:owner,market:market,currency:currency||(market==="us"?"USD":"TWD"),twdAmount:twdAmount};
   }).filter(Boolean).sort((a,b)=>a.date.localeCompare(b.date));
 }
 function firstPositive(rows,col){
@@ -1218,25 +1225,51 @@ async function fetchBenchmarkSeries(dataset,dataId,startDate,endDate,valueField)
   try{return await request}
   catch(error){benchmarkDataCache.delete(cacheKey);throw error}
 }
-function benchmarkHistoryKey(history,key){const scope=view==="mom"?"mom":view==="brother"?"brother":"family";const flowKey=(model?.cashFlows||[]).filter(flow=>scope==="family"||flow.owner===scope).map(flow=>flow.date+":"+flow.delta+":"+flow.owner).join(",");return key+"|"+history.map(item=>item.date).join(",")+"|"+flowKey}
+async function fetchTaiwanUsdRates(startDate,endDate){
+  const fromDate=shiftDate(startDate,-10);
+  const params=new URLSearchParams({dataset:"TaiwanExchangeRate",data_id:"USD",start_date:fromDate,end_date:endDate});
+  const response=await fetch("https://api.finmindtrade.com/api/v4/data?"+params.toString(),{headers:{Accept:"application/json"}});
+  if(!response.ok)throw new Error("HTTP "+response.status);
+  const result=await response.json();
+  if(result.status!==200||!Array.isArray(result.data))throw new Error(result.msg||"匯率資料格式錯誤");
+  return result.data.map(item=>{
+    const buy=Number(item.spot_buy??item.cash_buy),sell=Number(item.spot_sell??item.cash_sell);
+    const value=Number.isFinite(buy)&&buy>0&&Number.isFinite(sell)&&sell>0?(buy+sell)/2:Number(item.value??item.rate);
+    return {date:String(item.date||""),value:value};
+  }).filter(item=>/^\d{4}-\d{2}-\d{2}$/.test(item.date)&&Number.isFinite(item.value)&&item.value>0)
+    .sort((a,b)=>a.date.localeCompare(b.date));
+}
+function benchmarkHistoryKey(history,key){
+  const scope=view==="mom"?"mom":view==="brother"?"brother":"family";
+  const flowKey=(model?.cashFlows||[]).filter(flow=>scope==="family"||flow.owner===scope)
+    .map(flow=>[flow.date,flow.delta,flow.owner,flow.market,flow.currency].join(":")).join(",");
+  return key+"|"+history.map(item=>item.date).join(",")+"|"+flowKey;
+}
 function marketCloseOnOrBefore(records,date){
   let low=0,high=records.length-1,best=-1;
   while(low<=high){const middle=(low+high)>>1;if(records[middle].date<=date){best=middle;low=middle+1}else high=middle-1}
   return best>=0?records[best]:null;
 }
-function alignBenchmarkToSnapshots(records,history,key,id,color,cashFlows,scope){
-  const startDate=history[0]?.date,endDate=history.at(-1)?.date;
-  const baseline=startDate?marketCloseOnOrBefore(records,startDate):null;
-  if(!baseline)return null;
-  const flows=(cashFlows||[]).filter(flow=>flow.date>startDate&&flow.date<=endDate&&(scope==="family"||flow.owner===scope));
-  let shares=history[0][key]/baseline.value,flowIndex=0;
+function alignBenchmarkToSnapshots(records,history,key,id,color,cashFlows,scope,fxRecords=[]){
+  const endDate=history.at(-1)?.date;
+  const flows=(cashFlows||[]).filter(flow=>flow.market===id&&flow.date<=endDate&&(scope==="family"||flow.owner===scope));
+  if(!flows.length)return null;
+  let shares=0,flowIndex=0;
   const points=history.map(snapshot=>{
     while(flowIndex<flows.length&&flows[flowIndex].date<=snapshot.date){
       const flow=flows[flowIndex++],quote=marketCloseOnOrBefore(records,flow.date);
       if(quote)shares=Math.max(0,shares+flow.delta/quote.value);
     }
+    if(shares<=0)return null;
     const quote=marketCloseOnOrBefore(records,snapshot.date);
-    return quote?{date:snapshot.date,value:shares*quote.value}:null;
+    if(!quote)return null;
+    let value=shares*quote.value;
+    if(id==="us"){
+      const fx=marketCloseOnOrBefore(fxRecords,snapshot.date);
+      if(!fx)return null;
+      value*=fx.value;
+    }
+    return {date:snapshot.date,value:value};
   });
   if(points.filter(Boolean).length<2)return null;
   return {id:id,color:color,points:points};
@@ -1247,20 +1280,25 @@ function requestBenchmarkOverlay(history,key,requestKey){
   benchmarkRequestKey=requestKey;
   const requestId=++benchmarkRequestId;
   const status=$("#benchmarkDataStatus");
-  if(status)status.textContent=currentLanguage()==="en"?"Loading daily market closes…":"正在載入大盤每日收盤資料…";
+  if(status)status.textContent=currentLanguage()==="en"?"Loading daily market closes and USD/TWD rates…":"正在載入大盤收盤與美元匯率…";
+  const scope=view==="mom"?"mom":view==="brother"?"brother":"family";
+  const flows=(model?.cashFlows||[]).filter(flow=>scope==="family"||flow.owner===scope);
+  const firstFlowDate=flows[0]?.date;
+  const startDate=firstFlowDate&&firstFlowDate<history[0].date?firstFlowDate:history[0].date;
+  const endDate=history.at(-1).date;
   Promise.all([
-    fetchBenchmarkSeries("TaiwanStockPrice","TAIEX",history[0].date,history.at(-1).date,"close"),
-    fetchBenchmarkSeries("USStockPrice","^GSPC",history[0].date,history.at(-1).date,"Close")
-  ]).then(([taiwan,us])=>{
+    fetchBenchmarkSeries("TaiwanStockPrice","TAIEX",startDate,endDate,"close"),
+    fetchBenchmarkSeries("USStockPrice","^GSPC",startDate,endDate,"Close"),
+    fetchTaiwanUsdRates(startDate,endDate).catch(error=>{console.warn("USD/TWD rate data unavailable",error);return[]})
+  ]).then(([taiwan,us,fx])=>{
     if(requestId!==benchmarkRequestId)return;
     const rootStyle=getComputedStyle(document.documentElement);
-    const scope=view==="mom"?"mom":view==="brother"?"brother":"family";
-    const flows=model?.cashFlows||[];
+    const allFlows=model?.cashFlows||[];
     const series=[
-      alignBenchmarkToSnapshots(taiwan,history,key,"tw",rootStyle.getPropertyValue("--market-tw").trim(),flows,scope),
-      alignBenchmarkToSnapshots(us,history,key,"us",rootStyle.getPropertyValue("--market-us").trim(),flows,scope)
+      alignBenchmarkToSnapshots(taiwan,history,key,"tw",rootStyle.getPropertyValue("--market-tw").trim(),allFlows,scope),
+      alignBenchmarkToSnapshots(us,history,key,"us",rootStyle.getPropertyValue("--market-us").trim(),allFlows,scope,fx)
     ].filter(Boolean);
-    if(!series.length)throw new Error("No market observations matched the snapshot dates");
+    if(!series.length)throw new Error("No benchmark data matched the recorded contributions and snapshot dates");
     benchmarkOverlayState={key:requestKey,status:"ready",series:series,error:""};
     renderTrend();
   }).catch(error=>{
@@ -1276,10 +1314,13 @@ function renderTrendLegend(series,requestKey){
   const visible=benchmarkOverlayState.key===requestKey&&benchmarkOverlayState.status==="ready"?series:[];
   const tw=visible.find(item=>item.id==="tw"),us=visible.find(item=>item.id==="us");
   legend.innerHTML='<span class="trend-legend-item"><i class="trend-legend-line portfolio"></i>'+copy("benchmarkPortfolio")+'</span>'+
-    '<span class="trend-legend-item"><i class="trend-legend-line tw"></i>'+copy("benchmarkTaiwan")+' · '+copy("benchmarkCashFlowAdjusted")+(tw?' <strong>'+formatMoney(tw.points.filter(Boolean).at(-1).value)+'</strong>':'')+'</span>'+
-    '<span class="trend-legend-item"><i class="trend-legend-line us"></i>'+copy("benchmarkUS")+' · '+copy("benchmarkCashFlowAdjusted")+(us?' <strong>'+formatMoney(us.points.filter(Boolean).at(-1).value)+'</strong>':'')+'</span>';
+    (tw?'<span class="trend-legend-item"><i class="trend-legend-line tw"></i>'+copy("benchmarkTaiwan")+' · '+copy("benchmarkCashFlowAdjusted")+' <strong>'+formatMoney(tw.points.filter(Boolean).at(-1).value)+'</strong></span>':'')+
+    (us?'<span class="trend-legend-item"><i class="trend-legend-line us"></i>'+copy("benchmarkUS")+' · '+copy("benchmarkCashFlowAdjusted")+' <strong>'+formatMoney(us.points.filter(Boolean).at(-1).value)+'</strong></span>':'');
   if(benchmarkOverlayState.key===requestKey&&benchmarkOverlayState.status==="ready"){
-    status.textContent=currentLanguage()==="en"?"FinMind · snapshot-aligned daily closes · cash flows matched":"資料來源：FinMind · 依資產快照日期對齊 · 入出金同步套用 · 每日收盤（非即時）";
+    const usIncluded=Boolean(us);
+    status.textContent=currentLanguage()==="en"
+      ?(usIncluded?"FinMind · same native-currency cash flows on recorded dates · U.S. values converted to TWD by snapshot-date FX · daily closes":"FinMind · same TWD cash flows on recorded dates · daily closes; U.S. comparison unavailable")
+      :(us?"資料來源：FinMind · 按實際日期與原幣套用入出金 · 美股依快照日匯率換算新台幣 · 每日收盤（非即時）":"資料來源：FinMind · 按實際日期套用台幣入出金 · 美股匯率資料暫缺 · 每日收盤（非即時）");
   }
 }
 
