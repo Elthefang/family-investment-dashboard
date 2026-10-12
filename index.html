@@ -588,87 +588,185 @@ function drawSnapshotWrapped(context,text,x,y,maxWidth,size,lineHeight,color="#7
   if(line)context.fillText(line,x,lineY);
   return lineY;
 }
-function createSnapshotCanvas(title,subtitle){
+function drawSnapshotBrand(context,page){
+  const image=document.querySelector(".brand-mark img"),cx=103,y=98,r=38;
+  context.save();context.beginPath();context.arc(cx,y,r,0,Math.PI*2);context.clip();
+  context.fillStyle="#ffffff";context.fillRect(cx-r,y-r,r*2,r*2);
+  if(image?.complete&&image.naturalWidth&&image.naturalHeight){
+    const scale=Math.min((r*2-4)/image.naturalWidth,(r*2-4)/image.naturalHeight);
+    const width=image.naturalWidth*scale,height=image.naturalHeight*scale;
+    context.drawImage(image,cx-width/2,y-height/2,width,height);
+  }else{drawSnapshotText(context,"企",cx,y+15,40,"#20345d",850,"center")}
+  context.restore();context.beginPath();context.arc(cx,y,r,0,Math.PI*2);context.strokeStyle="#dca23b";context.lineWidth=4;context.stroke();
+  drawSnapshotText(context,"企鹅家庭基金",158,109,31,"#20345d",850);
+  fillRoundRect(context,908,70,100,52,18,"#edf0f4");
+  drawSnapshotText(context,String(page).padStart(2,"0")+" / 03",958,104,17,"#20345d",800,"center");
+}
+function createSnapshotCanvas(title,subtitle,page){
   const canvas=document.createElement("canvas");canvas.width=REDNOTE_EXPORT_SIZE.width;canvas.height=REDNOTE_EXPORT_SIZE.height;
   const context=canvas.getContext("2d");
-  context.fillStyle="#f4f5f2";context.fillRect(0,0,canvas.width,canvas.height);
-  context.fillStyle="#ecefeb";context.fillRect(0,0,canvas.width,22);
-  context.fillStyle="#20345d";context.fillRect(54,76,10,50);
-  drawSnapshotText(context,"家庭投资总览",84,112,25,"#20345d",800);
-  drawSnapshotText(context,title,54,194,52,"#171d2a",850);
-  drawSnapshotWrapped(context,subtitle,54,238,900,23,34,"#707b8a",500);
-  drawSnapshotText(context,"数据来源：家庭合计 · 人民币展示",54,1375,18,"#707b8a",500);
+  context.fillStyle="#f3f5f4";context.fillRect(0,0,canvas.width,canvas.height);
+  fillRoundRect(context,24,24,1032,1392,38,"#ffffff");
+  context.fillStyle="#20345d";context.fillRect(24,24,1032,12);
+  drawSnapshotBrand(context,page);
+  drawSnapshotText(context,"家庭投资总览",72,205,19,"#75839a",750);
+  drawSnapshotText(context,title,72,275,53,"#171d2a",850);
+  drawSnapshotWrapped(context,subtitle,72,318,920,22,32,"#707b8a",500);
+  context.strokeStyle="#e1e5e8";context.lineWidth=2;context.beginPath();context.moveTo(72,1343);context.lineTo(1008,1343);context.stroke();
+  drawSnapshotText(context,"数据截至 "+(model?.snapshotDate||"—")+"  ·  人民币展示",72,1382,17,"#707b8a",600);
+  drawSnapshotText(context,"企鹅家庭基金",1008,1382,17,"#20345d",750,"right");
   return {canvas,context};
 }
-function drawSnapshotMetric(context,{x,y,width,label,value,accent="#20345d"}){
-  fillRoundRect(context,x,y,width,186,24,"#ffffff");
-  context.fillStyle=accent;context.fillRect(x,y,7,186);
-  drawSnapshotText(context,label,x+30,y+50,20,"#707b8a",700);
-  drawSnapshotText(context,value,x+30,y+119,36,"#171d2a",850);
+function rednoteRate(value){
+  if(!Number.isFinite(value))return"—";
+  return (value>=0?"+":"−")+Math.abs(value*100).toFixed(2)+"%";
 }
-function snapshotCategory(account){
-  const text=`${account.key||""} ${account.name||""}`.toLowerCase();
-  if(/crypto|加密|比特|btc|eth/.test(text))return "crypto";
-  if(/cash|现金|現金/.test(text))return "cash";
-  if(account.key==="brotherTW"||/台股|tw stock|taiwan/.test(text))return "tw";
-  return "us";
+function rednoteYears(startDate,endDate){
+  if(!startDate||!endDate)return 0;
+  return Math.max(0,(Date.parse(endDate+"T00:00:00Z")-Date.parse(startDate+"T00:00:00Z"))/(365.2425*86400000));
 }
-function snapshotCategories(accounts,total){
-  const labels={cash:"现金",tw:"台股",us:"美股",crypto:"加密货币"};
-  const values={cash:0,tw:0,us:0,crypto:0};
-  accounts.forEach(account=>{values[snapshotCategory(account)]+=Number(account.value)||0});
-  return Object.entries(values).filter(([,value])=>value>0).map(([key,value])=>({key,label:labels[key],value,pct:total?value/total:0,color:REDNOTE_COLORS[key]}));
+function drawSnapshotHeroPerformance(context,{annualized,totalReturn}){
+  fillRoundRect(context,72,354,936,300,28,"#20345d");
+  drawSnapshotText(context,"当前年化回报",112,413,23,"#dbe3f1",700);
+  drawSnapshotText(context,rednoteRate(annualized),112,526,82,annualized>=0?"#ffffff":"#ffb9b9",850);
+  context.fillStyle="#dca23b";context.fillRect(112,568,856,3);
+  drawSnapshotText(context,"总回报",112,615,20,"#dbe3f1",650);
+  drawSnapshotText(context,rednoteRate(totalReturn),968,615,31,totalReturn>=0?"#ffffff":"#ffb9b9",850,"right");
 }
-function drawSnapshotTrend(context,history){
-  const x=76,y=770,width=928,height=330;
-  fillRoundRect(context,x,y,width,height,24,"#ffffff");
-  drawSnapshotText(context,"资产趋势",x+28,y+48,24,"#171d2a",800);
+function drawSnapshotSummaryMetric(context,{x,y,width,label,value,accent="#20345d"}){
+  fillRoundRect(context,x,y,width,168,23,"#f5f6f5");
+  context.fillStyle=accent;context.fillRect(x,y,6,168);
+  drawSnapshotText(context,label,x+25,y+48,19,"#707b8a",700);
+  drawSnapshotText(context,value,x+25,y+115,34,"#171d2a",850);
+}
+function drawSnapshotTrendChart(context,history){
+  const x=72,y=1012,width=936,height=285;
+  fillRoundRect(context,x,y,width,height,24,"#f5f6f5");
+  drawSnapshotText(context,"资产增长趋势",x+28,y+43,22,"#171d2a",800);
   const values=history.map(item=>Number(item.family)||0).filter(value=>value>0);
-  if(values.length<2){drawSnapshotText(context,"历史数据不足",x+28,y+122,22,"#707b8a",500);return}
-  const min=Math.min(...values)*.96,max=Math.max(...values)*1.04,chartX=x+42,chartY=y+92,chartW=width-80,chartH=180;
+  if(values.length<2){drawSnapshotText(context,"历史数据不足",x+28,y+122,21,"#707b8a",500);return}
+  const min=Math.min(...values)*.97,max=Math.max(...values)*1.03,chartX=x+38,chartY=y+76,chartW=width-76,chartH=144;
   context.strokeStyle="#e1e5e8";context.lineWidth=2;
   for(let i=0;i<4;i++){const lineY=chartY+(chartH/3)*i;context.beginPath();context.moveTo(chartX,lineY);context.lineTo(chartX+chartW,lineY);context.stroke()}
-  const points=values.map((value,index)=>({x:chartX+chartW*(index/(values.length-1)),y:chartY+chartH*(1-(value-min)/(max-min||1))}));
-  context.beginPath();points.forEach((point,index)=>index?context.lineTo(point.x,point.y):context.moveTo(point.x,point.y));context.strokeStyle="#20345d";context.lineWidth=7;context.lineJoin="round";context.lineCap="round";context.stroke();
-  const last=points.at(-1);context.fillStyle="#20345d";context.beginPath();context.arc(last.x,last.y,9,0,Math.PI*2);context.fill();
-  drawSnapshotText(context,formatRednoteMoney(values.at(-1)),x+28,y+306,22,"#171d2a",800);
+  const points=values.map((value,index)=>({x:chartX+chartW*index/(values.length-1),y:chartY+chartH*(1-(value-min)/(max-min||1))}));
+  context.beginPath();points.forEach((point,index)=>index?context.lineTo(point.x,point.y):context.moveTo(point.x,point.y));
+  context.strokeStyle="#20345d";context.lineWidth=6;context.lineJoin="round";context.lineCap="round";context.stroke();
+  const first=points[0],last=points.at(-1);context.fillStyle="#dca23b";context.beginPath();context.arc(first.x,first.y,7,0,Math.PI*2);context.fill();
+  context.fillStyle="#20345d";context.beginPath();context.arc(last.x,last.y,9,0,Math.PI*2);context.fill();
+  drawSnapshotText(context,formatRednoteMoney(values.at(-1)),x+28,y+260,20,"#20345d",800);
 }
-function drawSnapshotAllocation(context,categories,total){
-  const centerX=300,centerY=610,radius=170;let angle=-Math.PI/2;
-  categories.forEach(category=>{const end=angle+Math.PI*2*category.pct;context.beginPath();context.moveTo(centerX,centerY);context.arc(centerX,centerY,radius,angle,end);context.closePath();context.fillStyle=category.color;context.fill();angle=end});
-  context.fillStyle="#f4f5f2";context.beginPath();context.arc(centerX,centerY,104,0,Math.PI*2);context.fill();
-  drawSnapshotText(context,"总资产",centerX,590,20,"#707b8a",700,"center");drawSnapshotText(context,formatRednoteMoney(total),centerX,636,29,"#171d2a",850,"center");
-  let y=400;
-  categories.forEach(category=>{fillRoundRect(context,536,y,468,116,18,"#ffffff");context.fillStyle=category.color;context.beginPath();context.arc(572,y+44,10,0,Math.PI*2);context.fill();drawSnapshotText(context,category.label,596,y+51,22,"#171d2a",750);drawSnapshotText(context,formatRednoteMoney(category.value),596,y+87,23,"#171d2a",800);drawSnapshotText(context,`${(category.pct*100).toFixed(1)}%`,968,y+51,22,"#707b8a",700,"right");y+=132});
+async function getRednoteBenchmarkResults(history){
+  const flows=model?.cashFlows||[];
+  const scopeFlows=flows.filter(flow=>flow.owner==="mom"||flow.owner==="brother");
+  if(!scopeFlows.length||history.length<2)return[];
+  const firstFlow=scopeFlows[0].date,startDate=firstFlow<history[0].date?firstFlow:history[0].date,endDate=history.at(-1).date;
+  try{
+    const [taiwan,us,fx]=await Promise.all([
+      fetchBenchmarkSeries("TaiwanStockPrice","TAIEX",startDate,endDate,"close"),
+      fetchBenchmarkSeries("USStockPrice","^GSPC",startDate,endDate,"Close"),
+      fetchTaiwanUsdRates(startDate,endDate)
+    ]);
+    return [
+      alignBenchmarkToSnapshots(taiwan,history,"family","tw",REDNOTE_COLORS.tw,flows,"family"),
+      alignBenchmarkToSnapshots(us,history,"family","us",REDNOTE_COLORS.us,flows,"family",fx)
+    ].filter(Boolean).map(item=>({id:item.id,value:item.points.filter(Boolean).at(-1)?.value}));
+  }catch(error){console.warn("Rednote benchmark comparison unavailable",error);return[]}
 }
-function drawSnapshotTarget(context,label,target,current,y,color){
-  const reached=current>=target,progress=Math.max(0,Math.min(current/target,1));
-  drawSnapshotText(context,label,76,y,25,"#171d2a",800);drawSnapshotText(context,`${(progress*100).toFixed(0)}%`,1004,y,23,reached?"#16816c":"#20345d",800,"right");
-  fillRoundRect(context,76,y+24,928,22,11,"#e1e5e8");fillRoundRect(context,76,y+24,928*progress,22,11,color);
-  drawSnapshotText(context,`${formatRednoteMoney(current)} / ${formatRednoteMoney(target)}`,76,y+82,20,"#707b8a",600);
+function drawSnapshotBenchmarkCard(context,{benchmark,portfolio}){
+  fillRoundRect(context,72,604,936,294,24,"#f5f6f5");
+  const isTw=benchmark.id==="tw",color=isTw?"#dca23b":"#657da9",title=isTw?"台股大盘 · 台湾加权指数":"美股大盘 · 标普 500";
+  context.fillStyle=color;context.beginPath();context.arc(111,652,9,0,Math.PI*2);context.fill();
+  drawSnapshotText(context,title,134,660,22,"#171d2a",800);
+  drawSnapshotText(context,"我的组合",104,716,18,"#707b8a",650);
+  drawSnapshotText(context,formatRednoteMoney(portfolio),104,764,30,"#20345d",850);
+  drawSnapshotText(context,"大盘模拟",536,716,18,"#707b8a",650);
+  drawSnapshotText(context,formatRednoteMoney(benchmark.value),536,764,30,"#171d2a",800);
+  const difference=portfolio-benchmark.value,relative=benchmark.value?difference/benchmark.value:0,ahead=difference>=0;
+  fillRoundRect(context,104,798,872,72,18,ahead?"#e7f3ef":"#fae9e9");
+  drawSnapshotText(context,(ahead?"跑赢 ":"未跑赢 ")+(isTw?"台股":"美股")+"基准",128,844,20,ahead?"#16816c":"#c94850",800);
+  drawSnapshotText(context,(ahead?"+":"−")+formatRednoteMoney(Math.abs(difference))+"（"+rednoteRate(relative)+"）",952,844,22,ahead?"#16816c":"#c94850",850,"right");
 }
-function buildRednoteSnapshots(){
+function drawSnapshotComparisonResult(context,results,portfolio){
+  const available=results.filter(item=>Number.isFinite(item.value));
+  if(!available.length){
+    fillRoundRect(context,72,482,936,102,20,"#f5f6f5");
+    drawSnapshotText(context,"大盘比较暂不可用",104,545,26,"#707b8a",750);
+    return{wins:0,total:0,summary:"大盘比较数据暂不可用"};
+  }
+  const wins=available.filter(item=>portfolio>=item.value).length;
+  const label=wins===available.length?"跑赢全部基准":wins===0?"暂未跑赢基准":("跑赢 "+wins+" 项基准");
+  fillRoundRect(context,72,482,936,102,20,wins?"#e7f3ef":"#fae9e9");
+  drawSnapshotText(context,label,104,548,34,wins?"#16816c":"#c94850",850);
+  drawSnapshotText(context,wins+"/"+available.length+" 项",972,546,20,"#707b8a",700,"right");
+  const summary=available.map(item=>{
+    const name=item.id==="tw"?"台股":"美股";
+    return portfolio>=item.value?"跑赢"+name+"基准":"未跑赢"+name+"基准";
+  }).join(" · ");
+  return{wins,total:available.length,summary};
+}
+async function buildRednoteSnapshots(){
+  const logo=document.querySelector(".brand-mark img");
+  if(logo?.decode)try{await logo.decode()}catch(_){}
   const accounts=model.accounts||[];
   const total=accounts.reduce((sum,account)=>sum+(Number(account.value)||0),0);
   const cost=accounts.reduce((sum,account)=>sum+(Number(account.cost)||0),0);
-  const profit=total-cost,rate=cost?profit/cost:0,history=(model.history||[]).filter(item=>(Number(item.family)||0)>0);
-  const snapshotOne=createSnapshotCanvas("家庭资产快照","记录当前资产、收益与趋势变化");
-  drawSnapshotMetric(snapshotOne.context,{x:54,y:320,width:468,label:"总资产",value:formatRednoteMoney(total)});
-  drawSnapshotMetric(snapshotOne.context,{x:558,y:320,width:468,label:"总成本",value:formatRednoteMoney(cost),accent:"#75839a"});
-  drawSnapshotMetric(snapshotOne.context,{x:54,y:530,width:468,label:profit>=0?"当前盈利":"当前亏损",value:`${profit>=0?"+":""}${formatRednoteMoney(profit)}`,accent:profit>=0?"#16816c":"#e25259"});
-  drawSnapshotMetric(snapshotOne.context,{x:558,y:530,width:468,label:"总回报率",value:`${rate>=0?"+":""}${(rate*100).toFixed(2)}%`,accent:"#20345d"});
-  drawSnapshotTrend(snapshotOne.context,history);
-  const snapshotTwo=createSnapshotCanvas("资产配置快照","按当前市值查看各类资产占比");
-  drawSnapshotAllocation(snapshotTwo.context,snapshotCategories(accounts,total),total);
-  const snapshotThree=createSnapshotCanvas("成长目标快照","以总成本为基准，追踪净值成长进度");
-  drawSnapshotMetric(snapshotThree.context,{x:54,y:320,width:468,label:"当前净值",value:formatRednoteMoney(total)});
-  drawSnapshotMetric(snapshotThree.context,{x:558,y:320,width:468,label:"总成本",value:formatRednoteMoney(cost),accent:"#75839a"});
-  drawSnapshotText(snapshotThree.context,"成长目标进度",76,610,30,"#171d2a",850);
-  ROADMAP_TARGETS.forEach((target,index)=>drawSnapshotTarget(snapshotThree.context,target.label,cost*(1+target.rate),total,680+index*150,index===0?"#20345d":index===1?"#e25259":"#dca23b"));
+  const totalReturn=cost?total/cost-1:null;
+  const memberCosts={mom:accounts.filter(account=>account.owner==="媽媽").reduce((sum,account)=>sum+(Number(account.cost)||0),0),
+    brother:accounts.filter(account=>account.owner==="哥哥").reduce((sum,account)=>sum+(Number(account.cost)||0),0)};
+  const annualizedRows=[{rate:model.annualized?.mom,cost:memberCosts.mom},{rate:model.annualized?.brother,cost:memberCosts.brother}]
+    .filter(item=>Number.isFinite(item.rate)&&item.cost>0);
+  const annualized=annualizedRows.length?annualizedRows.reduce((sum,item)=>sum+item.rate*item.cost,0)/annualizedRows.reduce((sum,item)=>sum+item.cost,0):null;
+  const history=(model.history||[]).filter(item=>(Number(item.family)||0)>0);
+  const maxYears=Math.max(0,...accounts.map(account=>rednoteYears(account.investedSince,model.snapshotDate)));
+  const deposits=(model.cashFlows||[]).filter(flow=>flow.delta>0).reduce((sum,flow)=>sum+(Number(flow.twdAmount)||0),0);
+  const benchmarks=await getRednoteBenchmarkResults(history);
+  const snapshotOne=createSnapshotCanvas("投资成绩快照","截至 "+(model.snapshotDate||"—")+" · 家庭合计长期表现",1);
+  drawSnapshotHeroPerformance(snapshotOne.context,{annualized,totalReturn});
+  drawSnapshotSummaryMetric(snapshotOne.context,{x:72,y:704,width:296,label:"当前总资产",value:formatRednoteMoney(total),accent:"#20345d"});
+  drawSnapshotSummaryMetric(snapshotOne.context,{x:393,y:704,width:296,label:"累计入金（已记录）",value:deposits?formatRednoteMoney(deposits):"—",accent:"#dca23b"});
+  drawSnapshotSummaryMetric(snapshotOne.context,{x:714,y:704,width:294,label:"投资最长时间",value:maxYears?maxYears.toFixed(1)+"年":"—",accent:"#16816c"});
+  drawSnapshotTrendChart(snapshotOne.context,history);
+  drawSnapshotText(snapshotOne.context,"注：家庭年化回报按成员年化值与成本加权估算；入金统计按资金异动表记录。",72,985,15,"#707b8a",550);
+
+  const snapshotTwo=createSnapshotCanvas("大盘绩效对比","以相同入金日期与原币模拟大盘，按最新资产快照日对照",2);
+  drawSnapshotText(snapshotTwo.context,"我的组合 · 当前总资产",72,422,22,"#707b8a",700);
+  drawSnapshotText(snapshotTwo.context,formatRednoteMoney(total),72,478,54,"#20345d",850);
+  const verdict=drawSnapshotComparisonResult(snapshotTwo.context,benchmarks,total);
+  let benchmarkY=604;
+  benchmarks.forEach(benchmark=>{
+    drawSnapshotBenchmarkCard(snapshotTwo.context,{benchmark,portfolio:total});
+    benchmarkY+=318;
+  });
+  if(benchmarks.length===1)drawSnapshotText(snapshotTwo.context,"另一项基准数据暂不可用",72,946,17,"#707b8a",550);
+  drawSnapshotText(snapshotTwo.context,"基准：台股加权指数、标普 500 · 采用日收盘价，未计股息与交易费用。",72,1260,16,"#707b8a",550);
+  drawSnapshotText(snapshotTwo.context,"按资金异动表已记录的日期、金额与原币模拟；更早未记录的入金不纳入基准。",72,1292,15,"#707b8a",550);
+
+  const snapshotThree=createSnapshotCanvas("长期复利成果","持续记录投入与净值变化，让长期比较更清晰",3);
+  fillRoundRect(snapshotThree.context,72,354,936,260,28,"#20345d");
+  drawSnapshotText(snapshotThree.context,"当前总资产",112,414,22,"#dbe3f1",700);
+  drawSnapshotText(snapshotThree.context,formatRednoteMoney(total),112,516,68,"#ffffff",850);
+  drawSnapshotText(snapshotThree.context,"截至 "+(model.snapshotDate||"—"),112,566,18,"#dbe3f1",550);
+  drawSnapshotSummaryMetric(snapshotThree.context,{x:72,y:660,width:296,label:"累计入金（已记录）",value:deposits?formatRednoteMoney(deposits):"—",accent:"#dca23b"});
+  drawSnapshotSummaryMetric(snapshotThree.context,{x:393,y:660,width:296,label:"总回报率",value:rednoteRate(totalReturn),accent:"#16816c"});
+  drawSnapshotSummaryMetric(snapshotThree.context,{x:714,y:660,width:294,label:"加权年化回报",value:rednoteRate(annualized),accent:"#20345d"});
+  fillRoundRect(snapshotThree.context,72,866,936,198,24,"#f5f6f5");
+  drawSnapshotText(snapshotThree.context,"资产成长",104,916,21,"#171d2a",800);
+  drawSnapshotText(snapshotThree.context,"总成本",104,964,16,"#707b8a",600);
+  drawSnapshotText(snapshotThree.context,formatRednoteMoney(cost),260,964,19,"#171d2a",750);
+  drawSnapshotText(snapshotThree.context,"当前净值",536,964,16,"#707b8a",600);
+  drawSnapshotText(snapshotThree.context,formatRednoteMoney(total),692,964,19,"#20345d",800);
+  const growth=Math.max(0,Math.min(total/cost,1));
+  fillRoundRect(snapshotThree.context,104,1000,872,18,9,"#e1e5e8");
+  fillRoundRect(snapshotThree.context,104,1000,872*growth,18,9,"#16816c");
+  const resultText=verdict.total?verdict.summary:"持续记录投入，逐步积累长期成果。";
+  fillRoundRect(snapshotThree.context,72,1110,936,170,24,"#edf0f4");
+  drawSnapshotText(snapshotThree.context,"基准比较总结",104,1160,19,"#707b8a",700);
+  drawSnapshotWrapped(snapshotThree.context,resultText,104,1209,830,26,36,"#20345d",800);
+  drawSnapshotText(snapshotThree.context,"总回报按总成本计算 · 入金按已记录资金异动统计",72,1310,15,"#707b8a",550);
   return [
-    {title:"家庭资产快照",filename:"family-asset-snapshot.png",canvas:snapshotOne.canvas},
-    {title:"资产配置快照",filename:"asset-allocation-snapshot.png",canvas:snapshotTwo.canvas},
-    {title:"成长目标快照",filename:"growth-target-snapshot.png",canvas:snapshotThree.canvas}
+    {title:"投资成绩快照",filename:"investment-performance-snapshot.png",canvas:snapshotOne.canvas},
+    {title:"大盘绩效对比",filename:"market-performance-comparison.png",canvas:snapshotTwo.canvas},
+    {title:"长期复利成果",filename:"long-term-compounding-summary.png",canvas:snapshotThree.canvas}
   ];
 }
 function canvasToPng(canvas){
@@ -685,7 +783,8 @@ async function openRednoteExport(){
   rednoteExportBusy=true;
   try{
     revokeRednoteImages();
-    const pngs=await Promise.all(buildRednoteSnapshots().map(async image=>({...image,url:URL.createObjectURL(await canvasToPng(image.canvas))})));
+    const snapshots=await buildRednoteSnapshots();
+    const pngs=await Promise.all(snapshots.map(async image=>({...image,url:URL.createObjectURL(await canvasToPng(image.canvas))})));
     rednoteExportImages=pngs;
     $("#rednoteExportPreviews").innerHTML=pngs.map((image,index)=>`<article class="export-preview"><img src="${image.url}" alt="${image.title} 预览"><strong>${image.title}</strong><button class="btn" type="button" data-rednote-download="${index}">下载 PNG</button></article>`).join("");
     $("#rednoteExportModal").hidden=false;
