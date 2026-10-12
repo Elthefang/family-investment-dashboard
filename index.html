@@ -776,7 +776,7 @@ function revokeRednoteImages(){rednoteExportImages.forEach(image=>URL.revokeObje
 function downloadRednoteImage(image){const link=document.createElement("a");link.href=image.url;link.download=image.filename;document.body.appendChild(link);link.click();link.remove()}
 function closeRednoteExport(){ $("#rednoteExportModal").hidden=true;revokeRednoteImages();$("#rednoteExportPreviews").innerHTML=""; }
 function showRednoteNotice(message){const notice=$("#rednoteExportNotice");notice.textContent=message;notice.hidden=false;clearTimeout(notice._timeout);notice._timeout=setTimeout(()=>notice.hidden=true,4200)}
-async async function openRednoteExport(){
+async function openRednoteExport(){
   if(!model?.accounts?.length){showRednoteNotice(rednoteText("請先同步 Google Sheet 後再生成小紅書圖片。","请先同步 Google Sheet 后再生成小红书图片。"));return}
   if($("#app").classList.contains("masked")){showRednoteNotice(rednoteText("目前已開啟金額隱藏。請先顯示金額再生成小紅書圖片。","当前已开启金额隐藏。请先显示金额再生成小红书图片。"));return}
   if(rednoteExportBusy)return;
