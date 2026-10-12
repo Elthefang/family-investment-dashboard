@@ -1420,13 +1420,14 @@ function renderTrend(){
   for(let i=0;i<=4;i++){const v=mn+(mx-mn)*i/4,y=Y(v);out+=`<line class="gridline" x1="${p.l}" y1="${y}" x2="${W-p.r}" y2="${y}"/><text class="axis" x="${p.l-7}" y="${y+4}" text-anchor="end">${short(v)}</text>`}
   const pts=h.map((d,i)=>[X(i),Y(d[key])]),path=pts.map((q,i)=>(i?"L":"M")+q.join(",")).join(" ");
   const area=path+` L ${pts.at(-1)[0]},${H-p.b} L ${pts[0][0]},${H-p.b} Z`;
+  out+=`<path class="area" d="${area}"/>`;
   overlay.forEach(series=>{
     const plotted=series.points.map((point,index)=>point?{x:X(index),y:Y(point.value)}:null);
     const marketPath=plotted.map((point,index)=>point?(index===0||!plotted[index-1]?"M":"L")+point.x+","+point.y:"").filter(Boolean).join(" ");
     out+='<path d="'+marketPath+'" fill="none" stroke="'+series.color+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"'+(series.id==="us"?' stroke-dasharray="6 4"':'')+'/>';
     plotted.forEach(point=>{if(point)out+='<circle cx="'+point.x+'" cy="'+point.y+'" r="2.2" fill="'+series.color+'"/>'});
   });
-  out+=`<path class="area" d="${area}"/><path class="trend" d="${path}"/`;
+  out+=`<path class="trend" d="${path}"/>`;
   pts.forEach((q,i)=>{out+=`<circle class="point" cx="${q[0]}" cy="${q[1]}" r="2.5"></circle>`;
     if(i===0||i===pts.length-1||pts.length<=7){
       const isFirst=i===0,isLast=i===pts.length-1;
