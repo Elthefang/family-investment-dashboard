@@ -409,6 +409,7 @@
 const CONFIG=window.APP_CONFIG||{};
 const SHEET_ID=CONFIG.GOOGLE_SHEET_ID||"";
 const SHEET_RANGE=CONFIG.GOOGLE_SHEET_RANGE||"'總表'!A:R";
+const CASH_FLOW_RANGE=CONFIG.GOOGLE_SHEET_CASH_FLOW_RANGE||"'資金異動'!A:F";
 const GOOGLE_CLIENT_ID=CONFIG.GOOGLE_CLIENT_ID||"";
 const PAGE_VIEW_ENDPOINT=CONFIG.PAGE_VIEW_ENDPOINT||"";
 const GOOGLE_SCOPE="https://www.googleapis.com/auth/spreadsheets.readonly";
@@ -897,35 +898,38 @@ function scheduleRefresh(){
   if(refreshTimer)clearInterval(refreshTimer);
   refreshTimer=setInterval(()=>{if(accessToken)sync()},REFRESH_MS);
 }
+async function fetchSheetValues(range){
+  const url="https://sheets.googleapis.com/v4/spreadsheets/"+encodeURIComponent(SHEET_ID)+"/values/"+encodeURIComponent(range)+"?majorDimension=ROWS&valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=SERIAL_NUMBER";
+  const res=await fetch(url,{method:"GET",headers:{Authorization:"Bearer "+accessToken},cache:"no-store",credentials:"omit"});
+  if(res.status===401){accessToken=null;if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null}resetPromptFallback();throw new Error("登入已過期，請再次按下按鈕繼續。")}
+  if(res.status===403)throw new Error("此 Google 帳號沒有試算表權限，或尚未啟用 Google Sheets API");
+  if(res.status===404)throw new Error("找不到試算表或指定分頁範圍："+range);
+  if(!res.ok){let detail="";try{detail=(await res.json())?.error?.message||""}catch(_){}throw new Error(detail||("Google Sheets API 錯誤 "+res.status))}
+  const data=await res.json();return Array.isArray(data.values)?data.values:[];
+}
 async function loadSummary(){
   if(!accessToken)throw new Error("尚未登入");
-  const range=encodeURIComponent(SHEET_RANGE);
-  const url=`https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(SHEET_ID)}/values/${range}?majorDimension=ROWS&valueRenderOption=UNFORMATTED_VALUE&dateTimeRenderOption=SERIAL_NUMBER`;
-  const res=await fetch(url,{
-    method:"GET",
-    headers:{Authorization:`Bearer ${accessToken}`},
-    cache:"no-store",
-    credentials:"omit"
-  });
-  if(res.status===401){
-    accessToken=null;
-    if(refreshTimer){clearInterval(refreshTimer);refreshTimer=null}
-    resetPromptFallback();
-    throw new Error("登入已過期，請再次按下按鈕繼續。");
-  }
-  if(res.status===403){
-    throw new Error("此 Google 帳號沒有試算表權限，或尚未啟用 Google Sheets API");
-  }
-  if(res.status===404){
-    throw new Error("找不到試算表或「總表」範圍");
-  }
-  if(!res.ok){
-    let detail="";
-    try{detail=(await res.json())?.error?.message||""}catch(_){}
-    throw new Error(detail||`Google Sheets API 錯誤 ${res.status}`);
-  }
-  const data=await res.json();
-  return Array.isArray(data.values)?data.values:[];
+  const [summary,flows]=await Promise.all([fetchSheetValues(SHEET_RANGE),fetchSheetValues(CASH_FLOW_RANGE)]);
+  return {summary:summary,flows:flows};
+}
+function parseCashFlows(rows){
+  if(!Array.isArray(rows)||!rows.length)return[];
+  const headers=(rows[0]||[]).map(value=>norm(value));
+  const dateColumn=headers.findIndex(value=>value.includes("日期"));
+  const typeColumn=headers.findIndex(value=>value.includes("項目")||value.includes("類型"));
+  const amountColumn=headers.findIndex(value=>value.includes("金額")&&(/twd|台幣|新台幣/.test(value)));
+  const ownerColumn=headers.findIndex(value=>value.includes("帳戶")||value.includes("持有人"));
+  if(dateColumn<0||typeColumn<0||amountColumn<0)throw new Error("「資金異動」分頁需有「日期」、「項目」及「金額（TWD）」欄位。");
+  return rows.slice(1).map(row=>{
+    const date=parseDate(row?.[dateColumn]);
+    const type=String(row?.[typeColumn]??"").trim().toLowerCase();
+    const amount=Math.abs(safeNum(row?.[amountColumn])??0);
+    const ownerText=String(ownerColumn>=0?row?.[ownerColumn]??"":"").toLowerCase();
+    const owner=/媽媽|妈妈|mom/.test(ownerText)?"mom":/哥哥|brother/.test(ownerText)?"brother":"family";
+    const kind=/入金|存入|deposit|contribution/.test(type)?"deposit":/出金|提領|提款|withdraw/.test(type)?"withdrawal":"";
+    if(!date||!amount||!kind)return null;
+    return {date:date,delta:kind==="deposit"?amount:-amount,owner:owner};
+  }).filter(Boolean).sort((a,b)=>a.date.localeCompare(b.date));
 }
 function firstPositive(rows,col){
   for(const r of rows){const n=safeNum(r?.[col]);if(n!==null&&n>0)return n}
@@ -1526,11 +1530,12 @@ async function sync(){
   if(syncing)return;
   if(!accessToken){showLogin("請重新登入後同步資料。",true);return}
   syncing=true;let seconds=0;
-  setStatus("loading","正在從私人 Google Sheet 讀取「總表」… 0 秒");
+  setStatus("loading","正在從私人 Google Sheet 讀取「總表」與「資金異動」… 0 秒");
   ticker=setInterval(()=>{seconds++;setStatus("loading",`正在從私人 Google Sheet 讀取「總表」… ${seconds} 秒`)},1000);
   try{
-    const rows=await loadSummary();
-    model=parseSummary(rows);
+    const loaded=await loadSummary();
+    model=parseSummary(loaded.summary);
+    model.cashFlows=parseCashFlows(loaded.flows);
     activeRoadmapTarget=null;
     calendarMonth=null;
     $("#empty").classList.remove("show");
