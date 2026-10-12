@@ -208,7 +208,7 @@
     .google-login:disabled{opacity:.55;cursor:progress}
     .login-message{min-height:22px;margin:12px 0 0!important;font-size:12px!important}
     .login-help{font-size:11px!important;margin-top:18px!important}
-    .currency-selector{appearance:none;min-width:90px;height:42px;padding:0 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface2);color:var(--text);font:inherit;font-size:12px;font-weight:800;text-align:center;text-align-last:center;cursor:pointer;box-shadow:var(--shadow)}
+    .currency-selector{appearance:none;min-width:90px;height:42px;padding:0 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface2);color:var(--text);font:inherit;font-size:12px;font-weight:800;text-align:center;text-align-last:center;cursor:pointer;box-shadow:var(--shadow)}#logoutBtn{width:90px;height:42px;padding:0;display:grid;place-items:center;white-space:nowrap}
     .currency-selector:focus-visible,.btn:focus-visible,.tab:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
     .export-modal[hidden],.export-notice[hidden]{display:none}
     .export-modal{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:22px;background:rgba(9,17,31,.62);backdrop-filter:blur(6px)}
@@ -221,7 +221,7 @@
     @media(max-width:1100px){.roadmap-chart{padding-top:86px}}
     @media(max-width:880px){.kpis,.kpis.five-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr}}
     @media(max-width:620px){.app{padding:17px 11px 42px}header{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:8px}.app header>div:first-child{display:contents}.brand-heading{grid-column:1;grid-row:1;gap:7px}.brand-mark{width:40px;height:40px;flex-basis:40px}.app header h1{font-size:clamp(18px,5.2vw,22px);overflow-wrap:anywhere}.actions{grid-column:2;grid-row:1;justify-content:flex-end;gap:5px;flex-wrap:nowrap;min-width:0}.status{grid-column:1/-1;grid-row:2;width:100%;white-space:nowrap}.status-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .currency-selector{min-width:78px;width:84px;height:38px;padding:0 7px;font-size:11px}.icon-btn{width:38px;height:38px}#logoutBtn{padding:8px 10px;white-space:nowrap}
+      .currency-selector{min-width:0;width:72px;height:38px;padding:0 5px;font-size:11px}#logoutBtn{width:72px;height:38px;padding:0;font-size:12px}.icon-btn{width:38px;height:38px}
       .export-modal{padding:12px}.export-dialog{max-height:calc(100svh - 24px);padding:17px;border-radius:18px}.export-preview-grid{grid-template-columns:1fr}.export-actions{display:grid;grid-template-columns:1fr}.export-actions .btn{width:100%}
       .kpis,.kpis.five-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
       .card{padding:15px;border-radius:17px}.table-card{padding:0}.table-card .table-head{padding:12px 14px 8px}.number{font-size:23px}
@@ -281,13 +281,13 @@
       </div>
     </div>
     <div class="actions">
-      <select class="currency-selector" id="currencySelector" aria-label="顯示幣別" data-i18n-aria-label="currencySelectorLabel">
-        <option value="TWD">TWD</option><option value="USD">USD</option><option value="CNY">RMB</option>
-      </select>
       <button class="btn icon-btn" id="privacyBtn" type="button" aria-label="隱藏金額" title="隱藏金額">
         <svg class="eye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.7"/></svg>
         <svg class="eye-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 6.2A10.7 10.7 0 0 1 12 6c6.1 0 9.5 6 9.5 6a16 16 0 0 1-3.1 3.8M6.2 6.3C3.8 7.9 2.5 12 2.5 12s3.4 6 9.5 6c1.2 0 2.3-.2 3.3-.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
       </button>
+      <select class="currency-selector" id="currencySelector" aria-label="顯示幣別" data-i18n-aria-label="currencySelectorLabel">
+        <option value="TWD">TWD</option><option value="USD">USD</option><option value="CNY">RMB</option>
+      </select>
       <button class="btn" id="logoutBtn" type="button" data-i18n="logout">登出</button>
     </div>
   </header>
