@@ -165,6 +165,16 @@
     .trend-readout{min-height:58px;margin:-4px 0 8px;display:grid;align-content:start}
     .trend-readout-value{font-size:clamp(26px,4vw,38px);line-height:1.05;font-weight:850;letter-spacing:-.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .trend-readout-date{margin-top:6px;color:var(--muted);font-size:13px}
+    .trend-comparison{display:flex;flex-wrap:wrap;gap:5px 14px;margin-top:8px}
+    .trend-comparison[hidden]{display:none}
+    .trend-comparison-row{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:750}
+    .trend-comparison-dot{width:8px;height:8px;flex:0 0 auto;border-radius:50%;background:var(--market-tw)}
+    .trend-comparison-row.us .trend-comparison-dot{background:var(--market-us)}
+    .trend-comparison-label{color:var(--muted)}
+    .trend-comparison-result{font-variant-numeric:tabular-nums}
+    .trend-comparison-result.ahead{color:var(--positive)}
+    .trend-comparison-result.behind{color:var(--negative)}
+    .trend-comparison-empty{color:var(--muted);font-size:10px}
     .chart{height:250px}.chart svg{width:100%;height:100%;display:block;overflow:visible;touch-action:pan-y}
     .trend-legend{display:flex;flex-wrap:wrap;gap:9px 18px;align-items:center;margin-top:12px}
     .trend-legend-item{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:12px;font-weight:750}
@@ -375,6 +385,7 @@
       <div class="trend-readout" id="trendReadout" aria-live="polite">
         <div class="trend-readout-value money" id="trendReadoutValue">—</div>
         <div class="trend-readout-date" id="trendReadoutDate">—</div>
+        <div class="trend-comparison" id="trendComparison" hidden aria-live="polite"></div>
       </div>
       <div class="chart"><svg id="trend" viewBox="0 0 700 250" aria-label="總資產趨勢圖"></svg>
         <div class="cashflow-tooltip" id="cashflowTooltip" role="status" hidden><strong class="cashflow-tooltip-date"></strong><div class="cashflow-tooltip-items"></div></div>
@@ -769,6 +780,43 @@ function showCashFlowTooltip(index,pinned){
   tooltip.hidden=false;
   cashflowTooltipPinned=Boolean(pinned);
 }
+function renderTrendComparison(index){
+  const container=$("#trendComparison");
+  if(!container)return;
+  container.replaceChildren();
+  const series=trendState.benchmarkSeries||[];
+  if(!series.length){container.hidden=true;return}
+  const date=trendState.points[index]?.date||"";
+  let count=0;
+  series.forEach(item=>{
+    const benchmark=item.points[index];
+    const row=document.createElement("span");
+    row.className="trend-comparison-row "+item.id;
+    const dot=document.createElement("i");dot.className="trend-comparison-dot";dot.setAttribute("aria-hidden","true");
+    const label=document.createElement("span");label.className="trend-comparison-label";
+    const value=document.createElement("span");
+    if(!benchmark){
+      label.textContent=item.id==="tw"?copy("benchmarkTaiwan"):copy("benchmarkUS");
+      value.className="trend-comparison-empty";
+      value.textContent=currentLanguage()==="en"?"No benchmark value":"此日期尚無可比較資料";
+    }else{
+      const actual=trendState.points[index].value,difference=actual-benchmark.value,ahead=difference>=0;
+      const rate=benchmark.value?difference/benchmark.value:0;
+      label.textContent=(item.id==="tw"?copy("benchmarkTaiwan"):copy("benchmarkUS"))+" · "+(currentLanguage()==="en"?(ahead?"ahead":"behind"):(ahead?"領先":"落後"));
+      value.className="trend-comparison-result "+(ahead?"ahead":"behind")+" money";
+      value.textContent=(ahead?"+":"−")+formatMoney(Math.abs(difference))+" ("+formatRateValue(rate)+")";
+    }
+    row.append(dot,label,value);container.appendChild(row);count++;
+  });
+  if(!count){container.hidden=true;return}
+  if(series.every(item=>!item.points[index])){
+    const note=document.createElement("span");
+    note.className="trend-comparison-empty";
+    note.textContent=currentLanguage()==="en"?"Benchmark comparison starts at the first recorded cash flow":"大盤比較從第一筆已記錄入金日起算";
+    container.appendChild(note);
+  }
+  container.hidden=false;
+}
 function showTrendSelection(index){
   const svg=$("#trend");
   if(!trendState.elements||index<0||!trendState.points[index]){
@@ -789,6 +837,7 @@ function showTrendSelection(index){
   marker.setAttribute("cy",point.y);
   readoutValue.textContent=formatMoney(point.value);
   readoutDate.textContent=point.date;
+  renderTrendComparison(index);
   svg.setAttribute("aria-label",$("#app").classList.contains("masked")?`總資產趨勢圖，${point.date}，金額已隱藏`:`總資產趨勢圖，${point.date}，${formatMoney(point.value)}`);
 }
 function parseDate(v){
@@ -1528,6 +1577,8 @@ function renderTrend(){
     trendState.points=[];
     trendState.activeIndex=-1;
     trendState.elements={crosshair:null,marker:null,readoutValue,readoutDate};
+    trendState.benchmarkSeries=[];
+    $("#trendComparison").hidden=true;
     readoutValue.textContent="—";
     readoutDate.textContent="—";
     svg.innerHTML='<text x="350" y="120" text-anchor="middle" class="axis">需要至少兩筆有效歷史資料</text>';
@@ -1537,6 +1588,7 @@ function renderTrend(){
   const requestKey=benchmarkHistoryKey(h,key);
   requestBenchmarkOverlay(h,key,requestKey);
   const overlay=benchmarkOverlayState.key===requestKey&&benchmarkOverlayState.status==="ready"?benchmarkOverlayState.series:[];
+  trendState.benchmarkSeries=overlay;
   const overlayValues=overlay.flatMap(series=>series.points.filter(Boolean).map(point=>point.value));
   const W=700,H=250,p={l:58,r:24,t:12,b:36},vals=h.map(x=>x[key]),allValues=vals.concat(overlayValues),mn=Math.min(...allValues)*.95,mx=Math.max(...allValues)*1.03;
   const X=i=>p.l+(W-p.l-p.r)*(i/(h.length-1)),Y=v=>p.t+(H-p.t-p.b)*(1-(v-mn)/(mx-mn||1));
