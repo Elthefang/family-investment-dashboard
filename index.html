@@ -474,6 +474,7 @@ let calendarMonth=null;
 let displayCurrency="TWD";
 const REDNOTE_EXPORT_SIZE={width:1080,height:1440};
 const REDNOTE_COLORS={cash:"#75839a",tw:"#dca23b",us:"#20345d",crypto:"#e25259"};
+const REDNOTE_THEME={brand:"#20345d",marketUS:"#657da9",marketTW:"#dca23b",positive:"#16816c",negative:"#c94850",text:"#171d2a",muted:"#707b8a",surface:"#ffffff",surfaceMuted:"#f5f6f5",line:"#e1e5e8",soft:"#edf0f4",positiveSoft:"#e7f3ef",negativeSoft:"#fae9e9"};
 let rednoteExportTapCount=0,rednoteExportTapTimer=null,rednoteExportBusy=false,rednoteExportCooldownUntil=0,rednoteExportImages=[];
 
 const $=s=>document.querySelector(s);
@@ -671,37 +672,65 @@ async function getRednoteBenchmarkResults(history){
     ].filter(Boolean).map(item=>({id:item.id,value:item.points.filter(Boolean).at(-1)?.value}));
   }catch(error){console.warn("Rednote benchmark comparison unavailable",error);return[]}
 }
-function drawSnapshotBenchmarkCard(context,{benchmark,portfolio}){
-  fillRoundRect(context,72,604,936,294,24,"#f5f6f5");
-  const isTw=benchmark.id==="tw",color=isTw?"#dca23b":"#657da9",title=isTw?"台股大盘 · 台湾加权指数":"美股大盘 · 标普 500";
-  context.fillStyle=color;context.beginPath();context.arc(111,652,9,0,Math.PI*2);context.fill();
-  drawSnapshotText(context,title,134,660,22,"#171d2a",800);
-  drawSnapshotText(context,"我的组合",104,716,18,"#707b8a",650);
-  drawSnapshotText(context,formatRednoteMoney(portfolio),104,764,30,"#20345d",850);
-  drawSnapshotText(context,"大盘模拟",536,716,18,"#707b8a",650);
-  drawSnapshotText(context,formatRednoteMoney(benchmark.value),536,764,30,"#171d2a",800);
-  const difference=portfolio-benchmark.value,relative=benchmark.value?difference/benchmark.value:0,ahead=difference>=0;
-  fillRoundRect(context,104,798,872,72,18,ahead?"#e7f3ef":"#fae9e9");
-  drawSnapshotText(context,(ahead?"跑赢 ":"未跑赢 ")+(isTw?"台股":"美股")+"基准",128,844,20,ahead?"#16816c":"#c94850",800);
-  drawSnapshotText(context,(ahead?"+":"−")+formatRednoteMoney(Math.abs(difference))+"（"+rednoteRate(relative)+"）",952,844,22,ahead?"#16816c":"#c94850",850,"right");
+function drawSnapshotComparisonBars(context,{portfolio,sp500}){
+  const colors=REDNOTE_THEME,x=72,y=710,width=936,height=342,innerX=104,innerRight=976,barWidth=872;
+  fillRoundRect(context,x,y,width,height,26,colors.surfaceMuted);
+  drawSnapshotText(context,"期末资产价值对比",innerX,y+48,25,colors.text,850);
+  drawSnapshotText(context,"两组金额均按相同入出金日期模拟",innerX,y+78,16,colors.muted,550);
+  const rows=[
+    {label:"我的组合",value:portfolio,color:colors.brand,labelY:y+137,barY:y+158},
+    {label:"标普500模拟",value:sp500,color:colors.marketUS,labelY:y+235,barY:y+256}
+  ];
+  const maxValue=Math.max(portfolio,sp500,0);
+  rows.forEach(row=>{
+    drawSnapshotText(context,row.label,innerX,row.labelY,19,colors.text,750);
+    drawSnapshotText(context,formatRednoteMoney(row.value),innerRight,row.labelY,21,colors.text,800,"right");
+    fillRoundRect(context,innerX,row.barY,barWidth,24,12,colors.line);
+    const ratio=maxValue>0?Math.max(0,Math.min(row.value/maxValue,1)):0;
+    if(ratio>0)fillRoundRect(context,innerX,row.barY,barWidth*ratio,24,12,row.color);
+  });
 }
-function drawSnapshotComparisonResult(context,results,portfolio){
+function drawSnapshotTaiwanSupport(context,{portfolio,benchmark}){
+  const colors=REDNOTE_THEME,x=72,y=1080,width=936,height=122;
+  fillRoundRect(context,x,y,width,height,22,colors.soft);
+  drawSnapshotText(context,"台股大盘模拟",104,y+43,18,colors.muted,700);
+  drawSnapshotText(context,Number.isFinite(benchmark?.value)?formatRednoteMoney(benchmark.value):"—",104,y+88,31,colors.text,850);
+  drawSnapshotText(context,"组合期末资产差额",976,y+43,16,colors.muted,650,"right");
+  const difference=Number.isFinite(benchmark?.value)?portfolio-benchmark.value:null;
+  const color=Number.isFinite(difference)?(difference>=0?colors.positive:colors.negative):colors.muted;
+  const value=Number.isFinite(difference)?(difference>0?"+":difference<0?"−":"")+formatRednoteMoney(Math.abs(difference)):"暂不可用";
+  drawSnapshotText(context,value,976,y+88,25,color,850,"right");
+}
+function summarizeSnapshotComparison(results,portfolio){
   const available=results.filter(item=>Number.isFinite(item.value));
-  if(!available.length){
-    fillRoundRect(context,72,482,936,102,20,"#f5f6f5");
-    drawSnapshotText(context,"大盘比较暂不可用",104,545,26,"#707b8a",750);
-    return{wins:0,total:0,summary:"大盘比较数据暂不可用"};
-  }
   const wins=available.filter(item=>portfolio>=item.value).length;
-  const label=wins===available.length?"跑赢全部基准":wins===0?"暂未跑赢基准":("跑赢 "+wins+" 项基准");
-  fillRoundRect(context,72,482,936,102,20,wins?"#e7f3ef":"#fae9e9");
-  drawSnapshotText(context,label,104,548,34,wins?"#16816c":"#c94850",850);
-  drawSnapshotText(context,wins+"/"+available.length+" 项",972,546,20,"#707b8a",700,"right");
   const summary=available.map(item=>{
     const name=item.id==="tw"?"台股":"美股";
     return portfolio>=item.value?"跑赢"+name+"基准":"未跑赢"+name+"基准";
   }).join(" · ");
-  return{wins,total:available.length,summary};
+  return{wins,total:available.length,summary:summary||"大盘比较数据暂不可用"};
+}
+function drawSnapshotBenchmarkComparison(context,{portfolio,benchmarks,snapshotDate}){
+  const colors=REDNOTE_THEME,sp500=benchmarks.find(item=>item.id==="us"),taiwan=benchmarks.find(item=>item.id==="tw");
+  const hero={x:72,y:354,width:936,height:314};
+  fillRoundRect(context,hero.x,hero.y,hero.width,hero.height,28,colors.brand);
+  drawSnapshotText(context,"相对标普500模拟",104,hero.y+55,19,"#dbe3f1",700);
+  if(sp500&&Number.isFinite(sp500.value)){
+    const difference=portfolio-sp500.value,relative=sp500.value?difference/sp500.value:null;
+    const relation=difference>0?"高于":difference<0?"低于":"持平";
+    drawSnapshotText(context,"期末资产价值差额",104,hero.y+101,22,"#dbe3f1",700);
+    const primary=(difference>0?"+":difference<0?"−":"")+formatRednoteMoney(Math.abs(difference));
+    drawSnapshotText(context,primary,104,hero.y+207,88,difference>=0?"#ffffff":"#ffd0d0",850);
+    const percent=Number.isFinite(relative)?rednoteRate(relative):"—";
+    drawSnapshotText(context,"组合期末资产"+relation+"标普500模拟 · 资产价值差距 "+percent,104,hero.y+260,19,"#dbe3f1",650);
+  }else{
+    drawSnapshotText(context,"标普500模拟数据暂不可用",104,hero.y+166,34,"#ffffff",800);
+  }
+  drawSnapshotComparisonBars(context,{portfolio,sp500:sp500?.value||0});
+  drawSnapshotTaiwanSupport(context,{portfolio,benchmark:taiwan});
+  drawSnapshotText(context,"口径：两种大盘均使用全部已记录家庭入出金的日期与金额分别模拟。",72,1248,15,colors.muted,550);
+  drawSnapshotText(context,"资产价值差距 = 组合期末价值 ÷ 基准模拟期末价值 − 1；不等同超额报酬率。",72,1277,15,colors.muted,550);
+  drawSnapshotWrapped(context,"美股现金流按异动日汇率换算为美元；基准采用每日收盘价，未计股息与交易费用。",72,1306,936,14,21,colors.muted,550);
 }
 async function buildRednoteSnapshots(){
   const logo=document.querySelector(".brand-mark img");
@@ -727,18 +756,9 @@ async function buildRednoteSnapshots(){
   drawSnapshotTrendChart(snapshotOne.context,history);
   drawSnapshotText(snapshotOne.context,"注：家庭年化回报按成员年化值与成本加权估算；入金统计按资金异动表记录。",72,985,15,"#707b8a",550);
 
-  const snapshotTwo=createSnapshotCanvas("大盘绩效对比","以相同入金日期与原币模拟大盘，按最新资产快照日对照",2);
-  drawSnapshotText(snapshotTwo.context,"我的组合 · 当前总资产",72,422,22,"#707b8a",700);
-  drawSnapshotText(snapshotTwo.context,formatRednoteMoney(total),72,478,54,"#20345d",850);
-  const verdict=drawSnapshotComparisonResult(snapshotTwo.context,benchmarks,total);
-  let benchmarkY=604;
-  benchmarks.forEach(benchmark=>{
-    drawSnapshotBenchmarkCard(snapshotTwo.context,{benchmark,portfolio:total});
-    benchmarkY+=318;
-  });
-  if(benchmarks.length===1)drawSnapshotText(snapshotTwo.context,"另一项基准数据暂不可用",72,946,17,"#707b8a",550);
-  drawSnapshotText(snapshotTwo.context,"基准：台股加权指数、标普 500 · 采用日收盘价，未计股息与交易费用。",72,1260,16,"#707b8a",550);
-  drawSnapshotWrapped(snapshotTwo.context,"两条基准均纳入全部已记录入出金；台币现金流按异动日汇率换算后投入标普，期末按网页所选币别显示。",72,1282,936,14,21,"#707b8a",550);
+  const snapshotTwo=createSnapshotCanvas("大盘绩效对比","相同家庭入出金 · 截至 "+(model.snapshotDate||"—")+" · 人民币展示",2);
+  const verdict=summarizeSnapshotComparison(benchmarks,total);
+  drawSnapshotBenchmarkComparison(snapshotTwo.context,{portfolio:total,benchmarks,snapshotDate:model.snapshotDate});
 
   const snapshotThree=createSnapshotCanvas("长期复利成果","持续记录投入与净值变化，让长期比较更清晰",3);
   fillRoundRect(snapshotThree.context,72,354,936,260,28,"#20345d");
