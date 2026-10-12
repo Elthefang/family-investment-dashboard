@@ -988,6 +988,9 @@ function parseSummary(rows){
     if(!date)continue;
     history.push({date,brother:brother??0,mom:mom??0,family:(brother??0)+(mom??0)});
   }
+  // Keep stored snapshots separate from the live query row above the header.
+  // The live row may use NOW(), so its date must not create a calendar event.
+  const snapshotHistory=history.map(record=>({...record}));
   const currentDate=parseDate(current[6]);
   const brotherNow=safeNum(current[9])??accounts.filter(a=>a.owner==="哥哥").reduce((s,a)=>s+a.value,0);
   const momNow=safeNum(current[15])??accounts.filter(a=>a.owner==="媽媽").reduce((s,a)=>s+a.value,0);
@@ -999,6 +1002,7 @@ function parseSummary(rows){
     snapshotDate:currentDate||history.at(-1)?.date||"",
     accounts,
     history,
+    snapshotHistory,
     annualized:{
       mom:parseOptionalRate(rows?.[0]?.[17]),
       brother:parseOptionalRate(rows?.[0]?.[11])
@@ -1547,7 +1551,7 @@ function buildChangeCalendar(history,key,monthKey){
 }
 function renderChangeCalendar(){
   const key=view==="mom"?"mom":view==="brother"?"brother":"family";
-  const history=model?.history||[];
+  const history=model?.snapshotHistory||model?.history||[];
   const calendar=buildChangeCalendar(history,key,calendarMonth||"");
   const monthLabel=$("#calendarMonthLabel"),days=$("#calendarDays");
   if(calendar.records.length<2){
