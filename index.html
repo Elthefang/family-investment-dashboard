@@ -180,6 +180,22 @@
     .crosshair{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 5;opacity:.65}
     .selected-point{fill:var(--surface);stroke:var(--brand);stroke-width:3}
     .interaction-hit{fill:transparent;pointer-events:all;cursor:crosshair}
+    .cashflow-marker{cursor:pointer;pointer-events:all;outline:none}
+    .cashflow-marker line{stroke:var(--positive);stroke-width:1.4;stroke-dasharray:2 3;opacity:.8}
+    .cashflow-marker.withdrawal line{stroke:var(--negative)}
+    .cashflow-dot{fill:var(--positive);stroke:var(--surface);stroke-width:2}
+    .cashflow-marker.withdrawal .cashflow-dot{fill:var(--negative)}
+    .cashflow-hit{fill:transparent;stroke:none}
+    .cashflow-marker:focus .cashflow-dot{stroke:var(--text);stroke-width:3}
+    .chart{position:relative}
+    .cashflow-tooltip{position:absolute;z-index:5;transform:translate(-50%,-100%);pointer-events:none;
+      min-width:138px;max-width:min(230px,calc(100vw - 42px));padding:9px 11px;border:1px solid var(--line);
+      border-radius:12px;background:var(--surface);box-shadow:var(--shadow);color:var(--text);font-size:11px;line-height:1.45}
+    .cashflow-tooltip[hidden]{display:none}
+    .cashflow-tooltip-date{display:block;margin-bottom:4px;color:var(--muted);font-size:10px;font-weight:800}
+    .cashflow-tooltip-item{display:block;font-weight:800;white-space:normal}
+    .cashflow-tooltip-item.deposit{color:var(--positive)}
+    .cashflow-tooltip-item.withdrawal{color:var(--negative)}
     .calendar-card{margin-bottom:12px}.calendar-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
     .calendar-month{font-size:16px;font-weight:850}.calendar-nav{display:flex;gap:7px}.calendar-nav button{width:32px;height:32px;padding:0;border:1px solid var(--line);border-radius:10px;background:var(--surface2);color:var(--text);font-weight:850;cursor:pointer}
     .calendar-nav button:disabled{opacity:.45;cursor:default}
@@ -360,7 +376,9 @@
         <div class="trend-readout-value money" id="trendReadoutValue">—</div>
         <div class="trend-readout-date" id="trendReadoutDate">—</div>
       </div>
-      <div class="chart"><svg id="trend" viewBox="0 0 700 250" aria-label="總資產趨勢圖"></svg></div>
+      <div class="chart"><svg id="trend" viewBox="0 0 700 250" aria-label="總資產趨勢圖"></svg>
+        <div class="cashflow-tooltip" id="cashflowTooltip" role="status" hidden><strong class="cashflow-tooltip-date"></strong><div class="cashflow-tooltip-items"></div></div>
+      </div>
       <div class="trend-legend" id="trendLegend" aria-label="折線圖圖例"></div>
       <div class="benchmark-data-note" id="benchmarkDataStatus" aria-live="polite"></div>
     </section>
@@ -717,6 +735,39 @@ async function updatePageViewCounter(){
     console.warn("Page-view counter unavailable",error);
     resetPageViewCounter();
   }
+}
+let cashflowTooltipPinned=false;
+function hideCashFlowTooltip(){
+  const tooltip=$("#cashflowTooltip");
+  if(tooltip)tooltip.hidden=true;
+  cashflowTooltipPinned=false;
+}
+function showCashFlowTooltip(index,pinned){
+  const group=trendState.cashFlowGroups?.[index],position=trendState.cashFlowPositions?.[index];
+  const tooltip=$("#cashflowTooltip"),svg=$("#trend");
+  if(!group||!position||!tooltip||!svg)return;
+  const chart=svg.parentElement,chartRect=chart.getBoundingClientRect(),svgRect=svg.getBoundingClientRect();
+  const rawX=(svgRect.left-chartRect.left)+(position.x/700)*svgRect.width;
+  const rawY=(svgRect.top-chartRect.top)+(position.y/250)*svgRect.height;
+  const left=Math.max(112,Math.min(chart.clientWidth-112,rawX));
+  const top=Math.max(42,Math.min(chart.clientHeight-12,rawY-9));
+  tooltip.style.left=left+"px";tooltip.style.top=top+"px";
+  tooltip.querySelector(".cashflow-tooltip-date").textContent=group.date;
+  const items=tooltip.querySelector(".cashflow-tooltip-items");
+  items.replaceChildren();
+  group.flows.forEach(flow=>{
+    const row=document.createElement("span");
+    const kind=flow.delta>=0?"deposit":"withdrawal";
+    const label=kind==="deposit"?(currentLanguage()==="en"?"Deposit":"入金"):(currentLanguage()==="en"?"Withdrawal":"出金");
+    const owner=flow.owner==="mom"?copy("mom"):flow.owner==="brother"?copy("brother"):"";
+    const currency=flow.currency==="USD"?"USD":"TWD";
+    const amount=new Intl.NumberFormat(currentCurrencyOption().locale,{minimumFractionDigits:currency==="USD"?2:0,maximumFractionDigits:currency==="USD"?2:0}).format(Math.abs(flow.delta));
+    row.className="cashflow-tooltip-item "+kind;
+    row.textContent=label+(owner?" · "+owner:"")+" · "+currency+" "+amount;
+    items.appendChild(row);
+  });
+  tooltip.hidden=false;
+  cashflowTooltipPinned=Boolean(pinned);
 }
 function showTrendSelection(index){
   const svg=$("#trend");
@@ -1420,6 +1471,9 @@ function bindTrendInteraction(){
     showTrendSelection(index);
   };
   svg.addEventListener("pointerdown",event=>{
+    const flowMarker=event.target.closest?.("[data-cashflow-index]");
+    if(flowMarker){showCashFlowTooltip(Number(flowMarker.dataset.cashflowIndex),true);event.preventDefault();return}
+    hideCashFlowTooltip();
     if(!trendState.points.length)return;
     trendState.dragging=true;
     trendState.pointerId=event.pointerId;
@@ -1430,6 +1484,9 @@ function bindTrendInteraction(){
   });
   svg.addEventListener("pointermove",event=>{
     if(!trendState.points.length)return;
+    const flowMarker=event.target.closest?.("[data-cashflow-index]");
+    if(flowMarker&&event.pointerType==="mouse")showCashFlowTooltip(Number(flowMarker.dataset.cashflowIndex),false);
+    else if(event.pointerType==="mouse"&&!cashflowTooltipPinned)hideCashFlowTooltip();
     if(event.pointerType==="mouse"&&!trendState.dragging){
       updateFromEvent(event);
       return;
@@ -1448,6 +1505,14 @@ function bindTrendInteraction(){
     }
   };
   svg.addEventListener("pointerup",endPointer);
+  svg.addEventListener("pointerleave",()=>{if(!cashflowTooltipPinned)hideCashFlowTooltip()});
+  svg.addEventListener("keydown",event=>{
+    if(event.key==="Escape"){hideCashFlowTooltip();return}
+    if(event.key==="Enter"||event.key===" "){
+      const flowMarker=event.target.closest?.("[data-cashflow-index]");
+      if(flowMarker){event.preventDefault();showCashFlowTooltip(Number(flowMarker.dataset.cashflowIndex),true)}
+    }
+  });
   svg.addEventListener("pointercancel",endPointer);
   trendState.bound=true;
 }
@@ -1493,9 +1558,35 @@ function renderTrend(){
       const anchor=isFirst?"start":isLast?"end":"middle";
       out+=`<text class="axis" x="${q[0]}" y="${H-11}" text-anchor="${anchor}">${h[i].date.slice(5).replace("-","/")}</text>`;
     }});
+  const scope=view==="mom"?"mom":view==="brother"?"brother":"family";
+  const flowGroupsMap=new Map();
+  (model.cashFlows||[]).filter(flow=>(scope==="family"||flow.owner===scope)&&flow.date>=h[0].date&&flow.date<=h.at(-1).date)
+    .filter(flow=>range!=="ytd"||flow.date.slice(0,4)===currentYear)
+    .forEach(flow=>{if(!flowGroupsMap.has(flow.date))flowGroupsMap.set(flow.date,{date:flow.date,flows:[]});flowGroupsMap.get(flow.date).flows.push(flow)});
+  const cashFlowGroups=[...flowGroupsMap.values()].sort((a,b)=>a.date.localeCompare(b.date));
+  const cashFlowPositions=cashFlowGroups.map(group=>{
+    const target=Date.parse(group.date+"T00:00:00Z");
+    let upper=h.findIndex(item=>Date.parse(item.date+"T00:00:00Z")>=target);
+    if(upper<0)upper=h.length-1;
+    const lower=Math.max(0,upper-1),lowerTime=Date.parse(h[lower].date+"T00:00:00Z"),upperTime=Date.parse(h[upper].date+"T00:00:00Z");
+    const fraction=upper===lower||upperTime===lowerTime?0:(target-lowerTime)/(upperTime-lowerTime);
+    const index=lower+Math.max(0,Math.min(1,fraction));
+    const value=h[lower][key]+(h[upper][key]-h[lower][key])*Math.max(0,Math.min(1,fraction));
+    return {x:X(index),y:Y(value)};
+  });
   out+=`<line class="crosshair" id="trendCrosshair" style="display:none"></line>
     <circle class="selected-point" id="trendMarker" r="5.5" style="display:none"></circle>
     <rect class="interaction-hit" id="trendHit" x="${p.l}" y="${p.t}" width="${W-p.l-p.r+1}" height="${H-p.t-p.b}"></rect>`;
+  cashFlowGroups.forEach((group,index)=>{
+    const point=cashFlowPositions[index],withdrawal=group.flows.every(flow=>flow.delta<0);
+    const type=withdrawal?"withdrawal":"deposit";
+    const label=(withdrawal?(currentLanguage()==="en"?"Withdrawal":"出金"):(currentLanguage()==="en"?"Deposit":"入金"))+" "+group.date;
+    out+=`<g class="cashflow-marker ${type}" data-cashflow-index="${index}" tabindex="0" role="button" aria-label="${label}">
+      <line x1="${point.x}" y1="${Math.min(point.y+5,H-p.b-6)}" x2="${point.x}" y2="${Math.min(point.y+15,H-p.b)}"></line>
+      <circle class="cashflow-hit" cx="${point.x}" cy="${point.y}" r="11"></circle>
+      <circle class="cashflow-dot" cx="${point.x}" cy="${point.y}" r="4.5"></circle>
+    </g>`;
+  });
   svg.innerHTML=out;
   renderTrendLegend(overlay,requestKey);
   trendState.points=h.map((d,i)=>({date:d.date,value:d[key],x:pts[i][0],y:pts[i][1],plotLeft:p.l,plotRight:W-p.r,plotTop:p.t,plotBottom:H-p.b}));
@@ -1507,6 +1598,9 @@ function renderTrend(){
   };
   trendState.dragging=false;
   trendState.pointerId=null;
+  trendState.cashFlowGroups=cashFlowGroups;
+  trendState.cashFlowPositions=cashFlowPositions;
+  hideCashFlowTooltip();
   svg.style.touchAction="pan-y";
   showTrendSelection(h.length-1);
 }
