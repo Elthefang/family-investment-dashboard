@@ -679,14 +679,14 @@ function drawSnapshotComparisonBars(context,{portfolio,sp500}){
   drawSnapshotText(context,"两组金额均按相同入出金日期模拟",innerX,y+78,16,colors.muted,550);
   const rows=[
     {label:"我的组合",value:portfolio,color:colors.brand,labelY:y+137,barY:y+158},
-    {label:"标普500模拟",value:sp500,color:colors.marketUS,labelY:y+235,barY:y+256}
+    {label:"标普500模拟",value:Number.isFinite(sp500)?sp500:null,color:colors.marketUS,labelY:y+235,barY:y+256}
   ];
-  const maxValue=Math.max(portfolio,sp500,0);
+  const maxValue=Math.max(portfolio,...rows.map(row=>Number.isFinite(row.value)?row.value:0));
   rows.forEach(row=>{
     drawSnapshotText(context,row.label,innerX,row.labelY,19,colors.text,750);
-    drawSnapshotText(context,formatRednoteMoney(row.value),innerRight,row.labelY,21,colors.text,800,"right");
+    drawSnapshotText(context,Number.isFinite(row.value)?formatRednoteMoney(row.value):"暂不可用",innerRight,row.labelY,21,Number.isFinite(row.value)?colors.text:colors.muted,800,"right");
     fillRoundRect(context,innerX,row.barY,barWidth,24,12,colors.line);
-    const ratio=maxValue>0?Math.max(0,Math.min(row.value/maxValue,1)):0;
+    const ratio=maxValue>0&&Number.isFinite(row.value)?Math.max(0,Math.min(row.value/maxValue,1)):0;
     if(ratio>0)fillRoundRect(context,innerX,row.barY,barWidth*ratio,24,12,row.color);
   });
 }
@@ -718,15 +718,17 @@ function drawSnapshotBenchmarkComparison(context,{portfolio,benchmarks,snapshotD
   if(sp500&&Number.isFinite(sp500.value)){
     const difference=portfolio-sp500.value,relative=sp500.value?difference/sp500.value:null;
     const relation=difference>0?"高于":difference<0?"低于":"持平";
-    drawSnapshotText(context,"期末资产价值差额",104,hero.y+101,22,"#dbe3f1",700);
-    const primary=(difference>0?"+":difference<0?"−":"")+formatRednoteMoney(Math.abs(difference));
-    drawSnapshotText(context,primary,104,hero.y+207,88,difference>=0?"#ffffff":"#ffd0d0",850);
-    const percent=Number.isFinite(relative)?rednoteRate(relative):"—";
-    drawSnapshotText(context,"组合期末资产"+relation+"标普500模拟 · 资产价值差距 "+percent,104,hero.y+260,19,"#dbe3f1",650);
+    drawSnapshotText(context,"相对标普500模拟 · 期末资产价值差距",104,hero.y+63,22,"#dbe3f1",700);
+    drawSnapshotText(context,Number.isFinite(relative)?rednoteRate(relative):"—",104,hero.y+177,92,difference>=0?"#ffffff":"#ffd0d0",850);
+    drawSnapshotText(context,"组合期末资产价值"+relation+"基准模拟",104,hero.y+218,18,"#dbe3f1",650);
+    fillRoundRect(context,104,hero.y+240,872,52,16,"rgba(255,255,255,.12)");
+    drawSnapshotText(context,"绝对资产差额",128,hero.y+273,16,"#dbe3f1",650);
+    const absoluteValue=(difference>0?"+":difference<0?"−":"")+formatRednoteMoney(Math.abs(difference));
+    drawSnapshotText(context,absoluteValue,952,hero.y+275,21,"#ffffff",800,"right");
   }else{
     drawSnapshotText(context,"标普500模拟数据暂不可用",104,hero.y+166,34,"#ffffff",800);
   }
-  drawSnapshotComparisonBars(context,{portfolio,sp500:sp500?.value||0});
+  drawSnapshotComparisonBars(context,{portfolio,sp500:sp500?.value});
   drawSnapshotTaiwanSupport(context,{portfolio,benchmark:taiwan});
   drawSnapshotText(context,"口径：两种大盘均使用全部已记录家庭入出金的日期与金额分别模拟。",72,1248,15,colors.muted,550);
   drawSnapshotText(context,"资产价值差距 = 组合期末价值 ÷ 基准模拟期末价值 − 1；不等同超额报酬率。",72,1277,15,colors.muted,550);
