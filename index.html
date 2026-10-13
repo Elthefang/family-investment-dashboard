@@ -265,7 +265,10 @@
       .legend{gap:9px}.legend-row{grid-template-columns:auto minmax(0,1fr) auto;gap:6px;font-size:12px}
       .legend-value{font-size:12px}.legend-value small{font-size:10px}
       .roadmap-readout{min-height:58px}
-      .chart{height:auto;aspect-ratio:700 / 250}
+      .chart{display:flex;flex-direction:column;height:auto;aspect-ratio:auto}
+      .chart svg{height:auto;aspect-ratio:700 / 300;flex:0 0 auto}
+      .trend-legend{position:static;order:0;flex-direction:column;align-items:flex-start;align-self:flex-start;gap:6px;margin:0 0 8px;padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+      .trend-legend-item{font-size:11px}
       .roadmap-readout-value{font-size:22px}
       .roadmap-readout-meta{font-size:11px}
       .roadmap-chart{padding-top:70px}
